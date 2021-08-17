@@ -1,6 +1,6 @@
 import pytest
 
-from boilerplate.examples import Person
+from priority_vendor_aging.examples import Person
 
 
 class TestPerson:

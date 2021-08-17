@@ -1,5 +1,12 @@
 # {Project Title}
 
+- **Version:** 0.2.0
+- **Status:** Final
+- **Last Modified:** 2021-08-17
+
+<details open="closed">
+<summary>Table of Contents</summary>
+
 <!-- TOC -->
 
 - [Overview](#overview)
@@ -21,100 +28,142 @@
 
 <!-- /TOC -->
 
+</details>
+
 ## Overview
 
-### Problem Statement <!-- REQUIRED -->
+### Problem Statement
 
-{1-2 sentences of concise context which frame the problem}
+When payments to vendors for outstanding invoices are significantly delayed, those vendors often contact the DGS Fiscal team asking about the status of their invoice. Because each invoice passes through multiple technical systems during the fulfillment process, a member of the Fiscal team has to manually search for information about each priority invoice across all those systems and compile it in a single Excel workbook. This current process is time intensive, error prone, and makes it difficult to understand exactly where an invoice is stuck and what needs to be done to move it forward.
 
-_{1 sentence description of how this project should address that problem}_
+_As a result, the DGS Fiscal team needs a more efficient means of identifying all of the priority invoices that are overdue, reflecting where in the fulfillment process they are stuck, and understanding what actions need to be taken to move them forward in that process._
 
-### Objectives <!-- REQUIRED -->
+### Objectives
 
-- {Brief description of expected outcome}
-- {Brief description of expected outcome}
-- ...
+- Create a single point of entry for vendors to flag priority invoices that are overdue, which immediately adds each invoice to the Priority Vendor Aging Report.
+- Automate as many of the steps as possible involved in generating and updating information about the invoices on the Priority Vendor Aging report
+- Deliver a dashboard based on the Priority Vendor Aging report that allows the DGS Fiscal team to gain insight into major bottlenecks in the invoice fulfillment process.
+- Create a mechanism for communicating updates to vendors about the status of invoices that are overdue.
 
-### Background <!-- RECOMMENDED -->
+### Background
 
-## User Stories <!-- RECOMMENDED -->
+#### _Invoice Fulfillment Workflow_
 
-### {User Persona 1}
+The process for remitting payment to vendors for invoices they submit involves coordinating actions amongst several agencies and individuals. A detailed breakdown of the process – including the system in which these steps occur, the actions that are taken, and the set of stakeholders involved at that step – can be found in the Appendix, but the following summary highlights the key stages and systems involved.
 
-{2-3 sentences describing a person who represents a group of users. It often helps to model this after a real person}
+1. **Outlook:** Vendor sends invoice to DGS
+   1. Integrify: Invoice is prepared for CitiBuy processing
+   1. Invoice is uploaded to Integrify
+   1. Invoice is assigned to analyst for CitiBuy processing
+1. **CitiBuy:** Generate Purchase Order and receipting
+   1. Requisition is submitted and approved in CitiBuy
+   1. CitiBuy PO is generated and sent to vendor
+   1. PO invoice receipting is completed
+1. **CoreIntegrator:** BAPS executes payment to vendor
+
+#### _Priority Vendor Aging Report Workflow_
+
+The current process for creating and updating the Priority Vendor Aging Report involves a lot of manual steps completed by a member of the DGS Fiscal admin team. The core tasks involved in this process are outlined below:
+
+1. A member of the DGS Fiscal admin team sends vendors a template of information that vendors need to fill out for their report to be added to the Priority Vendor Aging Report.
+1. When invoice payments are overdue, the vendor fills out that template and submits it to a member of the DGS Fiscal admin team via email.
+1. A member of the DGS Fiscal admin team (i.e., Tonay) searches for this invoice in each of the systems involved in the invoice fulfillment workflow to understand at what stage and why this invoice is stuck in that process.
+1. That information gets added to a shared Excel workbook known as the Priority Vendor Aging Report in SharePoint.
+1. Steps 4 and 5 are repeated for every invoice on the Priority Vendor Aging Report on a bi-weekly basis.
+
+#### _Pain Points with the Current Workflow_
+
+There are several challenges with the current process for creating and maintaining the Priority Vendor Aging Report. A summary of those headaches can be found below:
+
+- Because the process is so manual and involves searching for information in several different technical systems, maintaining this report consumes a significant amount of the DGS Fiscal admin team member’s time each month.
+- Similarly, because the information is being transferred and consolidated manually from all of these different locations, the likelihood of accidentally introducing an error or overwriting the existing information is quite high.
+- Because the report takes so long to update, the limited frequency of updates made to the report mean that the information within it quickly becomes out of date.
+- Because the spreadsheet doesn’t easily allow for historic information about each invoice to be captured and displayed in the report, it’s difficult to access summary statistics about invoices on the report over the course of several weeks or months.
+
+## User Stories
+
+### Fiscal Admin Team Member
+
+Tonay Davis is a member of the DGS Fiscal team who is responsible for soliciting the list of high priority invoices from vendors, searching for information about those invoices across all of the systems involved in the invoice fulfillment process, and compiling that information in the Priority Vendor Aging Report.
 
 **User Needs**
 
-- As a {User Persona 1}, I want to {description of task this User Persona wants to perform}, so that {outcome that this User Persona desires}
-- As a {User Persona 1}, I want to {description of task this User Persona wants to perform}, so that {outcome that this User Persona desires}
-- ...
+- As a Fiscal admin team member, I want vendors to be able to add their overdue invoices directly to the Priority Vendor Aging Report (after a brief approval), so that I don’t have to spend time copying and pasting information about each invoice from my email or from SharePoint.
+- As a Fiscal Staff Member, I want the status of each invoice in the Priority Vendor Aging report to be updated automatically, so that can spend more time troubleshooting stalled invoices and don’t risk transferring information incorrectly.
 
-### {User Persona 2}
+### Fiscal Leadership
 
-{2-3 sentences describing a person who represents a group of users. It often helps to model this after a real person}
+Matt Rappaport is a member of Fiscal Leadership who uses the Priority Vendor Aging Report to understand the current backlog of overdue invoices and troubleshoot specific bottlenecks to getting the highest priority invoices fulfilled.
 
 **User Needs**
 
-- As a {User Persona 2}, I want to {description of task this User Persona wants to perform}, so that {outcome that this User Persona desires}
-- As a {User Persona 2}, I want to {description of task this User Persona wants to perform}, so that {outcome that this User Persona desires}
-- ...
+- As a member of Fiscal Leadership, I want Fiscal team staff to spend less time manually updating reports, so that they can help troubleshoot issues with the invoice fulfillment process.
+- As a member of Fiscal Leadership, I want the Priority Vendor Aging Report to capture not only where an invoice is stuck but also why it’s stuck, so that I can take the necessary steps to move that invoice forward.
+- As a member of Fiscal Leadership, I want to be able to view summary statistics about all of the invoices on the Priority Vendor Aging report, so that I can understand things like:
+  - How many invoices in total are overdue?
+  - Where are the bottlenecks in the invoice fulfillment process?
+  - How long does an invoice spend on the Priority Vendor Aging report?
+  - What’s the total sum of all overdue invoice payments?
 
-## Feasibility Assessment <!-- REQUIRED -->
+### Priority Vendor
+
+Acme Co. is a priority vendor who has a long-standing relationship with DGS. They often need to contact a member of the DGS Fiscal team to receive updates about their outstanding invoices.
+
+**User Needs**
+
+- As a priority vendor, I want to be able to quickly flag multiple overdue invoices for the DGS Fiscal team, so that they can ensure that those invoices get paid more quickly.
+- As a priority vendor, I want to receive updates about my overdue invoices, so that I don’t have to consistently reach out to the DGS Fiscal team to get status updates.
+
+## Feasibility Assessment
 
 ### Feasibility Criteria
 
 In order for this project to be feasible the following conditions must be met:
 
-- {Brief description of project dependency to validate}
-- {Brief description of project dependency to validate}
+- **System Access:** BPIO must be able to programmatically access each of the systems involved in the fulfillment process, including:
+  - Integrify
+  - CitiBuy
+  - CoreIntegrator
+  - SharePoint
+- **Sample Data:** DGS Fiscal must be able to provide access to samples of the current versions of the tools and reports used in this process, including:
+  - Vendor uploads of overdue invoice templates
+  - Priority Vendor Aging Report
+- **Stakeholder Input:** BPIO must be able to meet with the set of stakeholders outlined below in order to sufficiently scope and test the usability of the deliverables for this project.
 
 ### Practicality Criteria
 
-f the project is feasible, the following conditions must also be met in order for it to be worth pursuing:
+If the project is feasible, the following conditions must also be met in order for it to be worth pursuing:
 
-- {Brief description of assumption about project outcome to validate}
-- {Brief description of assumption about project outcome to validate}
+- **ROI:** The projected amount of time saved by this solution over the course of three quarters must exceed the amount of time invested by BPIO to develop it.
+- **Maintenance Cost:** The amount of time BPIO needs to invest in ongoing maintenance of this solution must not exceed 15 hours per quarter.
+- **Non-Duplication:** There must not be an alternative tool or process available that will satisfy all of the objectives outlined above with a greater ROI.
 
-## Deliverable Specifications <!-- REQUIRED -->
+## Deliverable Summary
 
-### {Deliverable or Phase 1}
+### Feasibility Assessment
 
-- **Definition of Done**
-- **Dependencies or Constraints**
-- **Does not Include**
+- **Status:** In Progress
+- **Link to Spec:** [Feasibility Assessment](https://bmore.sharepoint.com/:w:/s/DGS-BPIO/EXbGRKCekfZBjt5FkT0HdvkBPfXl2oWriB7gTWK4DpaxYw?e=wBpBBT) <!-- TODO: replace with link to document in the repo -->
 
-### {Deliverable or Phase 2}
+Conduct a feasibility assessment of this project to validate the riskiest assumptions and key constraints listed in the Feasibility and Practicality sections above. The intended outcome is to refine this discovery document and to finalize the charter for the next deliverable based on the findings of the assessment. If the results of the assessment suggest that a meaningful ROI is either infeasible or impractical, even with a reduced project scope, then we may decide not to pursue the project.
 
-- **Definition of Done**
-- **Dependencies or Constraints**
-- **Does Not Include**
+### Priority Vendor Submission Form
 
-## Team and Timeline
+- **Status:** In Progress
+- **Link to Spec:** [Priority Vendor Submission Form](https://bmore.sharepoint.com/:w:/s/DGS-BPIO/ET8QjoqM2wJGpKiTpvymq2sBrXjD00Meim0R3ffxX_JlLQ?e=Sbhc8u)
 
-### Roles and Responsibilities <!-- REQUIRED -->
+Create a public-facing form for vendors to submit the information that DGS Fiscal needs to begin tracking the status of that invoice. This form should add that invoice to a SharePoint list or another shared workbook that will replace the current Priority Vendor Aging Excel workbook.
 
-The following division of responsibilities borrows the [MOCHA framework](https://www.managementcenter.org/resources/assigning-responsibilities/) from the Management Center.
+### Priority Vendor Aging Automation Workflow
 
-- **Manager:** {Manager's Name} <!-- individual who helps owner address project blockers that arise. MUST be a single person. -->
-- **Owner:** {Owner's Name} <!-- individual responsible for project's success or failure. MUST be a single person. -->
-- **Consulted** <!-- individuals who provide input or feedback on the project -->
-  - **{Consulted Name}:** {3-5 word description of their area of input}
-  - **{Consulted Name}:** {3-5 word description of their area of input}
-  - ...
-- **Helpers** <!-- Individuals who complete portions of the project delegated by the owner -->
-  - **{Helper's Name}:** {3-5 word description of their contribution}
-  - **{Helper's Name}:** {3-5 word description of their contribution}
-  - ...
-- **Approvers** <!-- individuals with final say over components of the project -->
-  - **{Approver's Name}:** {3-5 word description of what they have approval on}
-  - **{Approver's Name}:** {3-5 word description of what they have approval on}
-  - ...
+- **Status:** Backlog
+- **Link to Spec:**
 
-### Project Roadmap <!-- RECOMMENDED -->
+Create an automation script that regularly scrapes information about each of the invoices in the Priority Vendor Aging Report from the various systems that are a part of the invoice fulfillment workflow, then updates the report with that information.
 
-- **{Phase 1}**
-  - {Description of Phase 1 milestone}
-  - {Description of Phase 1 milestone}
-- **{Phase 2}**
-  - {Description of Phase 2 milestone}
-  - {Description of Phase 2 milestone}
+### Priority Vendor Aging Dashboard
+
+- **Status:** Backlog
+- **Link to Spec:**
+
+Create a dashboard that provides members of the DGS Fiscal team with real-time descriptive statistics about the invoices in the Priority Vendor Aging Report, and that allows them to identify and target critical bottlenecks in the invoice fulfillment process.

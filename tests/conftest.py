@@ -1,6 +1,6 @@
 import pytest
 
-from boilerplate.examples.classes import Person
+from priority_vendor_aging.examples.classes import Person
 
 
 @pytest.fixture(scope="function")
