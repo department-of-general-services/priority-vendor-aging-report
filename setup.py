@@ -10,7 +10,7 @@ setup(
     version="1.0.0",
     description=(
         "Automates the process for updating the Priority Vendor Aging Report",
-    )
+    ),
     author="Department of General Services",
     author_email="william.daly@baltimorecity.gov",
     install_requires=[],
