@@ -8,3 +8,4 @@ safety==1.10.3
 liccheck==0.6.0
 pytest-cov==2.12.1
 mdformat==0.7.6
+msal==1.13.0

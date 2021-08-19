@@ -1,0 +1,7 @@
+[DEFAULT]
+current_env = "default"
+
+[TESTING]
+dog = "Rover"
+client_id = "test_id"
+client_secret = "test_secret"
