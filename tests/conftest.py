@@ -2,6 +2,8 @@ import pytest
 
 from aging_report.config import settings
 
+collect_ignore = ["integration_tests"]
+
 
 @pytest.fixture(scope="session")
 def test_config():

@@ -1,7 +1,7 @@
 [DEFAULT]
-current_env = "default"
+scopes = ["https://graph.microsoft.com/.default"]
+authority = "https://login.microsoftonline.com/common"
 
 [TESTING]
-dog = "Rover"
 client_id = "test_id"
 client_secret = "test_secret"
