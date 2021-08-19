@@ -1,4 +1,4 @@
-"""Setup script for priority_vendor_aging package."""
+"""Setup script for aging_report package."""
 import os
 
 from setuptools import find_packages
@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 setup(
-    name="priority_vendor_aging",
+    name="aging_report",
     version="1.0.0",
     description=(
         "Automates the process for updating the Priority Vendor Aging Report",
