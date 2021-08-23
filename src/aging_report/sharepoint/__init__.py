@@ -1,4 +1,4 @@
-__all__ = ["AgingReportList", "AgintReportItems", "SharePoint"]
+__all__ = ["AgingReportList", "AgingReportItem", "SharePoint"]
 
 from aging_report.sharepoint.aging_report import (
     AgingReportList,

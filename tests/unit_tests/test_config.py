@@ -10,6 +10,5 @@ def test_config_fixture(test_config):
     assert test_config.current_env == "testing"
     assert test_config.client_id == "test_id"
     assert test_config.client_secret == "test_secret"
-    assert test_config.scopes == ["https://graph.microsoft.com/.default"]
-    assert test_config.authority == "https://login.microsoftonline.com/common"
-    assert test_config.get("tenant_id") is None
+    assert test_config.scopes == "https://graph.microsoft.com/.default"
+    assert test_config.tenant_id == "12345"

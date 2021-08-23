@@ -1,11 +1,9 @@
-import requests
 from azure.core.credentials import AccessToken
 from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import (
     ClientSecretCredential,
     CredentialUnavailableError,
 )
-
 
 from aging_report.config import settings
 

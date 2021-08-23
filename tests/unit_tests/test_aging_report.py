@@ -5,8 +5,10 @@ from aging_report.sharepoint import (
 
 
 class TestInit:
+    """Tests the"""
+
     def test_init_success(self):
-        """Tests the successful instantiation of the AgingReport class
+        """Tests that AgingReportList initializes correctly
 
         Validates the following conditions:
         -
