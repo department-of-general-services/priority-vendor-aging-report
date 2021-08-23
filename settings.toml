@@ -1,5 +1,5 @@
 [DEFAULT]
-scopes = ["https://graph.microsoft.com/.default"]
+scopes = "https://graph.microsoft.com/.default"
 authority = "https://login.microsoftonline.com/common"
 
 [TESTING]

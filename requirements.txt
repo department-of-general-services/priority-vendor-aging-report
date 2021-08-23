@@ -9,3 +9,4 @@ liccheck==0.6.0
 pytest-cov==2.12.1
 mdformat==0.7.6
 msal==1.13.0
+azure-identity==1.6.1
