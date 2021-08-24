@@ -35,7 +35,7 @@ class TestSharePoint:
         # execution
         with pytest.raises(ClientAuthenticationError):
             client = SharePoint(test_config)
-            client._authenticate()
+            client.authenticate()
 
     def test_auth_credential_unavailable_error(self):
         """Tests that authenticate() fails correctly if one of the credentials

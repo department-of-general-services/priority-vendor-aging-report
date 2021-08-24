@@ -3,12 +3,19 @@ def test_config_fixture(test_config):
     when using the test_config fixture from conftest
 
     Tests the following conditions:
-    - username is not set
-    - password is not set
-    - base_url matches the CITIBUY_URL above
+    - current_env is "testing"
+    - The following variables all match the values set in settings.toml
+      - client_id
+      - client_secret
+      - scopes
+      - tenant_id
+
     """
     assert test_config.current_env == "testing"
     assert test_config.client_id == "test_id"
     assert test_config.client_secret == "test_secret"
     assert test_config.scopes == "https://graph.microsoft.com/.default"
     assert test_config.tenant_id == "12345"
+    assert test_config.site_id == "acme.sharepoint.com,12345,67890"
+    assert test_config.host_name == "acme.sharepoint.com"
+    assert test_config.site_name == "AcmeSite"
