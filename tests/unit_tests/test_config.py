@@ -9,7 +9,8 @@ def test_config_fixture(test_config):
       - client_secret
       - scopes
       - tenant_id
-
+      - host_name
+      - site_name
     """
     assert test_config.current_env == "testing"
     assert test_config.client_id == "test_id"
