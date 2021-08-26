@@ -11,3 +11,4 @@ mdformat==0.7.6
 msal==1.13.0
 azure-identity==1.6.1
 dynaconf==3.1.4
+O365==2.0.15

@@ -133,3 +133,4 @@ dmypy.json
 
 # Ignore dynaconf secret files
 .secrets.*
+o365_token.txt
