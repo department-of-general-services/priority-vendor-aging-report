@@ -1,4 +1,4 @@
-# {short title of solved problem and solution}
+# Report Storage Format: SharePoint List
 
 - **Status:** Accepted
 - **Last Modified:**: 2021-08-26
