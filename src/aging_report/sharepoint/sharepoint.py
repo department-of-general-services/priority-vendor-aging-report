@@ -111,21 +111,21 @@ class ListItem:
     API
     """
 
-    def __init__(self, client, list, item_id):
+    def __init__(self, client, site_list, item_id):
         """Inits the SiteList class for a particular SharePoint list"""
         self.client = client
-        self.list = list
+        self.list = site_list
         self.item_id = item_id
         self.base_url = self.list.base_url + "/items/" + item_id
 
     @authenticate_request
-    def get_item_details(self, session, columns):
+    def get_item_details(self, session):
         """Makes a call to GET /items/{list_id}"""
-        url = self.base_url + "?expand=fields"
+        url = self.base_url + "?expand=fields()"
         return session.get(url)
 
     @authenticate_request
     def update_item(self, session, data):
         """Makes a call to PUT /items with data to update record"""
         url = self.base_url + "/items"
-        return session.get(url)
+        return session.post(url, data=data)

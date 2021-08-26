@@ -15,11 +15,12 @@ def test_config():
 
 @pytest.fixture(scope="session")
 def account():
+    """Create an authenticated Graph API client for use in integration tests"""
     credentials = (settings.client_id, settings.client_secret)
-    account = Account(
+    client = Account(
         credentials,
         auth_flow_type="credentials",
         tenant_id=settings.tenant_id,
     )
-    account.authenticate()
-    return account
+    client.authenticate()
+    return client
