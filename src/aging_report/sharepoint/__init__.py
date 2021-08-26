@@ -1,7 +1,7 @@
-__all__ = ["AgingReportList", "AgingReportItem", "SharePoint"]
+__all__ = ["AgingReportList", "AgingReportItem", "Client"]
 
 from aging_report.sharepoint.aging_report import (
+    Client,
     AgingReportList,
     AgingReportItem,
 )
-from aging_report.sharepoint.sharepoint import SharePoint, Site
