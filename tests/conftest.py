@@ -1,7 +1,7 @@
 import pytest
-from O365 import Account
 
 from aging_report.config import settings
+from aging_report.sharepoint import Client
 
 collect_ignore = ["integration_tests"]
 
@@ -14,13 +14,6 @@ def test_config():
 
 
 @pytest.fixture(scope="session")
-def account():
+def client():
     """Create an authenticated Graph API client for use in integration tests"""
-    credentials = (settings.client_id, settings.client_secret)
-    client = Account(
-        credentials,
-        auth_flow_type="credentials",
-        tenant_id=settings.tenant_id,
-    )
-    client.authenticate()
-    return client
+    return Client()

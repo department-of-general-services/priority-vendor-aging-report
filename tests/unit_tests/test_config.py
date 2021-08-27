@@ -20,3 +20,4 @@ def test_config_fixture(test_config):
     assert test_config.site_id == "acme.sharepoint.com,12345,67890"
     assert test_config.host_name == "acme.sharepoint.com"
     assert test_config.site_name == "AcmeSite"
+    assert test_config.report_id == "45678"
