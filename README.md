@@ -145,21 +145,20 @@ client = Client()
 report = client.get_aging_report()
 invoices = report.get_invoices()
 for i in invoices:
-  pring(invoice.fields)
+    print(invoice.fields)
 ```
 
 ## Vision and Roadmap
 
-The vision for this template is to simplify the process of creating open source python projects with high quality codebase and mechanisms that promote smart and collaborative project governance. This project aims to fulfill this vision by:
+The vision for this project is to create a single source of truth for information about invoices throughout the fulfillment pipeline, so that the DGS Fiscal Office can more easily track and report on the status of outstanding invoices. This project aims to fulfill this vision by:
 
-- Adopting a common python package file structure
-- Implementing basic linting and code quality checks
-- Reinforcing compliance with those code quality checks using CI/CD
-- Providing templates for things like documentation, issues, and pull requests
-- Offering pythonic implementation examples of common data structures and scripting tasks like:
-  - Creating classes, methods, and functions
-  - Setting up unit and integration testing
-  - Reading and writing to files
+- Adding all invoices that get processed through Integrify to to a SharePoint list that will become the single source of truth.
+- Scraping information about these invoices from each of the systems involved in processing invoice payments, namely:
+  - Integrify
+  - CitiBuy
+  - CoreIntegrator
+- Updating the invoices in the SharePoint list with information scraped from each of the sites listed above.
+- Map the SharePoint list to a PowerBI Dashboard so that the members of the DGS Fiscal Office can report on summary statistics about outstanding invoices.
 
 For a more detailed breakdown of the feature roadmap and other development priorities please reference the following links:
 
