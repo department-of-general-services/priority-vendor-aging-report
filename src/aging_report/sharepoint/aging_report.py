@@ -1,113 +1,7 @@
 from __future__ import annotations  # prevents NameError for typehints
-from typing import List
+from typing import Dict
 
-from dynaconf import Dynaconf
-from O365 import Account
-from O365.sharepoint import Site, SharepointList, SharepointListItem
-from aging_report.config import settings
-
-
-def authenticate_account(config: Dynaconf) -> Account:
-    """Creates and authenticates an O365.Account instance
-
-    Parameters
-    ----------
-    config: Dynaconf
-        The config settings that will be used to authenticate the account with
-        Microsoft Graph API
-
-    Returns
-    -------
-    Account
-        An instance of the Account class from O365 that has been authenticated
-    """
-    credentials = (config.client_id, config.client_secret)
-    account = Account(
-        credentials,
-        auth_flow_type="credentials",
-        tenant_id=config.tenant_id,
-    )
-    if not account.is_authenticated:
-        account.authenticate()
-    return account
-
-
-class Client:
-    """Creates a SharePoint client to manage Graph API access using O365"""
-
-    def __init__(self, config: Dynaconf = settings):
-        """Instantiates the Client class"""
-        self.config = config
-        self.account = authenticate_account(config)
-        self.app = self.account.sharepoint()
-        self.fiscal_site: FiscalSite = None
-        self.aging_report: AgingReportList = None
-
-    @property
-    def is_authenticated(self) -> bool:
-        """Returns True if account is authenticated"""
-        return self.account.is_authenticated
-
-    def get_fiscal_site(self) -> FiscalSite:
-        """Returns FiscalSite instance and stores it in self.fiscal_site"""
-        site = self.app.get_site(self.config.site_id)
-        self.fiscal_site = FiscalSite(self, site)
-        return self.fiscal_site
-
-    def get_aging_report(self) -> AgingReportList:
-        """Returns AgingReportList instance and stores it in self.aging_report"""
-        site = self.fiscal_site or self.get_fiscal_site()
-        site_list = site.get_list_by_id(self.config.report_id)
-        self.aging_report = AgingReportList(self, site, site_list)
-        return self.aging_report
-
-
-class FiscalSite:
-    """Creates a SharePoint client for the DGS Fiscal site
-
-    Facilitates accessing lists and drives in the DGS SharePoint site using
-    the O365 library and the Microsoft Graph API.
-
-    Attributes
-    ----------
-    client: Client
-        An instance of the Client class to manage Graph API access
-    site: Site
-        An instance of the O365.Site class that manages calls to the Sites
-        Graph API resource
-    """
-
-    def __init__(self, client: Client, site: Site) -> None:
-        """Instantiates the FiscalSite class"""
-        self.client = client
-        self.site = site
-
-    def get_list_by_id(self, list_id: str) -> SharepointList:
-        """Find and return SharepointList instance by the list_id
-
-        Parameters
-        ----------
-        list_id: str
-            The id of the SharePoint list to query
-
-        Returns
-        -------
-        SharepointList
-            An instance of the O365.SharepointList class for the SharePoint
-            list that matches the list_id
-        """
-        site = self.site
-        # query the endpoint
-        url = site.build_url(f"/lists/{list_id}")
-        response = site.con.get(url)
-        response.raise_for_status()
-        # convert the response into a SharepointList instance
-        # syntax borrowed from O365.Site.get_list_by_name()
-        site_list = site.list_constructor(
-            parent=site,
-            **{site._cloud_data_key: response.json()},  # pylint: disable=W0212
-        )
-        return site_list
+from O365.sharepoint import SharepointList, SharepointListItem
 
 
 class AgingReportList:
@@ -118,54 +12,98 @@ class AgingReportList:
 
     Attributes
     ----------
-    client: Client
-        An instance of the Client class to manage Graph API access
+    site: FiscalSite
+        An instance of the FiscalSite class that the Priority Vendor
+        Aging list belongs to
     site_list: O365.SharepointList
         An instance of the O365.SharepointList class that manages calls to the
         Lists resource in Graph API
-    items: List[AgingReportItem]
+    items: dict[AgingReportItem]
         A list of the items in the PriorityVendorAging SharePoint list
         instantiated as members of the AgingReportItem class
     """
 
-    INVOICE_FIELDS = ("Invoice Number", "PO Number")
+    INVOICE_FIELDS = ("InvoiceNumber", "PONumber")
+    FILTER_OPERATORS = (
+        "equals",
+        "not equals",
+        "contains",
+        "starts with",
+    )
 
     def __init__(
         self,
-        client: Client,
-        site: FiscalSite,
         site_list: SharepointList,
     ) -> None:
-        """Instantiates the AgingReportList class
+        """Instantiates the AgingReportList class"""
+        self.list = site_list
+        self.invoices = {}
+
+    def get_invoices(  # pylint: disable = dangerous-default-value
+        self,
+        fields: tuple = INVOICE_FIELDS,
+        query: Dict[str, tuple] = {"Status": ("not equals", "Paid")},
+    ) -> Dict[tuple, AgingReportItem]:
+        """Gets items from the Piority Vendor Aging list in SharePoint and
+        instantiates them as members of the AgingReportItem class
 
         Parameters
         ----------
-        client: Client
-            An instance of the client class to manage Graph API access
-        site: FiscalSite
-            An instance of the FiscalSite class that the Priority Vendor
-            Aging list belongs to
-        """
-        self.client = client
-        self.site = site
-        self.list = site_list
-        self.invoices = []
+        fields: tuple
+            A tuple of the fields that should be included for each item
+            returned in the response. Must be members of self.list.columns
+        query: dict, optional
+            A dictionary that specifies which fields to filter on and what
+            filters to apply to them. The keys of the dictionary must be the
+            name of a field, and the values should be a tuple of the logical
+            operator and the value applied to the logical operator. Default
+            is to exclude all paid invoices.
 
-    def get_invoices(
-        self,
-        fields: list = INVOICE_FIELDS,
-    ) -> List[AgingReportItem]:
-        """Gets items from the Piority Vendor Aging list in SharePoint and
-        instantiates them as members of the AgingReportItem class
+        Returns
+        -------
+        Dict[str, AgingReportItem]
+            A list of items from the Priority Vendor Aging SharePoint list
+            instantiated as members of the AgingReportItem class
         """
+        if query:
+            pass
+
         # query invoice records from SharePoint
-        results = self.list.get_items(expand_fields=fields)
+        results = self.list.get_items(expand_fields=list(fields))
 
-        # instantiate each record as a AgingReportItem
+        # instantiate each record as an AgingReportItem
         for record in results:
-            invoice = AgingReportItem(self.client, self, record, record.fields)
-            self.invoices.append(invoice)
+            invoice = AgingReportItem(self, record)
+
+            # add it to self.invoices keyed by (PO number, invoice number)
+            po_num = record.fields.get("PONumber")
+            invoice_num = record.fields.get("InvoiceNumber")
+            invoice_key = (po_num, invoice_num)
+            print(invoice_key)
+            self.invoices[invoice_key] = invoice
+
         return self.invoices
+
+    def get_invoice_by_key(
+        self, po_num: str, invoice_num: str
+    ) -> AgingReportItem:
+        """Return a single invoice keyed by Invoice Number and PO Number"""
+
+        # first, check the list of existing invoices
+        invoice_key = (po_num, invoice_num)
+        invoice = self.invoices.get(invoice_key)
+
+        # if none found, query the invoice from SharePoint
+        if not invoice:
+            # filter items on invoice number and po number
+            q = self.list.new_query()
+            q.on_attribute("InvoiceNumber").equals(invoice_num)
+            q.chain("and").on_attribute("PONumber").equals(po_num)
+            # instantiate result as AgingReportItem
+            results = self.list.get_items(query=q)
+            invoice = AgingReportItem(self, results[0])
+
+        return invoice
 
     def add_invoices(self, **kwargs) -> None:
         """Inserts a new item into the Priority Vendor Aging list in SharePoint
@@ -182,21 +120,23 @@ class AgingReportItem:
 
     Attributes
     ----------
-
+    report: AgingReportList
+        An instance of the AgingReportList class that the Priority Vendor
+        Aging list item belongs to
+    item: SharepointListItem
+        An instance of the O365.SharepointListItem class that manages calls to
+        the ListItems resource in Graph API
     """
 
     def __init__(
         self,
-        client: Client,
         report: AgingReportList,
         item: SharepointListItem,
-        fields: dict,
     ) -> None:
         """Instantiates the AgingReportItem class"""
-        self.client = client
         self.report = report
         self.item = item
-        self.fields = fields
+        self.id = item.object_id
 
     def update(self, **kwargs) -> None:
         """Updates the Priority Vendor Aging list item in SharePoint"""

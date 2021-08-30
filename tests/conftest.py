@@ -19,7 +19,7 @@ def fixture_test_client():
     return Client()
 
 
-@pytest.fixture(scope="session")
-def report(test_client):
+@pytest.fixture(scope="session", name="test_report")
+def fixture_report(test_client):
     """Create an instance of AgingReportList for use in integration tests"""
     return test_client.get_aging_report()
