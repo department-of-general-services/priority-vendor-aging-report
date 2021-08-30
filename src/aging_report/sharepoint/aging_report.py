@@ -128,7 +128,7 @@ class AgingReportList:
         instantiated as members of the AgingReportItem class
     """
 
-    INVOICE_FIELDS = ["Invoice Number", "PO Number"]
+    INVOICE_FIELDS = ("Invoice Number", "PO Number")
 
     def __init__(
         self,
@@ -161,9 +161,9 @@ class AgingReportList:
         # query invoice records from SharePoint
         results = self.list.get_items(expand_fields=fields)
 
-        # instantiate each as a AgingReportItem
-        for r in results:
-            invoice = AgingReportItem(self.client, self, r, r.fields)
+        # instantiate each record as a AgingReportItem
+        for record in results:
+            invoice = AgingReportItem(self.client, self, record, record.fields)
             self.invoices.append(invoice)
         return self.invoices
 

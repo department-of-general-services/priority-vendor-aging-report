@@ -17,7 +17,7 @@ from aging_report.sharepoint import (
 class TestClient:
     """Tests the Client methods that make external calls to Graph API"""
 
-    def test_init(self, client):
+    def test_init(self, test_client):
         """Tests that Client instantiates correctly
 
         Validatees the following conditions:
@@ -26,11 +26,11 @@ class TestClient:
         - Client.account is authenticated with Graph API
         """
         # validation
-        assert isinstance(client.account, Account)
-        assert isinstance(client.app, Sharepoint)
-        assert client.is_authenticated
+        assert isinstance(test_client.account, Account)
+        assert isinstance(test_client.app, Sharepoint)
+        assert test_client.is_authenticated
 
-    def test_get_fiscal_site(self, client):
+    def test_get_fiscal_site(self, test_client):
         """Tests that Client.get_fiscal_site() returns a DGSFiscal instance
 
         Validates the following conditions:
@@ -39,13 +39,13 @@ class TestClient:
         - The SharePoint site retrieved has the correct url
         """
         # execution
-        fiscal = client.get_fiscal_site()
+        fiscal = test_client.get_fiscal_site()
         # validation
         assert isinstance(fiscal, FiscalSite)
         assert isinstance(fiscal.site, Site)
         assert "Fiscal" in fiscal.site.web_url
 
-    def test_get_aging_report(self, client):
+    def test_get_aging_report(self, test_client):
         """Tests that Client.get_aging_report() returns an AgingReportList instance
 
         Validates the following conditions:
@@ -54,7 +54,7 @@ class TestClient:
         - The SharePoint list retrieved has the correct name
         """
         # execution
-        report = client.get_aging_report()
+        report = test_client.get_aging_report()
         # validation
         assert isinstance(report, AgingReportList)
         assert isinstance(report.list, SharepointList)
