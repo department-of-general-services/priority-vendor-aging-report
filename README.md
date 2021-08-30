@@ -5,19 +5,21 @@
 
 <!-- TOC -->
 
-- [About this Project](#about-this-project)
-  - [Made With](#made-with)
-  - [Relevant Documents](#relevant-documents)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-  - [This Template](#this-template)
-  - [{Use Case 1}](#use-case-1)
-- [Contributing](#contributing)
-- [License](#license)
-- [Maintainers](#maintainers)
-- [Acknowledgements](#acknowledgements)
+- [Priority Vendor Aging Report](#priority-vendor-aging-report)
+  - [About this Project](#about-this-project)
+    - [Made With](#made-with)
+    - [Relevant Documents](#relevant-documents)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Secret Configuration](#secret-configuration)
+  - [Usage](#usage)
+    - [Get all invoices](#get-all-invoices)
+  - [Vision and Roadmap](#vision-and-roadmap)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Maintainers](#maintainers)
+  - [Acknowledgements](#acknowledgements)
 
 <!-- /TOC -->
 
