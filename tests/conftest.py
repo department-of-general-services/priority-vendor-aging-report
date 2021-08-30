@@ -17,3 +17,9 @@ def test_config():
 def client():
     """Create an authenticated Graph API client for use in integration tests"""
     return Client()
+
+
+@pytest.fixture(scope="session")
+def report(client):
+    """Create an instance of AgingReportList for use in integration tests"""
+    return client.get_aging_report()

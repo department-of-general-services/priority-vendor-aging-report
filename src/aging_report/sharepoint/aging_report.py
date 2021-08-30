@@ -1,11 +1,9 @@
 from __future__ import annotations  # prevents NameError for typehints
+from typing import List
 
 from dynaconf import Dynaconf
 from O365 import Account
-from O365.sharepoint import (
-    Site,
-    SharepointList,
-)
+from O365.sharepoint import Site, SharepointList, SharepointListItem
 from aging_report.config import settings
 
 
@@ -42,7 +40,7 @@ class Client:
         self.config = config
         self.account = authenticate_account(config)
         self.app = self.account.sharepoint()
-        self.fiscal_site: DGSFiscalSite = None
+        self.fiscal_site: FiscalSite = None
         self.aging_report: AgingReportList = None
 
     @property
@@ -50,10 +48,10 @@ class Client:
         """Returns True if account is authenticated"""
         return self.account.is_authenticated
 
-    def get_fiscal_site(self) -> DGSFiscalSite:
-        """Returns DGSFiscalSite instance and stores it in self.fiscal_site"""
+    def get_fiscal_site(self) -> FiscalSite:
+        """Returns FiscalSite instance and stores it in self.fiscal_site"""
         site = self.app.get_site(self.config.site_id)
-        self.fiscal_site = DGSFiscalSite(self, site)
+        self.fiscal_site = FiscalSite(self, site)
         return self.fiscal_site
 
     def get_aging_report(self) -> AgingReportList:
@@ -64,7 +62,7 @@ class Client:
         return self.aging_report
 
 
-class DGSFiscalSite:
+class FiscalSite:
     """Creates a SharePoint client for the DGS Fiscal site
 
     Facilitates accessing lists and drives in the DGS SharePoint site using
@@ -75,11 +73,12 @@ class DGSFiscalSite:
     client: Client
         An instance of the Client class to manage Graph API access
     site: Site
-        An instance of O365.Site to
+        An instance of the O365.Site class that manages calls to the Sites
+        Graph API resource
     """
 
     def __init__(self, client: Client, site: Site) -> None:
-        """Instantiates the DGSFiscalSite class"""
+        """Instantiates the FiscalSite class"""
         self.client = client
         self.site = site
 
@@ -129,10 +128,12 @@ class AgingReportList:
         instantiated as members of the AgingReportItem class
     """
 
+    INVOICE_FIELDS = ["Invoice Number", "PO Number"]
+
     def __init__(
         self,
         client: Client,
-        site: DGSFiscalSite,
+        site: FiscalSite,
         site_list: SharepointList,
     ) -> None:
         """Instantiates the AgingReportList class
@@ -141,20 +142,30 @@ class AgingReportList:
         ----------
         client: Client
             An instance of the client class to manage Graph API access
-        site: DGSFiscalSite
-            An instance of the DGSFiscalSite class that the Priority Vendor
+        site: FiscalSite
+            An instance of the FiscalSite class that the Priority Vendor
             Aging list belongs to
         """
         self.client = client
         self.site = site
         self.list = site_list
-        self.items = None
+        self.invoices = []
 
-    def get_invoices(self) -> None:
+    def get_invoices(
+        self,
+        fields: list = INVOICE_FIELDS,
+    ) -> List[AgingReportItem]:
         """Gets items from the Piority Vendor Aging list in SharePoint and
         instantiates them as members of the AgingReportItem class
         """
-        pass
+        # query invoice records from SharePoint
+        results = self.list.get_items(expand_fields=fields)
+
+        # instantiate each as a AgingReportItem
+        for r in results:
+            invoice = AgingReportItem(self.client, self, r, r.fields)
+            self.invoices.append(invoice)
+        return self.invoices
 
     def add_invoices(self, **kwargs) -> None:
         """Inserts a new item into the Priority Vendor Aging list in SharePoint
@@ -174,9 +185,18 @@ class AgingReportItem:
 
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(
+        self,
+        client: Client,
+        report: AgingReportList,
+        item: SharepointListItem,
+        fields: dict,
+    ) -> None:
         """Instantiates the AgingReportItem class"""
-        pass
+        self.client = client
+        self.report = report
+        self.item = item
+        self.fields = fields
 
     def update(self, **kwargs) -> None:
         """Updates the Priority Vendor Aging list item in SharePoint"""
