@@ -59,4 +59,5 @@ disable = [
   "R0201",  # Disables method could have been a function
   "R0903",  # Disables too few public methods
   "W0107",  # Disables unnecessary pass statement
+  "W0511",  # Disables fix me
 ]

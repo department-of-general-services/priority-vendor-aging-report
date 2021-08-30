@@ -42,7 +42,7 @@ class AgingReportList:
     def get_invoices(  # pylint: disable = dangerous-default-value
         self,
         fields: tuple = INVOICE_FIELDS,
-        query: Dict[str, tuple] = {"Status": ("not equals", "Paid")},
+        query: Dict[str, tuple] = None,
     ) -> Dict[tuple, AgingReportItem]:
         """Gets items from the Piority Vendor Aging list in SharePoint and
         instantiates them as members of the AgingReportItem class
@@ -57,7 +57,7 @@ class AgingReportList:
             filters to apply to them. The keys of the dictionary must be the
             name of a field, and the values should be a tuple of the logical
             operator and the value applied to the logical operator. Default
-            is to exclude all paid invoices.
+            is to return all invoice.
 
         Returns
         -------
@@ -65,6 +65,7 @@ class AgingReportList:
             A list of items from the Priority Vendor Aging SharePoint list
             instantiated as members of the AgingReportItem class
         """
+        # TODO: Add filtering capability
         if query:
             pass
 
@@ -85,7 +86,9 @@ class AgingReportList:
         return self.invoices
 
     def get_invoice_by_key(
-        self, po_num: str, invoice_num: str
+        self,
+        po_num: str,
+        invoice_num: str,
     ) -> AgingReportItem:
         """Return a single invoice keyed by Invoice Number and PO Number"""
 
@@ -93,6 +96,7 @@ class AgingReportList:
         invoice_key = (po_num, invoice_num)
         invoice = self.invoices.get(invoice_key)
 
+        # TODO: Fix the filtering capability
         # if none found, query the invoice from SharePoint
         if not invoice:
             # filter items on invoice number and po number
@@ -110,6 +114,11 @@ class AgingReportList:
         and instantiates the result as a member of the AgingReportItem class
         """
         pass
+
+    @property
+    def columns(self):
+        """Returns the columns in the SharePoint list"""
+        return list(self.list.column_name_cw.values())
 
 
 class AgingReportItem:

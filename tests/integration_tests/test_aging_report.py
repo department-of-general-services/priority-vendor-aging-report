@@ -6,6 +6,7 @@ from O365 import Account
 from O365.sharepoint import Sharepoint, Site, SharepointList
 
 from aging_report.config import settings
+from aging_report.errors import ColumnNotFound
 from aging_report.sharepoint import (
     Client,
     FiscalSite,
