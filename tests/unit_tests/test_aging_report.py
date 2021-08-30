@@ -1,9 +1,3 @@
-from aging_report.sharepoint import (
-    AgingReportList,
-    AgingReportItem,
-)
-
-
 class TestInit:
     """Tests the"""
 

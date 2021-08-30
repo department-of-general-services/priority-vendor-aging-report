@@ -150,3 +150,8 @@ class AgingReportItem:
     def update(self, **kwargs) -> None:
         """Updates the Priority Vendor Aging list item in SharePoint"""
         pass
+
+    @property
+    def fields(self) -> dict:
+        """Returns the fields associated with this list item"""
+        return self.item.fields

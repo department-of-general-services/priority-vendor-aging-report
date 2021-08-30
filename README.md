@@ -83,15 +83,70 @@ If you receive an error message, or the version of python you have installed is 
     congratulations :)
    ```
 
+### Secret Configuration
+
+1. Contact Billy Daly to receive access to the credentials for the Microsoft Daemon app that has permissions use the Graph API for this project.
+1. Create a file called `.secrets.toml` at the root of the project directory:
+   - On Mac/Linux: `touch .secrets.toml`
+   - On Windows: `echo > .secrets.toml`
+1. Open that new file in your text editor and add the credentials to it. The format should look something like this:
+   ```toml
+   [DEVELOPMENT]
+   client_id = "test_id"
+   client_secret = "test_secret"
+   tenant_id = "12345"
+   site_id = "acme.sharepoint.com,12345,67890"
+   host_name = "acme.sharepoint.com"
+   site_name = "AcmeSite"
+   report_id = "45678"
+   ```
+1. Test that the config variables are loading correctly. Enter all of the lines that begin with a `$` or `>>>`
+   ```bash
+   $ python
+   >>> from aging_report.config import settings
+   >>> settings.client_id
+   'test_id'  # This should match the value you added to .secrets.toml
+   >>> settings.secret
+   'test_secret'  # This should match the value you added to .secrets.toml
+   ```
+1. If the config variables are loading correctly, try running the integration tests: `pytest tests/integration_tests`
+1. All tests should pass with an output that looks something like this:
+   ```
+   ======================== test session starts ==============================
+   collected 5 items
+   tests/integration_tests/test_aging_report.py .....                   [100%]
+
+   ======================== 5 passed in 1.86s ================================
+   ```
+
 ## Usage
 
-### {Use Case 1}
+### Get all invoices
 
-{1-2 sentence summary of this use case}
+To retrieve a list of all of the invoices in the Priority Vendor Aging SharePoint list complete the following steps:
 
-1. {Step 1 to complete use case}
-1. {Step 2 to complete use case}
-1. ... <!-- number of steps and use cases may vary -->
+1. Initiate a new Python interpreter in your terminal: `python`
+1. Import the `Client` class: `from aging_report.sharepoint import Client`
+1. Instantiate the `Client` class: `client = Client()`
+1. Get an instance of the `AgingReportList` class: `report = client.get_aging_report()`
+1. Query the list of invoices: `invoices = report.get_invoices()`
+1. Print the invoice fields:
+```
+for invoice in invoices:
+    print(invoice.fields)
+```
+
+The full example looks like this:
+
+```python
+from aging_report.sharepoint import Client
+
+client = Client()
+report = client.get_aging_report()
+invoices = report.get_invoices()
+for i in invoices:
+  pring(invoice.fields)
+```
 
 ## Vision and Roadmap
 
