@@ -23,13 +23,7 @@ class AgingReportList:
         instantiated as members of the AgingReportItem class
     """
 
-    INVOICE_FIELDS = ("InvoiceNumber", "PONumber")
-    FILTER_OPERATORS = (
-        "equals",
-        "not equals",
-        "contains",
-        "starts with",
-    )
+    INVOICE_KEY = ("PONumber", "InvoiceNumber")
 
     def __init__(
         self,
@@ -41,7 +35,7 @@ class AgingReportList:
 
     def get_invoices(  # pylint: disable = dangerous-default-value
         self,
-        fields: tuple = INVOICE_FIELDS,
+        fields: tuple = INVOICE_KEY,
         query: Dict[str, tuple] = None,
     ) -> Dict[tuple, AgingReportItem]:
         """Gets items from the Piority Vendor Aging list in SharePoint and
@@ -57,7 +51,7 @@ class AgingReportList:
             filters to apply to them. The keys of the dictionary must be the
             name of a field, and the values should be a tuple of the logical
             operator and the value applied to the logical operator. Default
-            is to return all invoice.
+            is to return all invoices.
 
         Returns
         -------
@@ -65,53 +59,73 @@ class AgingReportList:
             A list of items from the Priority Vendor Aging SharePoint list
             instantiated as members of the AgingReportItem class
         """
-        # TODO: Add filtering capability
+        # query invoice records from SharePoint
         if query:
             pass
-
-        # query invoice records from SharePoint
-        results = self.list.get_items(expand_fields=list(fields))
-
-        # instantiate each record as an AgingReportItem
+        else:
+            results = self.list.get_items(expand_fields=list(fields))
+        # add them to self.invoices
         for record in results:
-            invoice = AgingReportItem(self, record)
-
-            # add it to self.invoices keyed by (PO number, invoice number)
-            po_num = record.fields.get("PONumber")
-            invoice_num = record.fields.get("InvoiceNumber")
-            invoice_key = (po_num, invoice_num)
-            print(invoice_key)
-            self.invoices[invoice_key] = invoice
-
+            self._init_aging_report_item(record)
         return self.invoices
 
     def get_invoice_by_key(
         self,
         po_num: str,
         invoice_num: str,
+        fields: tuple = INVOICE_KEY,
     ) -> AgingReportItem:
-        """Return a single invoice keyed by Invoice Number and PO Number"""
+        """Return a single invoice keyed by Invoice Number and PO Number
 
+        Parameters
+        ----------
+        po_num: str,
+            The PO Number associated with the invoice being queried
+        invoice_num: str,
+            The Invoice Number associated with the invoice being queried
+        fields: tuple, optional
+            The list item fields that should be returned by the query. Default
+            is to only return Invoice and PO Number.
+
+        Returns
+        -------
+        AgingReportItem
+            An instance of AgingReportItem for the invoice that matches the
+            Invoice and PO Number
+        """
         # first, check the list of existing invoices
         invoice_key = (po_num, invoice_num)
         invoice = self.invoices.get(invoice_key)
 
-        # TODO: Fix the filtering capability
         # if none found, query the invoice from SharePoint
         if not invoice:
-            # filter items on invoice number and po number
-            q = self.list.new_query()
-            q.on_attribute("InvoiceNumber").equals(invoice_num)
-            q.chain("and").on_attribute("PONumber").equals(po_num)
+            q = (
+                f"fields/PONumber eq '{po_num}' and "
+                f"fields/InvoiceNumber eq '{invoice_num}'"
+            )
             # instantiate result as AgingReportItem
-            results = self.list.get_items(query=q)
-            invoice = AgingReportItem(self, results[0])
+            results = self.list.get_items(query=q, expand_fields=list(fields))
+            if not results:
+                raise ValueError("No matching invoice found for that key")
+            invoice = self._init_aging_report_item(results[0])
 
         return invoice
 
-    def add_invoices(self, **kwargs) -> None:
+    def add_invoices(self, invoice_data: dict) -> AgingReportItem:
         """Inserts a new item into the Priority Vendor Aging list in SharePoint
         and instantiates the result as a member of the AgingReportItem class
+
+        Parameters
+        ----------
+        invoice_data: dict
+            The data that will be used to create a new Priority Vendor Aging
+            list item. Keys must be in list of columns and values must match
+            the data type for that column
+
+        Returns
+        -------
+        AgingReportItem
+            An instance of AgingReportItem for the list item that was created
         """
         pass
 
@@ -119,6 +133,23 @@ class AgingReportList:
     def columns(self):
         """Returns the columns in the SharePoint list"""
         return list(self.list.column_name_cw.values())
+
+    def _init_aging_report_item(self, item: SharepointListItem) -> None:
+        """Inits invoice as an AgingReportItem and adds it to self.invoices
+
+        Parameters
+        ----------
+        item: O365.SharepointListItem
+            Instance of SharepointListItem used to init AgingReportItem
+        """
+        # get Invoice and PO Number from fields
+        key = tuple(item.fields.get(k) for k in self.INVOICE_KEY)
+
+        # instantiate AgingReportItem and add to self.invoices
+        invoice = AgingReportItem(self, item)
+        self.invoices[key] = invoice
+
+        return invoice
 
 
 class AgingReportItem:
@@ -145,7 +176,6 @@ class AgingReportItem:
         """Instantiates the AgingReportItem class"""
         self.report = report
         self.item = item
-        self.id = item.object_id
 
     def update(self, **kwargs) -> None:
         """Updates the Priority Vendor Aging list item in SharePoint"""
