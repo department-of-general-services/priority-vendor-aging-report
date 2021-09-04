@@ -17,9 +17,10 @@ class TestAgingReportList:
         invoice_num = "12345"
         invoice_key = (po_num, invoice_num)
         # execution
-        # query = {"PO Number": ("equals", "P12345:12")}
-        invoices = test_report.get_invoices()
+        query = {"PO Number": ("equals", "P12345:12")}
+        invoices = test_report.get_invoices(query=query)
         # validation
+        assert len(invoices) == 3
         assert isinstance(invoices.get(invoice_key), AgingReportItem)
         assert invoices == test_report.invoices
 

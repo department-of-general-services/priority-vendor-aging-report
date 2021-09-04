@@ -1,36 +1,11 @@
 from __future__ import annotations  # prevents NameError for typehints
 
 from dynaconf import Dynaconf
-from O365 import Account
 from O365.sharepoint import Site, SharepointList
 
 from aging_report.config import settings
 from aging_report.sharepoint.aging_report import AgingReportList
-
-
-def authenticate_account(config: Dynaconf) -> Account:
-    """Creates and authenticates an O365.Account instance
-
-    Parameters
-    ----------
-    config: Dynaconf
-        The config settings that will be used to authenticate the account with
-        Microsoft Graph API
-
-    Returns
-    -------
-    Account
-        An instance of the Account class from O365 that has been authenticated
-    """
-    credentials = (config.client_id, config.client_secret)
-    account = Account(
-        credentials,
-        auth_flow_type="credentials",
-        tenant_id=config.tenant_id,
-    )
-    if not account.is_authenticated:
-        account.authenticate()
-    return account
+from aging_report.sharepoint.utils import authenticate_account
 
 
 class Client:

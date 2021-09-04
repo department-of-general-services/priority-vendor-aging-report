@@ -1,4 +1,4 @@
-class ColumnNotFound(Exception):
+class ColumnNotFoundError(Exception):
     """Exception raised when attempting to query or update a column that
     doesn't exist within a SharePoint list.
     """

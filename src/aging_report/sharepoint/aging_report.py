@@ -3,6 +3,8 @@ from typing import Dict
 
 from O365.sharepoint import SharepointList, SharepointListItem
 
+from aging_report.sharepoint.utils import build_filter_str
+
 
 class AgingReportList:
     """Creates an API client for the Priority Vendor Aging SharePoint list
@@ -25,10 +27,7 @@ class AgingReportList:
 
     INVOICE_KEY = ("PONumber", "InvoiceNumber")
 
-    def __init__(
-        self,
-        site_list: SharepointList,
-    ) -> None:
+    def __init__(self, site_list: SharepointList) -> None:
         """Instantiates the AgingReportList class"""
         self.list = site_list
         self.invoices = {}
@@ -61,7 +60,8 @@ class AgingReportList:
         """
         # query invoice records from SharePoint
         if query:
-            pass
+            q = build_filter_str(self.columns, query)
+            results = self.list.get_items(query=q, expand_fields=list(fields))
         else:
             results = self.list.get_items(expand_fields=list(fields))
         # add them to self.invoices
@@ -130,9 +130,9 @@ class AgingReportList:
         pass
 
     @property
-    def columns(self):
+    def columns(self) -> dict:
         """Returns the columns in the SharePoint list"""
-        return list(self.list.column_name_cw.values())
+        return self.list.column_name_cw
 
     def _init_aging_report_item(self, item: SharepointListItem) -> None:
         """Inits invoice as an AgingReportItem and adds it to self.invoices
