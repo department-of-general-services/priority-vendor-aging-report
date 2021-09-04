@@ -1,0 +1,11 @@
+[DEFAULT]
+scopes = "https://graph.microsoft.com/.default"
+
+[TESTING]
+client_id = "test_id"
+client_secret = "test_secret"
+tenant_id = "12345"
+site_id = "acme.sharepoint.com,12345,67890"
+host_name = "acme.sharepoint.com"
+site_name = "AcmeSite"
+report_id = "45678"

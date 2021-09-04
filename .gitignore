@@ -130,3 +130,7 @@ dmypy.json
 
 # Mac files
 .DS_Store
+
+# Ignore dynaconf secret files
+.secrets.*
+o365_token.txt
