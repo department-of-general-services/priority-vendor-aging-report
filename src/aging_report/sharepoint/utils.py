@@ -44,6 +44,37 @@ def authenticate_account(config: Dynaconf) -> Account:
     return account
 
 
+def get_col_api_name(columns: dict, col: str, prefix: str = "") -> str:
+    """Returns the API name of a column with optional prefix for querying and
+    updating data via Graph API
+
+    Parameters
+    ----------
+    columns: dict
+        A ditionary of SharePoint List columns with the following format:
+        {"Display Name": "API Name"}
+    col: str
+        The the column to search for in the list of columns
+    prefix: str, optional
+        Optional string to prepend the API name with, default is an empty string
+
+    Returns
+    -------
+    str
+        The API name of the column passed to the function, with optional prefix
+
+    Raises
+    ------
+    ColumnNotFoundError
+        Raises this error if the column provided isn't in the list of columns
+    """
+    if col in columns:
+        return prefix + columns[col]
+    if col in columns.values():
+        return prefix + col
+    raise ColumnNotFoundError(col, columns)
+
+
 def build_filter_str(columns: dict, query_dict: dict) -> str:
     """Converts a query dictionary to a string that conforms to the OData query
     format and can be passed to the query parameter in O365 get methods
@@ -54,10 +85,8 @@ def build_filter_str(columns: dict, query_dict: dict) -> str:
         A dictionary of the columns to filter on, with the display name of each
         column as the key and the API name as the value
     query_dict: dict
-        A dictionary that specifies which fields to filter on and what
-        filters to apply to them. The keys of the dictionary must be the
-        name of a field, and the values should be a tuple of the logical
-        operator and the value applied to the logical operator.
+        A dictionary of {"field name": ("operator": "condition")} used to
+        build the string filter.
 
     Returns
     -------
@@ -76,14 +105,7 @@ def build_filter_str(columns: dict, query_dict: dict) -> str:
     # iteratively create filters
     filters = []
     for col, condition in query_dict.items():
-        # check that filter field is in list of columns
-        if col in columns:
-            field = prefix + columns[col]
-        elif col in columns.values():
-            field = prefix + col
-        else:
-            raise ColumnNotFoundError(col, columns)
-
+        field = get_col_api_name(columns, col, prefix)
         # build filter using odata syntax mapping
         operator, value = condition
         if isinstance(value, str):

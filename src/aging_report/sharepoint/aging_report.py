@@ -3,7 +3,7 @@ from typing import Dict
 
 from O365.sharepoint import SharepointList, SharepointListItem
 
-from aging_report.sharepoint.utils import build_filter_str
+from aging_report.sharepoint.utils import build_filter_str, get_col_api_name
 
 
 class AgingReportList:
@@ -46,11 +46,8 @@ class AgingReportList:
             A tuple of the fields that should be included for each item
             returned in the response. Must be members of self.list.columns
         query: dict, optional
-            A dictionary that specifies which fields to filter on and what
-            filters to apply to them. The keys of the dictionary must be the
-            name of a field, and the values should be a tuple of the logical
-            operator and the value applied to the logical operator. Default
-            is to return all invoices.
+            A dictionary of {"field name": ("operator": "condition")} used to
+            filter the results. Default is to return all invoices.
 
         Returns
         -------
@@ -177,9 +174,25 @@ class AgingReportItem:
         self.report = report
         self.item = item
 
-    def update(self, **kwargs) -> None:
-        """Updates the Priority Vendor Aging list item in SharePoint"""
-        pass
+    def update(self, data: dict) -> None:
+        """Updates the Priority Vendor Aging list item in SharePoint
+
+        Parameters
+        ----------
+        data: dict
+            A dictionary of {"field name": new_value} used to update the fields
+        """
+        # gets api name for each field in update data
+        cols = self.report.columns
+        data = {get_col_api_name(cols, col): val for col, val in data.items()}
+        # adds field to self.fields to avoid update error
+        for field in data:
+            if field not in self.fields:
+                self.fields[field] = None
+
+        # update and save field
+        self.item.update_fields(data)
+        self.item.save_updates()
 
     @property
     def fields(self) -> dict:
