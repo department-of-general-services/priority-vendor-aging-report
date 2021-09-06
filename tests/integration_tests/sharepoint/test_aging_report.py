@@ -83,6 +83,8 @@ class TestAgingReportItem:
         po_num = "P12345:12"
         invoice_num = "12345"
         invoice_key = (po_num, invoice_num)
+        if invoice_key in test_report.invoices:
+            del test_report.invoices[invoice_key]
         invoice = test_report.get_invoice_by_key(po_num, invoice_num, fields)
         status = invoice.fields["CitiBuyStatus"]
         # setup - set update dict
@@ -96,4 +98,3 @@ class TestAgingReportItem:
         result = test_report.get_invoice_by_key(po_num, invoice_num, fields)
         # validation
         assert result.fields["CitiBuyStatus"] == data["Status"]
-        assert 0
