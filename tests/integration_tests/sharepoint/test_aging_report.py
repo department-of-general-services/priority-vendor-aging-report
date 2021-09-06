@@ -66,3 +66,34 @@ class TestAgingReportList:
         assert isinstance(invoice, AgingReportItem)
         assert isinstance(invoice.fields, dict)
         assert invoice_key in test_report.invoices
+
+
+class TestAgingReportItem:
+    """Tests the AgingReportItem methods that make calls to Graph API"""
+
+    def test_update(self, test_report):
+        """Tests that AgingReportItem.update executes successfully
+
+        Validates the following conditions:
+        - AgingReportItem.update() doesn't throw an error
+        - The field was successfully updated in SharePoint
+        """
+        # setup - get invoice
+        fields = ("PONumber", "InvoiceNumber", "CitiBuyStatus")
+        po_num = "P12345:12"
+        invoice_num = "12345"
+        invoice_key = (po_num, invoice_num)
+        invoice = test_report.get_invoice_by_key(po_num, invoice_num, fields)
+        status = invoice.fields["CitiBuyStatus"]
+        # setup - set update dict
+        if status == "8. Paid":
+            data = {"Status": "Error"}
+        else:
+            data = {"Status": "8. Paid"}
+        # execution
+        invoice.update(data)
+        del test_report.invoices[invoice_key]
+        result = test_report.get_invoice_by_key(po_num, invoice_num, fields)
+        # validation
+        assert result.fields["CitiBuyStatus"] == data["Status"]
+        assert 0
