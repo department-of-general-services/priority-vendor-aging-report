@@ -1,6 +1,7 @@
 from __future__ import annotations  # prevents NameError for typehints
 from pathlib import Path
 
+from dynaconf import Dynaconf
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,6 +11,8 @@ from selenium.common.exceptions import (
     UnexpectedAlertPresentException,
     SessionNotCreatedException,
 )
+
+from aging_report.config import settings
 
 
 class Driver:
@@ -21,7 +24,9 @@ class Driver:
         SessionNotCreatedException,
     ]
 
-    def __init__(self, driver_path: Path, download_dir: Path) -> None:
+    def __init__(
+        self, archives_dir: Path = None, config: Dynaconf = settings
+    ) -> None:
         """Inits the Driver class with specific download directory
 
         Parameters
@@ -31,7 +36,12 @@ class Driver:
         download_dir: Path
             Path to directory where downloads from the browser should be saved
         """
-        self.driver = self._create_driver(driver_path, download_dir)
+        # get path to chromedriver and project root
+        driver_path = Path(config.chrome_driver_path)
+        archives = archives_dir or (Path.cwd() / "archives")
+
+        self.download_dir = archives / "core_integrator"
+        self.driver = self._create_driver(self.download_dir, driver_path)
 
     def fill_in(self, element_id: str, content: str) -> None:
         """Uses the webdriver to fill in a form field with content
@@ -97,7 +107,11 @@ class Driver:
         except TimeoutException as error:
             raise error
 
-    def _create_driver(self, driver_path, download_dir) -> webdriver:
+    def _create_driver(
+        self,
+        download_dir: Path,
+        driver_path: Path,
+    ) -> webdriver.Chrome:
         """Configures a selenium webdriver with a specific download directory
 
         Parameters
@@ -109,7 +123,7 @@ class Driver:
 
         Returns
         -------
-        webdriver
+        webdriver.Chrome
             Selenium webdriver for Chrome with options configured
         """
         # sets default download directory
@@ -133,3 +147,11 @@ class Driver:
             raise error
 
         return driver
+
+    def get(self, url) -> None:
+        """Loads the webpage for a URL"""
+        return self.driver.get(url)
+
+    def quit(self) -> None:
+        """Closes the webdriver"""
+        return self.driver.quit()
