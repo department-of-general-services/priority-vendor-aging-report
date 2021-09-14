@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import pytest
-from dynaconf import Dynaconf
 
 from aging_report.config import settings
 from aging_report.sharepoint import Client
@@ -40,8 +39,8 @@ def fixture_archive_dir(tmp_path_factory):
     return archive_dir
 
 
-@pytest.fixture(scope="session")
-def driver(test_archive_dir):
+@pytest.fixture(scope="session", name="driver")
+def fixture_driver(test_archive_dir):
     """Creates a webdriver for testing"""
     driver = Driver(test_archive_dir)
     yield driver

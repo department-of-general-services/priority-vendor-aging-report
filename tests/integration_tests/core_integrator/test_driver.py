@@ -2,10 +2,7 @@ import time
 from pathlib import Path
 
 import pytest
-from selenium.common.exceptions import (
-    TimeoutException,
-    SessionNotCreatedException,
-)
+from selenium.common.exceptions import TimeoutException
 
 from aging_report.core_integrator.driver import Driver
 from aging_report.config import settings
@@ -61,7 +58,7 @@ class TestClick:
     """Tests the Driver.click() method"""
 
     def test_click_link(self, driver):
-        """ """
+        """Tests the link_text parameter of Driver.click()"""
         # setup
         url_out = "https://pypi.org/project/selenium/#description"
         link = "Project description"
@@ -75,6 +72,7 @@ class TestClick:
         driver.quit()
 
     def test_click_id(self, driver):
+        """Tests the id parameter of Driver.click()"""
         # setup
         url_out = "https://pypi.org/project/selenium/#description"
         link_id = "description-tab"
@@ -93,6 +91,7 @@ class TestFillIn:
     """Tests the Driver.fill_in() method"""
 
     def test_fill_in(self, driver):
+        """Tests the Driver.fill_in() method"""
         # setup
         search_id = "search"
         value_in = "FooBar"
@@ -112,6 +111,7 @@ class TestWaitToLoad:
     """Tests the Driver.wait_to_load() method"""
 
     def test_id_present(self, driver):
+        """Tests the id parameter for Driver.wait_to_load()"""
         # setup
         search_id = "search"
         # execution
@@ -123,6 +123,7 @@ class TestWaitToLoad:
         driver.quit()
 
     def test_link_present(self, driver):
+        """Tests the link parameter of Driver.wait_to_load()"""
         # setup
         link = "Project description"
 
@@ -136,6 +137,7 @@ class TestWaitToLoad:
         driver.quit()
 
     def test_id_missing(self, driver):
+        """Tests that wait_to_load() fails as expected when the id is missing"""
         # setup
         search_id = "fake_id"
 
@@ -146,6 +148,7 @@ class TestWaitToLoad:
         driver.quit()
 
     def test_link_missing(self, driver):
+        """Tests that wait_to_load() fails as expected when the link is missing"""
         # setup
         link = "fake_link"
 
