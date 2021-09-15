@@ -18,7 +18,24 @@ from aging_report.core_integrator.constants import CORE_ELEMENTS
 
 
 class CoreIntegrator:
-    """Client for scraping data from the CoreIntegrator website"""
+    """Client for scraping reports from the CoreIntegrator website
+
+    Attributes
+    ----------
+    elements: dict
+        Dictionary of HTML id tags used to select elements on the CoreIntegrator
+        website with the Selenium webdriver
+    download_dir: Path
+        Path to the directory where the report scraped from CoreIntegrator will
+        be donwloaded
+    download_path: Path
+        Path to the location of the report that's downloaded from CoreIntegrator
+    file_path: Path
+        Path to location of the report after it's been renamed with today's date
+    driver: Driver
+        Instance of Driver class used to programmatically interact with the
+        CoreIntegrator website and access the Prompt Payment Report
+    """
 
     EXCEPTIONS = (
         KeyError,
@@ -32,7 +49,6 @@ class CoreIntegrator:
         self,
         elements: dict = CORE_ELEMENTS,
         archives_dir: Path = None,
-        config: Dynaconf = settings,
     ) -> None:
         """Inits the CoreIntegrator class"""
         # sets download directory and file names
@@ -42,21 +58,32 @@ class CoreIntegrator:
         download_name = report_name + ".xlsx"
         file_name = f"prompt_payment{str(date.today())}.xlsx"
         # sets class attributes
-        self.elements = config
+        self.elements = elements
         self.download_dir = download_dir
         self.download_path = download_dir / download_name
         self.file_path = download_dir / file_name
         self.driver: Driver = None
 
-    def scrape_report(self, config: Dynaconf = settings) -> None:
+    def scrape_report(self, config: Dynaconf = settings) -> pd.DataFrame:
         """Scrapes and downloads the Prompt Payment report from CoreIntegrator
         then loads it as a dataframe
+
+        Parameters
+        ----------
+        config: Dynaconf
+            The configuration settings that contain the path to the Selenium
+            chromedriver executable and the user credentials for CoreIntegrator
+
+        Returns
+        -------
+        pd.DataFrame
+            The scraped Prompt Payment report loaded as a pandas dataframe
         """
         # try to scrape the report, up to 10 attempts
         for _ in range(10):
             try:
                 self.driver = Driver(self.download_dir, config)
-                self._login()
+                self._login(config)
                 self._access_report()
                 self._rename_download()
                 return self.load_report()
@@ -66,8 +93,14 @@ class CoreIntegrator:
                 self.driver.quit()
         raise error
 
-    def _login(self, config: Dynaconf = settings) -> None:
-        """Logs into the CoreIntegrator website"""
+    def _login(self, config: Dynaconf) -> None:
+        """Logs into the CoreIntegrator website to initiate scraping
+
+        Parameters
+        ----------
+        config: Dynaconf
+            Configuration settings that contain credentials to CoreIntegrator
+        """
         # rename attributes and config vars for ease
         driver = self.driver
         elements = self.elements
@@ -122,8 +155,15 @@ class CoreIntegrator:
         time.sleep(1)
         driver.driver.switch_to.alert.accept()
 
-    def _rename_download(self, attempts=60):
-        """Confirms report was downloaded and renames it"""
+    def _rename_download(self, attempts: int = 60) -> None:
+        """Confirms report was downloaded and renames it
+
+        Parameters
+        ----------
+        attempts: int, optional
+            Number of attempts to check for the downloaded report. Default is
+            to attempt once per second for 60 seconds.
+        """
         # set local vars for ease
         download_path = self.download_path
         renamed_path = self.file_path
@@ -142,9 +182,16 @@ class CoreIntegrator:
         download_path.replace(renamed_path)
 
     def load_report(self) -> pd.DataFrame:
-        """Automates the opening and saving of an excel workbook before reading it
-        in through pd.read_excel, which addresses the NaN issue described in this
-        post: https://stackoverflow.com/a/41730454/7338319
+        """Loads the downloaded report as a pandas dataframe
+
+        Automates the opening and saving of an excel workbook before reading it
+        in through pd.read_excel, which addresses the NaN issue described in
+        this post: https://stackoverflow.com/a/41730454/7338319
+
+        Returns
+        -------
+        pd.DataFrame
+            The scraped Prompt Payment report loaded as a pandas dataframe
         """
         # check that the file exists
         file = self.file_path
