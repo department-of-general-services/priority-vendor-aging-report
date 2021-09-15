@@ -53,37 +53,46 @@ class TestDriver:
             Driver(config=settings)
 
 
-@pytest.mark.skip
 class TestClick:
     """Tests the Driver.click() method"""
 
     def test_click_link(self, driver):
-        """Tests the link_text parameter of Driver.click()"""
+        """Tests that Driver.click() clicks the right html element when
+        passed the partial text of the link to click
+        """
         # setup
         url_out = "https://pypi.org/project/selenium/#description"
         link = "Project description"
 
         # execution
         driver.get(URL)
-        driver.click(driver, link, type="link")
+        driver.click(link, loc_type="link")
 
         # validation
         assert driver.current_url == url_out
-        driver.quit()
 
     def test_click_id(self, driver):
-        """Tests the id parameter of Driver.click()"""
+        """Tests that Driver.click() clicks the right html element when
+        passed the id of the link to click
+        """
         # setup
         url_out = "https://pypi.org/project/selenium/#description"
         link_id = "description-tab"
 
         # execution
         driver.get(URL)
-        driver.click(driver, link_id)
+        driver.click(link_id)
 
         # validation
         assert driver.current_url == url_out
-        driver.quit()
+
+    def test_click_key_error(self, driver):
+        """Tests that Driver.click() raises a KeyError when passed an invalid
+        value for loc_type
+        """
+        # execution
+        with pytest.raises(KeyError):
+            driver.click("link_text", loc_type="text")
 
 
 @pytest.mark.skip

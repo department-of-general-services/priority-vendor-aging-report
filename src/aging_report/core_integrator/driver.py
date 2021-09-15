@@ -72,7 +72,7 @@ class Driver:
             return self.driver.find_element_by_partial_link_text(
                 locator
             ).click()
-        raise KeyError
+        raise KeyError("Parameter loc_type must be one of ('id','link')")
 
     def wait_to_load(
         self,
@@ -155,3 +155,8 @@ class Driver:
     def quit(self) -> None:
         """Closes the webdriver"""
         return self.driver.quit()
+
+    @property
+    def current_url(self) -> str:
+        """Returns the URL that the webdriver is currently on"""
+        return self.driver.current_url
