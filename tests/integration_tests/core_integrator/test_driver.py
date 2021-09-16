@@ -37,14 +37,14 @@ class TestDriver:
         assert isinstance(driver, Driver)
         assert any(download_dir.iterdir()) is True
 
-    def test_missing_driver(self, test_archive_dir):
+    def test_missing_driver(self, test_archive_dir, monkeypatch):
         """Tests that create_driver() returns an error if the chromedriver
         file doesn't exist at the path specified in config.json
         """
         # setup
         driver_path = Path.cwd() / "fake"
         assert driver_path.exists() is False
-        settings.chrome_driver_path = driver_path
+        monkeypatch.setattr(settings, "chrome_driver_path", driver_path)
         # executive
         with pytest.raises(FileNotFoundError):
             Driver(test_archive_dir, config=settings)

@@ -47,8 +47,8 @@ class CoreIntegrator:
 
     def __init__(  # pylint: disable=dangerous-default-value
         self,
-        elements: dict = CORE_ELEMENTS,
         archives_dir: Path = None,
+        elements: dict = CORE_ELEMENTS,
     ) -> None:
         """Inits the CoreIntegrator class"""
         # sets download directory and file names
@@ -64,33 +64,43 @@ class CoreIntegrator:
         self.file_path = download_dir / file_name
         self.driver: Driver = None
 
-    def scrape_report(self, config: Dynaconf = settings) -> pd.DataFrame:
+    def scrape_report(
+        self,
+        config: Dynaconf = settings,
+        attempts: int = 10,
+    ) -> pd.DataFrame:
         """Scrapes and downloads the Prompt Payment report from CoreIntegrator
         then loads it as a dataframe
 
         Parameters
         ----------
-        config: Dynaconf
+        config: Dynaconf, optional
             The configuration settings that contain the path to the Selenium
             chromedriver executable and the user credentials for CoreIntegrator
+        attempts: int, optional
+            The number of times to attempt scraping the report, if it doesn't
+            execute successfully the first time
 
         Returns
         -------
         pd.DataFrame
             The scraped Prompt Payment report loaded as a pandas dataframe
         """
-        # try to scrape the report, up to 10 attempts
-        for _ in range(10):
+        # try to scrape the report
+        for _ in range(attempts):
             try:
                 self.driver = Driver(self.download_dir, config)
                 self._login(config)
                 self._access_report()
                 self._rename_download()
-                return self.load_report()
+                df = self.load_report()
+                return df
             except self.EXCEPTIONS as e:
                 error = e
             finally:
-                self.driver.quit()
+                # close the browser if it's still open
+                if self.driver.driver.session_id:
+                    self.driver.quit()
         raise error
 
     def _login(self, config: Dynaconf) -> None:
@@ -109,7 +119,7 @@ class CoreIntegrator:
         login_button = elements["login button"]
 
         # load CoreIntegrator site and enter credentials
-        driver.get(config["url"])
+        driver.get(config["core_url"])
         driver.wait_to_load(username_field, seconds=5)
         driver.fill_in(username_field, config["core_username"])
         driver.fill_in(password_field, config["core_password"])
@@ -130,7 +140,7 @@ class CoreIntegrator:
         today = date.today().strftime("%m/%d/%Y")
         report_link = elements["report name"]
         date_field = elements["date box"]
-        report_label = elements["report_label"]
+        report_label = elements["report label"]
         view_report = elements["view report"]
         export_report = elements["export report"]
 
@@ -199,7 +209,7 @@ class CoreIntegrator:
             raise FileNotFoundError(f"Report wasn't found at location: {file}")
         # open and save the wb to trigger formulas
         app = xl.App(visible=False)
-        book = app.books.open(self.file_path)
+        book = app.books.open(file)
         book.save()
         book.close()
         app.kill()

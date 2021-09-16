@@ -65,6 +65,8 @@ class Driver:
             "safebrowsing.enabled": True,
         }
         options.add_experimental_option("prefs", prefs)
+        # Addresses this issue: https://stackoverflow.com/a/63270005
+        options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
         # creates driver
         if not driver_path.exists():
