@@ -39,9 +39,10 @@ def fixture_archive_dir(tmp_path_factory):
     return archive_dir
 
 
-@pytest.fixture(scope="session", name="driver")
+@pytest.fixture(scope="module", name="driver")
 def fixture_driver(test_archive_dir):
     """Creates a webdriver for testing"""
-    driver = Driver(test_archive_dir)
+    download_dir = test_archive_dir / "core_integrator"
+    driver = Driver(download_dir)
     yield driver
     driver.quit()

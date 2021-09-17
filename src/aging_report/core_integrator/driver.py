@@ -8,7 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as Expected
 from selenium.common.exceptions import (
     TimeoutException,
-    UnexpectedAlertPresentException,
     SessionNotCreatedException,
 )
 
@@ -18,16 +17,31 @@ from aging_report.config import settings
 class Driver:
     """A Selenium webdriver used to operate a Chrome browser"""
 
-    EXCEPTIONS = [
-        TimeoutException,
-        UnexpectedAlertPresentException,
-        SessionNotCreatedException,
-    ]
-
     def __init__(
-        self, archives_dir: Path = None, config: Dynaconf = settings
+        self,
+        download_dir: Path,
+        config: Dynaconf = settings,
     ) -> None:
         """Inits the Driver class with specific download directory
+
+        Parameters
+        ----------
+        download_dir: Path
+            Path to directory where downloads from the browser should be saved
+        driver_path: Path
+            Location where the latest version of chromedriver is downloaded
+        """
+        # get path to chromedriver and project root
+        self.driver_path = Path(config.chrome_driver_path)
+        self.download_dir = download_dir
+        self.driver = self.create_driver(self.download_dir, self.driver_path)
+
+    def create_driver(
+        self,
+        download_dir: Path,
+        driver_path: Path,
+    ) -> webdriver.Chrome:
+        """Configures a selenium webdriver with a specific download directory
 
         Parameters
         ----------
@@ -35,13 +49,35 @@ class Driver:
             Location where the latest version of chromedriver is downloaded
         download_dir: Path
             Path to directory where downloads from the browser should be saved
-        """
-        # get path to chromedriver and project root
-        driver_path = Path(config.chrome_driver_path)
-        archives = archives_dir or (Path.cwd() / "archives")
 
-        self.download_dir = archives / "core_integrator"
-        self.driver = self._create_driver(self.download_dir, driver_path)
+        Returns
+        -------
+        webdriver.Chrome
+            Selenium webdriver for Chrome with options configured
+        """
+        # sets default download directory
+        download_dir.mkdir(exist_ok=True, parents=True)
+        options = webdriver.ChromeOptions()
+        prefs = {
+            "download.default_directory": str(download_dir),
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+            "safebrowsing.enabled": True,
+        }
+        options.add_experimental_option("prefs", prefs)
+        # Addresses this issue: https://stackoverflow.com/a/63270005
+        options.add_experimental_option("excludeSwitches", ["enable-logging"])
+
+        # creates driver
+        if not driver_path.exists():
+            message = f"No chromedriver found at '{driver_path}'"
+            raise FileNotFoundError(message)
+        try:
+            driver = webdriver.Chrome(str(driver_path), options=options)
+        except SessionNotCreatedException as error:
+            raise error
+
+        return driver
 
     def fill_in(self, element_id: str, content: str) -> None:
         """Uses the webdriver to fill in a form field with content
@@ -98,7 +134,7 @@ class Driver:
         elif loc_type == "link":
             by = By.PARTIAL_LINK_TEXT
         else:
-            raise KeyError
+            raise KeyError("Parameter loc_type must be one of ('id','link')")
 
         # try to locate the element within the given number of seconds
         try:
@@ -106,47 +142,6 @@ class Driver:
             WebDriverWait(self.driver, seconds).until(elem_present)
         except TimeoutException as error:
             raise error
-
-    def _create_driver(
-        self,
-        download_dir: Path,
-        driver_path: Path,
-    ) -> webdriver.Chrome:
-        """Configures a selenium webdriver with a specific download directory
-
-        Parameters
-        ----------
-        driver_path: Path
-            Location where the latest version of chromedriver is downloaded
-        download_dir: Path
-            Path to directory where downloads from the browser should be saved
-
-        Returns
-        -------
-        webdriver.Chrome
-            Selenium webdriver for Chrome with options configured
-        """
-        # sets default download directory
-        download_dir.mkdir(exist_ok=True, parents=True)
-        options = webdriver.ChromeOptions()
-        prefs = {
-            "download.default_directory": str(download_dir),
-            "download.prompt_for_download": False,
-            "download.directory_upgrade": True,
-            "safebrowsing.enabled": True,
-        }
-        options.add_experimental_option("prefs", prefs)
-
-        # creates driver
-        if not driver_path.exists():
-            message = f"No chromedriver found at '{driver_path}'"
-            raise FileNotFoundError(message)
-        try:
-            driver = webdriver.Chrome(str(driver_path), options=options)
-        except SessionNotCreatedException as error:
-            raise error
-
-        return driver
 
     def get(self, url) -> None:
         """Loads the webpage for a URL"""
