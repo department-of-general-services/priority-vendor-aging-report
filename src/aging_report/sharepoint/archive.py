@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from O365.drive import DriveItem, Folder, File
+from O365.drive import Folder
 
 
 class ArchiveFolder:
