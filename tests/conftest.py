@@ -39,6 +39,12 @@ def fixture_archive_dir(tmp_path_factory):
     return archive_dir
 
 
+@pytest.fixture(scope="session", name="test_archive")
+def fixture_archive(test_client, test_archive_dir):
+    """Creates an instance of ArchiveFolder for use in integration tests"""
+    return test_client.get_archive_folder(test_archive_dir)
+
+
 @pytest.fixture(scope="module", name="driver")
 def fixture_driver(test_archive_dir):
     """Creates a webdriver for testing"""

@@ -1,44 +1,18 @@
 from __future__ import annotations  # prevents NameError for typehints
+from pathlib import Path
 
 from dynaconf import Dynaconf
-from O365.sharepoint import Site, SharepointList
+from O365 import Account
+from O365.drive import Drive
+from O365.sharepoint import Site, Sharepoint, SharepointList
 
 from aging_report.config import settings
 from aging_report.sharepoint.aging_report import AgingReportList
+from aging_report.sharepoint.archive import ArchiveFolder
 from aging_report.sharepoint.utils import authenticate_account
 
 
 class Client:
-    """Creates a SharePoint client to manage Graph API access using O365"""
-
-    def __init__(self, config: Dynaconf = settings):
-        """Instantiates the Client class"""
-        self.config = config
-        self.account = authenticate_account(config)
-        self.app = self.account.sharepoint()
-        self.fiscal_site: FiscalSite = None
-        self.aging_report: AgingReportList = None
-
-    @property
-    def is_authenticated(self) -> bool:
-        """Returns True if account is authenticated"""
-        return self.account.is_authenticated
-
-    def get_fiscal_site(self) -> FiscalSite:
-        """Returns FiscalSite instance and stores it in self.fiscal_site"""
-        site = self.app.get_site(self.config.site_id)
-        self.fiscal_site = FiscalSite(site)
-        return self.fiscal_site
-
-    def get_aging_report(self) -> AgingReportList:
-        """Returns AgingReportList instance and stores it in self.aging_report"""
-        site = self.fiscal_site or self.get_fiscal_site()
-        site_list = site.get_list_by_id(self.config.report_id)
-        self.aging_report = AgingReportList(site_list)
-        return self.aging_report
-
-
-class FiscalSite:
     """Creates a SharePoint client for the DGS Fiscal site
 
     Facilitates accessing lists and drives in the DGS SharePoint site using
@@ -46,14 +20,52 @@ class FiscalSite:
 
     Attributes
     ----------
+    config: Dynaconf
+        Configuration settings used to authenticate the client
+    account: Account
+        Instance of O365.Account that manages authentication with Graph API
+    app: Sharepoint
+        Instance of O365.Sharepoint that organizes other SharePoint classes
     site: Site
         An instance of the O365.Site class that manages calls to the Sites
         Graph API resource
     """
 
-    def __init__(self, site: Site) -> None:
-        """Instantiates the FiscalSite class"""
-        self.site = site
+    def __init__(self, config: Dynaconf = settings):
+        """Instantiates the Client class"""
+        self.config: Dynaconf = config
+        self.account: Account = authenticate_account(config)
+        self.app: Sharepoint = self.account.sharepoint()
+        self.site: Site = self.app.get_site(self.config.site_id)
+        self.drive: Drive = None
+        self.aging_report: AgingReportList = None
+        self.archive: ArchiveFolder = None
+
+    @property
+    def is_authenticated(self) -> bool:
+        """Returns True if account is authenticated"""
+        return self.account.is_authenticated
+
+    def get_aging_report(self) -> AgingReportList:
+        """Returns AgingReportList instance and stores it in self.aging_report"""
+        report_id = self.config.report_id
+        site_list = self.get_list_by_id(report_id)
+        self.aging_report = AgingReportList(site_list)
+        return self.aging_report
+
+    def get_archive_folder(self, archive_dir: Path) -> ArchiveFolder:
+        """Returns ArchiveFolder instance and stores it in self.archive
+
+        Parameters
+        ----------
+        archive_dir: Path
+            Path to local archive directory
+        """
+        drive_id = self.config.drive_id
+        self.drive = self.site.get_document_library(drive_id)
+        folder = self.drive.get_item(self.config.archive_id)
+        self.archive = ArchiveFolder(folder, archive_dir)
+        return self.archive
 
     def get_list_by_id(self, list_id: str) -> SharepointList:
         """Find and return SharepointList instance by the list_id
