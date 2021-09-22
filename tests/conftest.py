@@ -29,12 +29,6 @@ def fixture_report(test_client):
     return test_client.get_aging_report()
 
 
-@pytest.fixture(scope="session", name="test_archive")
-def fixture_archive(test_client):
-    """Creates an instance of ArchiveFolder for use in integration tests"""
-    return test_client.get_archive_folder()
-
-
 @pytest.fixture(scope="session", name="test_archive_dir")
 def fixture_archive_dir(tmp_path_factory):
     """Sets up a temporary archive directory for testing"""
@@ -43,6 +37,12 @@ def fixture_archive_dir(tmp_path_factory):
     basetemp.mkdir(parents=True, exist_ok=True)
     archive_dir = tmp_path_factory.mktemp("archives", numbered=False)
     return archive_dir
+
+
+@pytest.fixture(scope="session", name="test_archive")
+def fixture_archive(test_client, test_archive_dir):
+    """Creates an instance of ArchiveFolder for use in integration tests"""
+    return test_client.get_archive_folder(test_archive_dir)
 
 
 @pytest.fixture(scope="module", name="driver")

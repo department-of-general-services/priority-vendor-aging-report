@@ -1,4 +1,5 @@
 from __future__ import annotations  # prevents NameError for typehints
+from pathlib import Path
 
 from dynaconf import Dynaconf
 from O365 import Account
@@ -52,12 +53,18 @@ class Client:
         self.aging_report = AgingReportList(site_list)
         return self.aging_report
 
-    def get_archive_folder(self) -> ArchiveFolder:
-        """Returns ArchiveFolder instance and stores it in self.archive"""
+    def get_archive_folder(self, archive_dir: Path) -> ArchiveFolder:
+        """Returns ArchiveFolder instance and stores it in self.archive
+
+        Parameters
+        ----------
+        archive_dir: Path
+            Path to local archive directory
+        """
         drive_id = self.config.drive_id
         self.drive = self.site.get_document_library(drive_id)
         folder = self.drive.get_item(self.config.archive_id)
-        self.archive = ArchiveFolder(folder)
+        self.archive = ArchiveFolder(folder, archive_dir)
         return self.archive
 
     def get_list_by_id(self, list_id: str) -> SharepointList:

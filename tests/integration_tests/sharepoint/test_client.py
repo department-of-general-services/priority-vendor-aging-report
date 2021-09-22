@@ -40,17 +40,22 @@ class TestClient:
         assert isinstance(report.list, SharepointList)
         assert report.list.name == "Priority Vendor Aging"
 
-    def test_get_archive_folder(self, test_client):
+    def test_get_archive_folder(self, test_client, test_archive_dir):
         """Tests that Client.get_archive_folder() returns an ArchiveFolder instance
 
         Validates the following conditions:
         - The response returned is an instance of ArchiveFolder
         - ArchiveFolder.list exists and is an instance of O365.Folder
         - The folder has the right name
+        - ArchiveFolder.tmp_dir points to the correct local directory and that
+          directory exists
         """
+        # setup
+        tmp_dir = test_archive_dir / "tmp"
         # execution
-        archive = test_client.get_archive_folder()
+        archive = test_client.get_archive_folder(test_archive_dir)
         # validation
         assert isinstance(archive, ArchiveFolder)
         assert isinstance(archive.folder, Folder)
         assert archive.folder.name == "Workflow Archives"
+        assert archive.tmp_dir == tmp_dir

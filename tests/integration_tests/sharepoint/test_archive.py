@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from O365.drive import Folder, File
 
 DATA_DIR = Path.cwd() / "tests" / "integration_tests" / "sharepoint" / "data"
@@ -37,6 +38,14 @@ class TestArchiveFolder:
         assert folders == test_archive.subfolders
         assert folder_names == expected
 
+    def test_get_sub_folder_error(self, test_archive):
+        """Tests that the ArchiveFolder._get_subfolder_by_name() raises
+        KeyError when passed a folder name that isn't in self.subfolders
+        """
+        # validation
+        with pytest.raises(KeyError):
+            test_archive.get_subfolder_by_name("fake")
+
     def test_upload_file(self, test_archive):
         """Tests that the ArchiveFolder.upload_file() method successfully
         uploads a file to the archive sub-folder specified.
@@ -67,3 +76,24 @@ class TestArchiveFolder:
         # validation
         assert isinstance(output, File)
         assert output.name == "test_last_upload.csv"
+
+    def test_download_file(self, test_archive_dir, test_archive):
+        """Tests that the ArchiveFolder.download_file() method successfully
+        downloads a file to the location specified by download_path
+
+        Validates the following conditions:
+        - The result returned is an instance of Path
+        - The Path returned is a file and it exists
+        """
+        # setup
+        file_name = "test_download.csv"
+        tmp_dir = test_archive_dir / "tmp"
+        if tmp_dir.exists():
+            assert not any(tmp_dir.iterdir())
+        file = test_archive.get_last_upload(TEST_FOLDER)
+        # execution
+        output = test_archive.download_file(file, tmp_dir, file_name)
+        # validation
+        assert isinstance(output, Path)
+        assert output.name == file_name
+        assert any(tmp_dir.iterdir())

@@ -7,11 +7,11 @@ from O365.drive import Folder, File
 class ArchiveFolder:
     """Creates an API client for the Archive folder in the DGS Fiscal site"""
 
-    def __init__(self, folder: Folder, archives_dir: Path = None) -> None:
+    def __init__(self, folder: Folder, archive_dir: Path = None) -> None:
         """Inits the Archive class"""
-        archives_dir = archives_dir or (Path.cwd() / "archives")
         self.folder = folder
-        self.tmp_dir = archives_dir / "tmp"
+        self.archive_dir = archive_dir or (Path.cwd() / "archives")
+        self.tmp_dir = self.archive_dir / "tmp"
         self.subfolders = []
 
     def get_subfolders(self):
@@ -43,7 +43,7 @@ class ArchiveFolder:
         if not local_path.exists():
             raise FileNotFoundError(f"No file found at {local_path}")
         # upload file
-        folder = self._get_subfolder_by_name(folder_name)
+        folder = self.get_subfolder_by_name(folder_name)
         file = folder.upload_file(local_path, file_name)
         return file
 
@@ -71,13 +71,13 @@ class ArchiveFolder:
             Local path to where the downloaded file can be accessed
         """
         # make sure the download directory exists
-        download_dir.makedir(parents=True, exist_ok=True)
+        download_dir.mkdir(parents=True, exist_ok=True)
         # set the download path
         if download_name:
             download_path = download_dir / download_name
         else:
             download_path = download_dir / file.name
-        file.download(download_path)
+        file.download(download_dir, download_name)
         return download_path
 
     def read_excel(self, file: File) -> pd.DataFrame:
@@ -112,7 +112,7 @@ class ArchiveFolder:
         File
             An instance of O365.File for the most recently created file
         """
-        folder = self._get_subfolder_by_name(folder_name)
+        folder = self.get_subfolder_by_name(folder_name)
         files = folder.get_items()
         last_upload = next(files)
         for file in files:
@@ -120,12 +120,7 @@ class ArchiveFolder:
                 last_upload = file
         return last_upload
 
-    def _clean_tmp_dir(self) -> None:
-        """Removes any remaining files in self.tmp_dir"""
-        for file in self.tmp_dir.iterdir():
-            file.unlink()
-
-    def _get_subfolder_by_name(self, name: str) -> Folder:
+    def get_subfolder_by_name(self, name: str) -> Folder:
         """Returns an O365.Folder instance of the sub-folder that matches the
         name passed as a parameter
         """
@@ -135,3 +130,8 @@ class ArchiveFolder:
         if not folder:
             raise KeyError(f"No sub-folder found with the name {name}")
         return folder
+
+    def _clean_tmp_dir(self) -> None:
+        """Removes any remaining files in self.tmp_dir"""
+        for file in self.tmp_dir.iterdir():
+            file.unlink()
