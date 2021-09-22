@@ -3,6 +3,7 @@ from pathlib import Path
 from O365.drive import Folder, File
 
 DATA_DIR = Path.cwd() / "tests" / "integration_tests" / "sharepoint" / "data"
+TEST_FOLDER = "test"
 
 
 class TestArchiveFolder:
@@ -20,7 +21,13 @@ class TestArchiveFolder:
           in the archive on SharePoint
         """
         # setup
-        expected = ["commented_invoices", "core_integrator", "output", "test"]
+        expected = [
+            "aging_report",
+            "commented_invoices",
+            "core_integrator",
+            "output",
+            "test",
+        ]
         # execution
         folders = test_archive.get_subfolders()
         folder_names = [f.name for f in folders]
@@ -41,9 +48,22 @@ class TestArchiveFolder:
         # setup
         file_loc = DATA_DIR / "upload.csv"
         file_name = "test_upload.csv"
-        folder_name = "test"
         # execution
-        file = test_archive.upload_file(file_loc, folder_name, file_name)
+        output = test_archive.upload_file(file_loc, TEST_FOLDER, file_name)
         # validation
-        assert isinstance(file, File)
-        assert file.name == file_name
+        assert isinstance(output, File)
+        assert output.name == file_name
+
+    def test_get_last_upload(self, test_archive):
+        """Tests that the ArchiveFolder.test_get_most_recent_archive() method
+        successfully returns the most recent upload
+
+        Validates the following conditions:
+        - The result returned is an instance of O365.File
+        - The name of that file matches the last uploaded csv
+        """
+        # execution
+        output = test_archive.get_last_upload(TEST_FOLDER)
+        # validation
+        assert isinstance(output, File)
+        assert output.name == "test_last_upload.csv"
