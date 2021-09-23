@@ -11,7 +11,7 @@
       - [Step 2.2: AP Review](#step-22-ap-review)
     - [Step 3: CitiBuy Processing](#step-3-citibuy-processing)
       - [Step 3.0: Requisition Process](#step-30-requisition-process)
-      - [Step 3.1: Invoice Receipting](#step-31-invoice-receipting)
+      - [Step 3.1: Invoice Receipting and Payment](#step-31-invoice-receipting-and-payment)
 
 <!-- /TOC -->
 
