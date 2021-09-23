@@ -1,5 +1,8 @@
 # Invoice Fulfillment Process
 
+<details open="open">
+<summary>Table of Contents</summary>
+
 <!-- TOC -->
 
 - [Invoice Fulfillment Process](#invoice-fulfillment-process)
@@ -15,9 +18,17 @@
 
 <!-- /TOC -->
 
+</details>
+
+
 ## Diagram
 
+<details open="open">
+<summary>Diagram</summary>
+
 ![Invoice Fulfillment Diagram](invoice-fulfillment-diagram.svg)
+
+</details>
 
 ## Process
 
