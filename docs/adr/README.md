@@ -1,11 +1,10 @@
 # Architecture Decision Records (ADRs)
 
-
 ## About ADRs
 
 ### Why do we need to document architecture decisions?
 
-
+TODO: Add
 
 ### What constitutes an architecture decision?
 
