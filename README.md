@@ -43,6 +43,7 @@ The Priority Vendor Aging Report is a weekly report that allows the DGS Fiscal t
 ### Relevant Documents
 
 - [Project Folder in SharePoint](https://bmore.sharepoint.com/:f:/r/sites/DGS-BPIO/Shared%20Documents/Projects/Fiscal%20-%20Priority%20Vendor%20Aging?csf=1&web=1&e=Y9q3gN) **Note:** Requires Baltimore City account access
+- [Invoice Fulfillment Process](docs/diagrams/invoice-fulfillment/invoice-fulfillment-process.md)
 - [Architecture Decision Records](docs/adrs)
 - [Project Scoping Document](docs/project-scope.md)
 - [Data Dictionary](docs/data-dictionary.md)
