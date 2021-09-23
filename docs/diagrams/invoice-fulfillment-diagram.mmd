@@ -1,0 +1,70 @@
+flowchart TB
+    subgraph Email
+        V1(Vendor 1)
+        V2(Vendor 2)
+        VN(Vendor n)
+        I1(Invoice 1)
+        I2(Invoice 2)
+        I3(Invoice 3)
+        IN(Invoice n)
+        StaffFMD(FMD Staff)
+        StaffHVAC(HVAC Staff)
+        V1 --creates--> I1
+        V2 --creates--> I2
+        V2 --creates--> I3
+        VN --creates--> IN
+        I1 --emailed to--> StaffFMD
+        I2 --emailed to--> StaffFMD
+        I3 --emailed to--> StaffHVAC
+        IN --emailed to--> StaffHVAC
+    end
+    subgraph Integrify
+        ProcessFMD(FMD Invoice Submission)
+        ProcessHVAC(HVAC Invoice Submission)
+        ReviewFMD([FMD Review Process])
+        ReviewAP([AP Review Process])
+        Approve1{FMD<br>Approved?}
+        POType{Type of<br>PO?}
+        ReleaseExist{Existing<br>Release?}
+        Analyst1(Fiscal Analyst 1)
+        Analyst2(Fiscal Analyst 2)
+        Analyst3(Fiscal Analyst 3)
+        NewReq[/New Requisition Needed/]
+        CurrentRelease[/Use Existing PO Release/]
+        CurrentPO[/Use Existing Purchase Order/]
+        StaffFMD --creates--> ProcessFMD
+        StaffHVAC --creates --> ProcessHVAC
+        ProcessFMD --> ReviewFMD
+        ProcessHVAC --> ReviewFMD
+        ReviewFMD --> Approve1
+        Approve1 --yes--> ReviewAP
+        ReviewAP --> POType
+        POType -->|open market| CurrentPO
+        POType --master blanket--> ReleaseExist
+        ReleaseExist --no--> NewReq
+        ReleaseExist --yes--> CurrentRelease
+        CurrentPO --> Analyst3
+        CurrentRelease --> Analyst2
+        NewReq --> Analyst1
+    end
+    subgraph CitiBuy
+        Req(Requisition)
+        ProcessBOP([BOP Approval Process])
+        PO(Open Market Purchase Order)
+        Release(Purchase Order Release)
+        Invoice(Invoice Record)
+        Receipted{Invoice<br>Receipted?}
+        Receiving([Agency Creates Receipt])
+        Paid([BAPS Processes Payment])
+        Analyst3 --uses existing--> PO
+        Analyst1 --creates--> Req
+        Req --initiates--> ProcessBOP
+        ProcessBOP --creates new--> Release
+        Analyst2 --uses existing--> Release
+        Release --to add--> Invoice
+        PO --to add--> Invoice
+        Invoice --> Receipted
+        Receipted --yes--> Paid
+        Receipted --no--> Receiving
+        Receiving --> Paid
+    end
