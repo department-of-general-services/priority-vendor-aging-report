@@ -5,4 +5,4 @@ from aging_report.sharepoint.aging_report import (
     AgingReportItem,
 )
 from aging_report.sharepoint.archive import ArchiveFolder
-from aging_report.sharepoint.client import Client
+from aging_report.sharepoint.client import SharePoint

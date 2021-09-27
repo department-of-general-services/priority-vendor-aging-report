@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from aging_report.config import settings
-from aging_report.sharepoint import Client
+from aging_report.sharepoint import SharePoint
 from aging_report.core_integrator.driver import Driver
 
 collect_ignore = ["integration_tests"]
@@ -20,7 +20,7 @@ def test_config():
 @pytest.fixture(scope="session", name="test_client")
 def fixture_test_client():
     """Creates an authenticated Graph API client for use in integration tests"""
-    return Client()
+    return SharePoint()
 
 
 @pytest.fixture(scope="session", name="test_report")
