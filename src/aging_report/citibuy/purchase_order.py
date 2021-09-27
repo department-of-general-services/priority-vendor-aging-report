@@ -2,7 +2,7 @@ from __future__ import annotations  # prevents NameError for typehints
 from typing import List, Dict
 
 from aging_report.citibuy.client import CitiBuy
-from aging_report.sharepoint import Client, ArchiveFolder
+from aging_report.sharepoint import SharePoint
 
 
 class PurchaseOrder(CitiBuy):
@@ -10,7 +10,8 @@ class PurchaseOrder(CitiBuy):
 
     def __init__(self) -> None:
         """Instantiates the Purchase Order class"""
-        pass
+        super().__init__()
+        self.sharepoint = SharePoint()
 
     def get_purchas_orders(
         self,

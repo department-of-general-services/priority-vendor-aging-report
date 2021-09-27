@@ -128,8 +128,8 @@ If you receive an error message, or the version of python you have installed is 
 To retrieve a list of all of the invoices in the Priority Vendor Aging SharePoint list complete the following steps:
 
 1. Initiate a new Python interpreter in your terminal: `python`
-1. Import the `Client` class: `from aging_report.sharepoint import Client`
-1. Instantiate the `Client` class: `client = Client()`
+1. Import the `Client` class: `from aging_report.sharepoint import SharePoint`
+1. Instantiate the `Client` class: `client = SharePoint()`
 1. Get an instance of the `AgingReportList` class: `report = client.get_aging_report()`
 1. Query the list of invoices: `invoices = report.get_invoices()`
 1. Print the invoice fields:
@@ -141,9 +141,9 @@ for invoice in invoices:
 The full example looks like this:
 
 ```python
-from aging_report.sharepoint import Client
+from aging_report.sharepoint import SharePoint
 
-client = Client()
+client = SharePoint()
 report = client.get_aging_report()
 invoices = report.get_invoices()
 for i in invoices:

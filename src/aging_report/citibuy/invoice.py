@@ -9,7 +9,7 @@ class Invoice(CitiBuy):
 
     def __init__(self) -> None:
         """Instantiates the Invoice class"""
-        pass
+        super().__init__()
 
     def get_invoices(
         self,

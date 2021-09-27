@@ -3,11 +3,13 @@ from typing import List
 
 from dynaconf import Dynaconf
 
+from aging_report.config import settings
+
 
 class CitiBuy:
     """Client that interfaces with the CitiBuy backend"""
 
-    def __init__(self, config: Dynaconf) -> None:
+    def __init__(self, config: Dynaconf = settings) -> None:
         """Instantiates the CitiBuy class"""
         pass
 

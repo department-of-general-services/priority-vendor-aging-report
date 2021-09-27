@@ -6,4 +6,7 @@ class TestCitiBuy:
 
     def test_init_success(self):
         """Tests that the CitiBuy class instantiates correctly"""
+        # setup
+        CitiBuy()
+        # validation
         assert 1

@@ -12,7 +12,7 @@ from aging_report.sharepoint.archive import ArchiveFolder
 from aging_report.sharepoint.utils import authenticate_account
 
 
-class Client:
+class SharePoint:
     """Creates a SharePoint client for the DGS Fiscal site
 
     Facilitates accessing lists and drives in the DGS SharePoint site using
