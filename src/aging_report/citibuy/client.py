@@ -31,7 +31,7 @@ class CitiBuy:
         conn_url = URL.create("mssql+pyodbc", query={"odbc_connect": conn_str})
         self.engine = sqlalchemy.create_engine(conn_url)
 
-    def query_many(self, query_str: str) -> List[dict]:
+    def query(self, query_str: str) -> List[dict]:
         """Executes a query and returns the results as a list of dicts
 
         Parameters
@@ -44,9 +44,8 @@ class CitiBuy:
 
         Returns
         -------
-        Rows
-            If fetch == "first" returns Row or None (if no results)
-            If fetch == "all" returns list of Rows or None (if no results)
+        List[dict]
+            List of records as dictionaries keyed by column name
         """
         try:
             with self.engine.connect() as conn:
