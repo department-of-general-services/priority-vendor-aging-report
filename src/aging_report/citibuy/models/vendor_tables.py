@@ -16,5 +16,5 @@ class Vendor(Base):
     email = Column("EMA_EMAIL", String)
     phone = Column("EMA_PHONE", String)
 
-    # releationship
+    # relationships
     purchase_orders = relationship("PurchaseOrder", backref="vendor")

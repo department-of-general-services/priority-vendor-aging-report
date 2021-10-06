@@ -1,20 +1,16 @@
 from __future__ import annotations
+from typing import Iterable
 
 from sqlalchemy.orm import Session
 
-from aging_report.citibuy.models import PurchaseOrder, Vendor
+from aging_report.citibuy.models import Invoice, PurchaseOrder, Vendor
+from tests.utils import citibuy_data as data
 
-VENDORS = [
-    {
-        "id": "123",
-        "name": "Acme",
-        "contact": "Jane Doe",
-        "email": "jane.doe@acme.com",
-        "phone": "(123) 456-7890",
-    }
-]
 
-POS = [{"po_number": "123", "release_number": 0, "vendor_id": "123"}]
+def add_to_session(session: Session, entries: Iterable) -> None:
+    """Adds uncommitted schema objects to the session"""
+    for entry in entries:
+        session.add(entry)
 
 
 def populate_db(session: Session) -> None:
@@ -25,10 +21,10 @@ def populate_db(session: Session) -> None:
     session: Session
         A SQLAlchemy session object passed to this function by the fixture
     """
-    vendors = [Vendor(**v) for v in VENDORS]
-    pos = [PurchaseOrder(**po) for po in POS]
-    for v in vendors:
-        session.add(v)
-    for po in pos:
-        session.add(po)
+    vendors = [Vendor(**vendor) for vendor in data.VENDORS]
+    pos = [PurchaseOrder(**po) for po in data.PURCHASE_ORDERS]
+    invoices = [Invoice(**invoice) for invoice in data.INVOICES]
+    add_to_session(session, vendors)
+    add_to_session(session, pos)
+    add_to_session(session, invoices)
     session.commit()
