@@ -2,11 +2,15 @@ import os
 from pathlib import Path
 
 import pytest
+import sqlalchemy
+from sqlalchemy.orm import Session
 
 from aging_report.config import settings
 from aging_report.sharepoint import SharePoint
 from aging_report.core_integrator.driver import Driver
 from aging_report.citibuy import CitiBuy
+from aging_report.citibuy.models import Base
+from tests.utils.populate_citibuy_db import populate_db
 
 collect_ignore = ["integration_tests"]
 
@@ -59,3 +63,14 @@ def fixture_driver(test_archive_dir):
 def fixture_citibuy():
     """Creates an instance of the CitiBuy class for testing"""
     return CitiBuy()
+
+
+@pytest.fixture(scope="session", name="mock_db")
+def fixture_citibuy_db(test_archive_dir):
+    """Creates a local version of the CitiBuy database for testing"""
+    db_path = test_archive_dir / "mock.db"
+    engine = sqlalchemy.create_engine(f"sqlite:////{db_path}")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        populate_db(session)
+    return db_path
