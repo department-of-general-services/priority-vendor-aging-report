@@ -18,17 +18,24 @@ class CitiBuy:
     engine: sqlalchemy.Engine
     """
 
-    def __init__(self, config: Dynaconf = settings) -> None:
+    def __init__(
+        self,
+        config: Dynaconf = settings,
+        conn_url: str = None,
+    ) -> None:
         """Instantiates the CitiBuy class and connects to the database"""
-        conn_str = (
-            "Driver={SQL Server};"
-            f"Server={config.citibuy_server};"
-            f"Database={config.citibuy_db};"
-            f"UID={config.citibuy_username};"
-            f"PWD={config.citibuy_password};"
-        )
-        pyodbc.pool = False
-        conn_url = URL.create("mssql+pyodbc", query={"odbc_connect": conn_str})
+        if not conn_url:
+            conn_str = (
+                "Driver={SQL Server};"
+                f"Server={config.citibuy_server};"
+                f"Database={config.citibuy_db};"
+                f"UID={config.citibuy_username};"
+                f"PWD={config.citibuy_password};"
+            )
+            pyodbc.pool = False
+            conn_url = URL.create(
+                "mssql+pyodbc", query={"odbc_connect": conn_str}
+            )
         self.engine = sqlalchemy.create_engine(conn_url)
 
     def query(self, query_str: str) -> List[dict]:
@@ -47,10 +54,14 @@ class CitiBuy:
         List[dict]
             List of records as dictionaries keyed by column name
         """
+        exceptions = (
+            sqlalchemy.exc.ProgrammingError,
+            sqlalchemy.exc.OperationalError,
+        )
         try:
             with self.engine.connect() as conn:
                 query = text(query_str)
                 cursor = conn.execute(query)
                 return [row._asdict() for row in cursor.all()]
-        except sqlalchemy.exc.ProgrammingError as error:
+        except exceptions as error:
             raise error

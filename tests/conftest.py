@@ -61,7 +61,7 @@ def fixture_driver(test_archive_dir):
 
 @pytest.fixture(scope="session", name="test_citibuy")
 def fixture_citibuy():
-    """Creates an instance of the CitiBuy class for testing"""
+    """Creates an instance of the CitiBuy class for integration testing"""
     return CitiBuy()
 
 
@@ -74,3 +74,10 @@ def fixture_citibuy_db(test_archive_dir):
     with Session(engine) as session:
         populate_db(session)
     return db_path
+
+
+@pytest.fixture(scope="session", name="mock_citibuy")
+def fixture_mock_citibuy(mock_db):
+    """Creates a mock instance of CitiBuy class for unit testing"""
+    conn_url = f"sqlite:////{mock_db}"
+    return CitiBuy(conn_url=conn_url)
