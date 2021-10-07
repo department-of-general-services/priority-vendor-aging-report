@@ -1,20 +1,17 @@
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String
-
-from aging_report.citibuy.models.base import Base
+import aging_report.citibuy.models.base as db
 
 
-class Vendor(Base):
+class Vendor(db.Base):
     """Table that contains information about vendors"""
 
     __tablename__ = "VENDOR"
 
     # columns
-    id = Column("VENDOR_NBR", String, primary_key=True)
-    name = Column("NAME", String)
-    contact = Column("EMA_CONTACT_NAME", String)
-    email = Column("EMA_EMAIL", String)
-    phone = Column("EMA_PHONE", String)
+    id = db.Column("VENDOR_NBR", db.String, primary_key=True)
+    name = db.Column("NAME", db.String)
+    contact = db.Column("EMA_CONTACT_NAME", db.String)
+    email = db.Column("EMA_EMAIL", db.String)
+    phone = db.Column("EMA_PHONE", db.String)
 
     # relationships
-    purchase_orders = relationship("PurchaseOrder", backref="vendor")
+    purchase_orders = db.relationship("PurchaseOrder", backref="vendor")

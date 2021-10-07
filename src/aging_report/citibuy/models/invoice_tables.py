@@ -1,35 +1,24 @@
-from sqlalchemy.orm import relationship
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Float,
-    ForeignKey,
-    ForeignKeyConstraint,
-)
-
-from aging_report.citibuy.models.base import Base
+import aging_report.citibuy.models.base as db
 
 
-class Invoice(Base):
+class Invoice(db.Base):
     """Table that contains summary level information about an Invoice"""
 
     __tablename__ = "INVOICE_HDR"
+    __table_args__ = (db.init_po_joint_key(),)
 
     # columns
-    id = Column("ID", String, primary_key=True)
-    po_number = Column("PO_NBR", String)
-    release_number = Column("RELEASE_NBR", Integer)
-    vendor_id = Column("VENDOR_NBR", String, ForeignKey("VENDOR.VENDOR_NBR"))
-    invoice_number = Column("INVOICE_NBR", String)
-    status = Column("INVOICE_STATUS", String)
-    amount = Column("INVOICE_AMT", Float(asdecimal=True))
-    __table_args__ = (
-        ForeignKeyConstraint(
-            ["PO_NBR", "RELEASE_NBR"],  # Invoice cols
-            ["PO_HEADER.PO_NBR", "PO_HEADER.RELEASE_NBR"],  # PO cols
-        ),
+    id = db.Column("ID", db.String, primary_key=True)
+    po_number = db.Column("PO_NBR", db.String)
+    release_number = db.Column("RELEASE_NBR", db.Integer)
+    invoice_number = db.Column("INVOICE_NBR", db.String)
+    status = db.Column("INVOICE_STATUS", db.String)
+    amount = db.Column("INVOICE_AMT", db.Float(asdecimal=True))
+    vendor_id = db.Column(
+        "VENDOR_NBR",
+        db.String,
+        db.ForeignKey("VENDOR.VENDOR_NBR"),
     )
 
     # relationship
-    purchase_order = relationship("Vendor", backref="invoices")
+    purchase_order = db.relationship("Vendor", backref="invoices")
