@@ -7,7 +7,7 @@ COLS = {"Text Col": "TextCol", "Num Col": "NumCol"}
 
 
 @pytest.mark.parametrize(
-    "input, expected",
+    "input_dict, expected",
     [
         ({"Text Col": ("equals", "Text")}, "fields/TextCol eq 'Text'"),
         ({"Text Col": ("not equals", "Text")}, "fields/TextCol ne 'Text'"),
@@ -22,7 +22,7 @@ COLS = {"Text Col": "TextCol", "Num Col": "NumCol"}
         ),
     ],
 )
-def test_build_filter_str(input, expected):
+def test_build_filter_str(input_dict, expected):
     """Tests build_filter_str against a number of inputs
 
     Validates the following conditions:
@@ -31,7 +31,7 @@ def test_build_filter_str(input, expected):
     - Both single and multiple filter are built correctly
     """
     # execute
-    output = build_filter_str(COLS, input)
+    output = build_filter_str(COLS, input_dict)
     print(output)
     # validate
     assert output == expected
@@ -42,7 +42,7 @@ def test_build_filter_str_error():
     dictionary includes a field not found in the list of columns
     """
     # setup
-    input = {"Fake Col": ("equals", "Text")}
+    input_dict = {"Fake Col": ("equals", "Text")}
     # execution
     with pytest.raises(ColumnNotFoundError):
-        build_filter_str(COLS, input)
+        build_filter_str(COLS, input_dict)

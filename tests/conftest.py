@@ -2,11 +2,15 @@ import os
 from pathlib import Path
 
 import pytest
+import sqlalchemy
+from sqlalchemy.orm import Session
 
 from aging_report.config import settings
 from aging_report.sharepoint import SharePoint
 from aging_report.core_integrator.driver import Driver
 from aging_report.citibuy import CitiBuy
+from aging_report.citibuy.models import Base
+from tests.utils.populate_citibuy_db import populate_db
 
 collect_ignore = ["integration_tests"]
 
@@ -57,5 +61,33 @@ def fixture_driver(test_archive_dir):
 
 @pytest.fixture(scope="session", name="test_citibuy")
 def fixture_citibuy():
-    """Creates an instance of the CitiBuy class for testing"""
+    """Creates an instance of the CitiBuy class for integration testing"""
     return CitiBuy()
+
+
+@pytest.fixture(scope="session", name="mock_db")
+def fixture_citibuy_db(test_archive_dir):
+    """Creates a local version of the CitiBuy database for testing"""
+    db_path = test_archive_dir / "mock.db"
+    db_path.touch(exist_ok=True)
+    if os.name == "nt":  # Checks if OS is Windows
+        conn_url = f"sqlite:///{db_path}"
+        print(conn_url)
+    else:
+        conn_url = f"sqlite:////{db_path}"
+    engine = sqlalchemy.create_engine(conn_url)
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        populate_db(session)
+    return db_path
+
+
+@pytest.fixture(scope="session", name="mock_citibuy")
+def fixture_mock_citibuy(mock_db):
+    """Creates a mock instance of CitiBuy class for unit testing"""
+    if os.name == "nt":  # Checks if os is Windows
+        conn_url = f"sqlite:///{mock_db}"
+        print(conn_url)
+    else:
+        conn_url = f"sqlite:////{mock_db}"
+    return CitiBuy(conn_url=conn_url)
