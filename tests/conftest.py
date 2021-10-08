@@ -69,7 +69,13 @@ def fixture_citibuy():
 def fixture_citibuy_db(test_archive_dir):
     """Creates a local version of the CitiBuy database for testing"""
     db_path = test_archive_dir / "mock.db"
-    engine = sqlalchemy.create_engine(f"sqlite:////{db_path}")
+    db_path.touch(exist_ok=True)
+    if os.name == "nt":  # Checks if OS is Windows
+        conn_url = f"sqlite:///{db_path}"
+        print(conn_url)
+    else:
+        conn_url = f"sqlite:////{db_path}"
+    engine = sqlalchemy.create_engine(conn_url)
     Base.metadata.create_all(engine)
     with Session(engine) as session:
         populate_db(session)
@@ -79,5 +85,9 @@ def fixture_citibuy_db(test_archive_dir):
 @pytest.fixture(scope="session", name="mock_citibuy")
 def fixture_mock_citibuy(mock_db):
     """Creates a mock instance of CitiBuy class for unit testing"""
-    conn_url = f"sqlite:////{mock_db}"
+    if os.name == "nt":  # Checks if os is Windows
+        conn_url = f"sqlite:///{mock_db}"
+        print(conn_url)
+    else:
+        conn_url = f"sqlite:////{mock_db}"
     return CitiBuy(conn_url=conn_url)
