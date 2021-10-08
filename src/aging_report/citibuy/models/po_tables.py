@@ -9,6 +9,10 @@ class PurchaseOrder(db.Base):
     # columns
     po_number = db.Column("PO_NBR", db.String, primary_key=True)
     release_number = db.Column("RELEASE_NBR", db.Integer, primary_key=True)
+    agency = db.Column("DEPT_NBR_PREFIX_REF", db.String)
+    status = db.Column("CURRENT_HDR_STATUS", db.String)
+    date = db.Column("PO_DATE", db.DateTime)
+    cost = db.Column("ACTUAL_COST", db.Float(asdecimal=True))
     vendor_id = db.Column(
         "VEND_ID",
         db.String,
@@ -25,6 +29,8 @@ class BlanketContract(db.Base):
     # columns
     po_number = db.Column("PO_NBR", db.String, primary_key=True)
     release_number = db.Column("RELEASE_NBR", db.Integer, primary_key=True)
-    department = db.Column("DEPT_NBR_PREFIX", db.String)
+    agency = db.Column("DEPT_NBR_PREFIX", db.String, primary_key=True)
     start_date = db.Column("BLANKET_BEG_DATE", db.DateTime)
     end_date = db.Column("BLANKET_END_DATE", db.DateTime)
+    dollar_limit = db.Column("BLANKET_DOLLAR_LIMIT", db.Float(asdecimal=True))
+    dollar_spent = db.Column("BLANKET_DOLLAR_TODATE", db.Float(asdecimal=True))

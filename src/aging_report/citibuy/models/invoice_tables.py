@@ -12,6 +12,7 @@ class Invoice(db.Base):
     po_number = db.Column("PO_NBR", db.String)
     release_number = db.Column("RELEASE_NBR", db.Integer)
     invoice_number = db.Column("INVOICE_NBR", db.String)
+    invoice_date = db.Column("INVOICE_DATE", db.DateTime)
     status = db.Column("INVOICE_STATUS", db.String)
     amount = db.Column("INVOICE_AMT", db.Float(asdecimal=True))
     vendor_id = db.Column(
