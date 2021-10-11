@@ -62,6 +62,10 @@ class CitiBuy:
             with self.engine.connect() as conn:
                 query = text(query_str)
                 cursor = conn.execute(query)
-                return [row._asdict() for row in cursor.all()]
+                return self.rows_to_dicts(cursor)
         except exceptions as error:
             raise error
+
+    def rows_to_dicts(self, cursor):
+        """Converts SQLAlchemy rows to a list of dicts keyed by column name"""
+        return [row._asdict() for row in cursor.all()]

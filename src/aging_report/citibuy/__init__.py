@@ -1,4 +1,4 @@
-__all__ = ["CitiBuy", "Invoice", "PurchaseOrders"]
+__all__ = ["CitiBuy", "Invoices", "PurchaseOrders"]
 
 from aging_report.citibuy.client import CitiBuy
 from aging_report.citibuy.invoice import Invoices

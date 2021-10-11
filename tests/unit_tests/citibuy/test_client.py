@@ -6,7 +6,7 @@ from sqlalchemy.exc import OperationalError
 class TestCitiBuy:
     """Unit tests for the CitiBuy class"""
 
-    def test_init(self, mock_db, mock_citibuy):
+    def test_init(self, mock_citibuy):
         """Tests that the mock CitiBuy db was populated correctly"""
         # validation
         assert isinstance(mock_citibuy.engine, sqlalchemy.engine.Engine)

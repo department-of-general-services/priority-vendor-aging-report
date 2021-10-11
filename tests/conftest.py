@@ -72,7 +72,6 @@ def fixture_citibuy_db(test_archive_dir):
     db_path.touch(exist_ok=True)
     if os.name == "nt":  # Checks if OS is Windows
         conn_url = f"sqlite:///{db_path}"
-        print(conn_url)
     else:
         conn_url = f"sqlite:////{db_path}"
     engine = sqlalchemy.create_engine(conn_url)
