@@ -9,7 +9,6 @@ class TestCitiBuy:
     def test_init(self, mock_db, mock_citibuy):
         """Tests that the mock CitiBuy db was populated correctly"""
         # validation
-        assert mock_db.exists()
         assert isinstance(mock_citibuy.engine, sqlalchemy.engine.Engine)
 
     def test_query_success(self, mock_citibuy):

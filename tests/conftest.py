@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from aging_report.config import settings
 from aging_report.sharepoint import SharePoint
 from aging_report.core_integrator.driver import Driver
-from aging_report.citibuy import CitiBuy
+from aging_report.citibuy import CitiBuy, PurchaseOrders
 from aging_report.citibuy.models import Base
 from tests.utils.populate_citibuy_db import populate_db
 
@@ -79,15 +79,16 @@ def fixture_citibuy_db(test_archive_dir):
     Base.metadata.create_all(engine)
     with Session(engine) as session:
         populate_db(session)
-    return db_path
+    return conn_url
 
 
 @pytest.fixture(scope="session", name="mock_citibuy")
 def fixture_mock_citibuy(mock_db):
     """Creates a mock instance of CitiBuy class for unit testing"""
-    if os.name == "nt":  # Checks if os is Windows
-        conn_url = f"sqlite:///{mock_db}"
-        print(conn_url)
-    else:
-        conn_url = f"sqlite:////{mock_db}"
-    return CitiBuy(conn_url=conn_url)
+    return CitiBuy(conn_url=mock_db)
+
+
+@pytest.fixture(scope="session", name="mock_po")
+def fixture_mock_po(mock_db):
+    """Creates a mock instance of CitiBuy class for unit testing"""
+    return PurchaseOrders(conn_url=mock_db)

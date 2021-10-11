@@ -4,7 +4,7 @@ from typing import List, Dict
 from aging_report.citibuy.client import CitiBuy
 
 
-class Invoice(CitiBuy):
+class Invoices(CitiBuy):
     """Client that organizes queries of Invoice data from CitiBuy"""
 
     def __init__(self) -> None:
