@@ -60,4 +60,5 @@ disable = [
   "R0903",  # Disables too few public methods
   "W0107",  # Disables unnecessary pass statement
   "W0511",  # Disables fix me
+  "R0801",  # Disables similar lines
 ]

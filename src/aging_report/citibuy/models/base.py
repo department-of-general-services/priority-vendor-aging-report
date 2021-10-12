@@ -14,16 +14,17 @@ Base = declarative_base()
 
 
 def init_po_joint_key(
-    po_col: str = "PO_NBR", release_col: str = "RELEASE_NBR"
+    po_col: str = "PO_NBR",
+    release_col: str = "RELEASE_NBR",
 ) -> ForeignKeyConstraint:
-    """Creates a ForeignKeyConstraint for po_number and release_number
+    """Creates a ForeignKeyConstraint for po_nbr and release_nbr
 
     Parameters
     ----------
     po_col: str
-        The name of the column on the src table that references po_number
+        The name of the column on the src table that references po_nbr
     release_col: str
-        The name of the column on the src table that references release_number
+        The name of the column on the src table that references release_nbr
 
     Returns
     -------
