@@ -19,6 +19,17 @@ class PurchaseOrder(db.Base):
         db.ForeignKey("VENDOR.VENDOR_NBR"),
     )
 
+    # column list for querying
+    columns = (
+        "po_nbr",
+        "release_nbr",
+        "agency",
+        "status",
+        "date",
+        "cost",
+        "vendor_id",
+    )
+
 
 class BlanketContract(db.Base):
     """Table that contains details about the blanket contract for the PO"""
@@ -29,8 +40,17 @@ class BlanketContract(db.Base):
     # columns
     po_nbr = db.Column("PO_NBR", db.String, primary_key=True)
     release_nbr = db.Column("RELEASE_NBR", db.Integer, primary_key=True)
-    contract_agency = db.Column("DEPT_NBR_PREFIX", db.String, primary_key=True)
+    contract_agency = db.Column("DEPT_NBR_PRFX", db.String, primary_key=True)
     start_date = db.Column("BLANKET_BEG_DATE", db.DateTime)
     end_date = db.Column("BLANKET_END_DATE", db.DateTime)
     dollar_limit = db.Column("BLANKET_DOLLAR_LIMIT", db.Float(precision=2))
     dollar_spent = db.Column("BLANKET_DOLLAR_TODATE", db.Float(precision=2))
+
+    # column list for querying
+    columns = (
+        "contract_agency",
+        "start_date",
+        "end_date",
+        "dollar_limit",
+        "dollar_spent",
+    )
