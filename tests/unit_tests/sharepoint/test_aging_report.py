@@ -2,7 +2,7 @@ class TestInit:
     """Tests the"""
 
     def test_init_success(self):
-        """Tests that AgingReportList initializes correctly
+        """Tests that InvoiceList initializes correctly
 
         Validates the following conditions:
         -

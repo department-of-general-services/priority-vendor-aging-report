@@ -29,7 +29,7 @@ def fixture_test_sharepoint():
 
 @pytest.fixture(scope="session", name="test_report")
 def fixture_report(test_sharepoint):
-    """Creates an instance of AgingReportList for use in integration tests"""
+    """Creates an instance of InvoiceList for use in integration tests"""
     return test_sharepoint.get_aging_report()
 
 

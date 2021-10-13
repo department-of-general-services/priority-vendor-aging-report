@@ -4,13 +4,11 @@ from typing import Dict
 from O365.sharepoint import SharepointList, SharepointListItem
 
 from aging_report.sharepoint.utils import build_filter_str, get_col_api_name
+from aging_report.sharepoint import ListBase, ListItemBase
 
 
-class AgingReportList:
+class InvoiceList(ListBase):
     """Creates an API client for the Priority Vendor Aging SharePoint list
-
-    Facilitates reading/writing to the Priority Vendor Aging SharePoint list
-    using the O365 library and the Microsoft Graph API.
 
     Attributes
     ----------
@@ -20,15 +18,15 @@ class AgingReportList:
     site_list: O365.SharepointList
         An instance of the O365.SharepointList class that manages calls to the
         Lists resource in Graph API
-    items: dict[AgingReportItem]
+    items: dict[InvoiceItem]
         A list of the items in the PriorityVendorAging SharePoint list
-        instantiated as members of the AgingReportItem class
+        instantiated as members of the InvoiceItem class
     """
 
     INVOICE_KEY = ("PONumber", "InvoiceNumber")
 
     def __init__(self, site_list: SharepointList) -> None:
-        """Instantiates the AgingReportList class"""
+        """Instantiates the InvoiceList class"""
         self.list = site_list
         self.invoices = {}
 
@@ -36,9 +34,9 @@ class AgingReportList:
         self,
         fields: tuple = INVOICE_KEY,
         query: Dict[str, tuple] = None,
-    ) -> Dict[tuple, AgingReportItem]:
+    ) -> Dict[tuple, InvoiceItem]:
         """Gets items from the Piority Vendor Aging list in SharePoint and
-        instantiates them as members of the AgingReportItem class
+        instantiates them as members of the InvoiceItem class
 
         Parameters
         ----------
@@ -51,19 +49,15 @@ class AgingReportList:
 
         Returns
         -------
-        Dict[str, AgingReportItem]
+        Dict[str, InvoiceItem]
             A list of items from the Priority Vendor Aging SharePoint list
-            instantiated as members of the AgingReportItem class
+            instantiated as members of the InvoiceItem class
         """
-        # query invoice records from SharePoint
-        if query:
-            q = build_filter_str(self.columns, query)
-            results = self.list.get_items(query=q, expand_fields=list(fields))
-        else:
-            results = self.list.get_items(expand_fields=list(fields))
+        # query the results
+        results = super().get_items(fields, query)
         # add them to self.invoices
         for record in results:
-            self._init_aging_report_item(record)
+            self._init_invoice_item(record)
         return self.invoices
 
     def get_invoice_by_key(
@@ -71,7 +65,7 @@ class AgingReportList:
         po_num: str,
         invoice_num: str,
         fields: tuple = INVOICE_KEY,
-    ) -> AgingReportItem:
+    ) -> InvoiceItem:
         """Return a single invoice keyed by Invoice Number and PO Number
 
         Parameters
@@ -86,8 +80,8 @@ class AgingReportList:
 
         Returns
         -------
-        AgingReportItem
-            An instance of AgingReportItem for the invoice that matches the
+        InvoiceItem
+            An instance of InvoiceItem for the invoice that matches the
             Invoice and PO Number
         """
         # first, check the list of existing invoices
@@ -100,17 +94,17 @@ class AgingReportList:
                 f"fields/PONumber eq '{po_num}' and "
                 f"fields/InvoiceNumber eq '{invoice_num}'"
             )
-            # instantiate result as AgingReportItem
+            # instantiate result as InvoiceItem
             results = self.list.get_items(query=q, expand_fields=list(fields))
             if not results:
                 raise ValueError("No matching invoice found for that key")
-            invoice = self._init_aging_report_item(results[0])
+            invoice = self._init_invoice_item(results[0])
 
         return invoice
 
-    def add_invoices(self, invoice_data: dict) -> AgingReportItem:
+    def add_invoices(self, invoice_data: dict) -> InvoiceItem:
         """Inserts a new item into the Priority Vendor Aging list in SharePoint
-        and instantiates the result as a member of the AgingReportItem class
+        and instantiates the result as a member of the InvoiceItem class
 
         Parameters
         ----------
@@ -121,35 +115,30 @@ class AgingReportList:
 
         Returns
         -------
-        AgingReportItem
-            An instance of AgingReportItem for the list item that was created
+        InvoiceItem
+            An instance of InvoiceItem for the list item that was created
         """
         pass
 
-    @property
-    def columns(self) -> dict:
-        """Returns the columns in the SharePoint list"""
-        return self.list.column_name_cw
-
-    def _init_aging_report_item(self, item: SharepointListItem) -> None:
-        """Inits invoice as an AgingReportItem and adds it to self.invoices
+    def _init_invoice_item(self, item: SharepointListItem) -> None:
+        """Inits invoice as an InvoiceItem and adds it to self.invoices
 
         Parameters
         ----------
         item: O365.SharepointListItem
-            Instance of SharepointListItem used to init AgingReportItem
+            Instance of SharepointListItem used to init InvoiceItem
         """
         # get Invoice and PO Number from fields
         key = tuple(item.fields.get(k) for k in self.INVOICE_KEY)
 
-        # instantiate AgingReportItem and add to self.invoices
-        invoice = AgingReportItem(self, item)
+        # instantiate InvoiceItem and add to self.invoices
+        invoice = InvoiceItem(self, item)
         self.invoices[key] = invoice
 
         return invoice
 
 
-class AgingReportItem:
+class InvoiceItem(ListItemBase):
     """Creates an API client for an item in the Priority Vendor Aging list
 
     Facilitates reading and updating items in the Priority Vendor Aging
@@ -157,8 +146,8 @@ class AgingReportItem:
 
     Attributes
     ----------
-    report: AgingReportList
-        An instance of the AgingReportList class that the Priority Vendor
+    parent: InvoiceList
+        An instance of the InvoiceList class that the Priority Vendor
         Aging list item belongs to
     item: SharepointListItem
         An instance of the O365.SharepointListItem class that manages calls to
@@ -167,12 +156,11 @@ class AgingReportItem:
 
     def __init__(
         self,
-        report: AgingReportList,
+        parent: InvoiceList,
         item: SharepointListItem,
     ) -> None:
-        """Instantiates the AgingReportItem class"""
-        self.report = report
-        self.item = item
+        """Instantiates the InvoiceItem class"""
+        super().__init__(parent, item)
 
     def update(self, data: dict) -> None:
         """Updates the Priority Vendor Aging list item in SharePoint
@@ -182,19 +170,4 @@ class AgingReportItem:
         data: dict
             A dictionary of {"field name": new_value} used to update the fields
         """
-        # gets api name for each field in update data
-        cols = self.report.columns
-        data = {get_col_api_name(cols, col): val for col, val in data.items()}
-        # adds field to self.fields to avoid update error
-        for field in data:
-            if field not in self.fields:
-                self.fields[field] = None
-
-        # update and save field
-        self.item.update_fields(data)
-        self.item.save_updates()
-
-    @property
-    def fields(self) -> dict:
-        """Returns the fields associated with this list item"""
-        return self.item.fields
+        super().update(data)

@@ -1,16 +1,16 @@
-from aging_report.sharepoint import AgingReportItem
+from aging_report.sharepoint import InvoiceItem
 
 
-class TestAgingReportList:
-    """Tests the AgingReportList methods that make calls to the Graph API"""
+class TestInvoiceList:
+    """Tests the InvoiceList methods that make calls to the Graph API"""
 
     def test_get_invoices(self, test_report):
         """Tests that the get_invoices() method executes correctly
 
         Validates the following conditions:
-        - The response returned is a dictionary of AgingReportItem instances
+        - The response returned is a dictionary of InvoiceItem instances
         - The correct set of invoices are returned
-        - The response matches the value of AgingReportList.invoices
+        - The response matches the value of InvoiceList.invoices
         """
         # setup
         po_num = "P12345:12"
@@ -21,15 +21,15 @@ class TestAgingReportList:
         invoices = test_report.get_invoices(query=query)
         # validation
         assert len(invoices) == 3
-        assert isinstance(invoices.get(invoice_key), AgingReportItem)
+        assert isinstance(invoices.get(invoice_key), InvoiceItem)
         assert invoices == test_report.invoices
 
     def test_get_invoice_by_key_existing(self, test_report):
         """Tests that the get_invoice_by_key method executes correctly when
-        the invoice with that key is already in AgingReportList.invoices
+        the invoice with that key is already in InvoiceList.invoices
 
         Validates the following conditions
-        - The response returned is an instance of AgingReportItem
+        - The response returned is an instance of InvoiceItem
         - The response has the fields attribute set correctly
         """
         # setup
@@ -40,16 +40,16 @@ class TestAgingReportList:
         # execution
         invoice = test_report.get_invoice_by_key(po_num, invoice_num)
         # validation
-        assert isinstance(invoice, AgingReportItem)
+        assert isinstance(invoice, InvoiceItem)
         assert isinstance(invoice.fields, dict)
 
     def test_get_invoice_by_key_missing(self, test_report):
         """Tests that the get_invoice_by_key method executes correctly when
-        the invoice with that key isn't in AgingReportList.invoices
+        the invoice with that key isn't in InvoiceList.invoices
 
         Validates the following conditions
-        - The response returned is an instance of AgingReportItem
-        - The invoice has been added to AgingReportList.invoices
+        - The response returned is an instance of InvoiceItem
+        - The invoice has been added to InvoiceList.invoices
         - The response has the fields attribute set correctly
         """
         # setup
@@ -63,19 +63,19 @@ class TestAgingReportList:
         # execution
         invoice = test_report.get_invoice_by_key(po_num, invoice_num)
         # validation
-        assert isinstance(invoice, AgingReportItem)
+        assert isinstance(invoice, InvoiceItem)
         assert isinstance(invoice.fields, dict)
         assert invoice_key in test_report.invoices
 
 
-class TestAgingReportItem:
-    """Tests the AgingReportItem methods that make calls to Graph API"""
+class TestInvoiceItem:
+    """Tests the InvoiceItem methods that make calls to Graph API"""
 
     def test_update(self, test_report):
-        """Tests that AgingReportItem.update executes successfully
+        """Tests that InvoiceItem.update executes successfully
 
         Validates the following conditions:
-        - AgingReportItem.update() doesn't throw an error
+        - InvoiceItem.update() doesn't throw an error
         - The field was successfully updated in SharePoint
         """
         # setup - get invoice
