@@ -1,8 +1,5 @@
-__all__ = ["AgingReportList", "AgingReportItem", "ArchiveFolder", "SharePoint"]
+__all__ = ["BaseList", "BaseItem", "ArchiveFolder", "SharePoint"]
 
-from aging_report.sharepoint.aging_report import (
-    AgingReportList,
-    AgingReportItem,
-)
+from aging_report.sharepoint.base_list import BaseList, BaseItem
 from aging_report.sharepoint.archive import ArchiveFolder
 from aging_report.sharepoint.client import SharePoint
