@@ -3,7 +3,6 @@ from typing import Dict
 
 from O365.sharepoint import SharepointList, SharepointListItem
 
-from aging_report.sharepoint.utils import build_filter_str, get_col_api_name
 from aging_report.sharepoint import ListBase, ListItemBase
 
 
@@ -27,7 +26,7 @@ class InvoiceList(ListBase):
 
     def __init__(self, site_list: SharepointList) -> None:
         """Instantiates the InvoiceList class"""
-        self.list = site_list
+        super().__init__(site_list)
         self.invoices = {}
 
     def get_invoices(  # pylint: disable = dangerous-default-value
@@ -161,13 +160,3 @@ class InvoiceItem(ListItemBase):
     ) -> None:
         """Instantiates the InvoiceItem class"""
         super().__init__(parent, item)
-
-    def update(self, data: dict) -> None:
-        """Updates the Priority Vendor Aging list item in SharePoint
-
-        Parameters
-        ----------
-        data: dict
-            A dictionary of {"field name": new_value} used to update the fields
-        """
-        super().update(data)

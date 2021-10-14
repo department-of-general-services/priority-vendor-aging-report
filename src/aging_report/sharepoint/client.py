@@ -7,7 +7,7 @@ from O365.drive import Drive
 from O365.sharepoint import Site, Sharepoint, SharepointList
 
 from aging_report.config import settings
-from aging_report.sharepoint.aging_report import InvoiceList
+from aging_report.sharepoint.invoice_list import InvoiceList
 from aging_report.sharepoint.archive import ArchiveFolder
 from aging_report.sharepoint.utils import authenticate_account
 

@@ -55,9 +55,7 @@ class ListBase:
         # query invoice records from SharePoint
         if query:
             q = build_filter_str(self.columns, query)
-            return self.list.get_items(query=q, expand_fields=list(fields))
-        else:
-            return self.list.get_items(expand_fields=list(fields))
+        return self.list.get_items(query=q, expand_fields=list(fields))
 
     def add_items(self, data: dict) -> List[SharepointListItem]:
         """Inserts a new item into the SharePoint list and returns an instance

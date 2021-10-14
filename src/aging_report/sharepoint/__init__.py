@@ -1,7 +1,7 @@
 __all__ = ["InvoiceList", "InvoiceItem", "ArchiveFolder", "SharePoint"]
 
 from aging_report.sharepoint.base_list import ListBase, ListItemBase
-from aging_report.sharepoint.aging_report import (
+from aging_report.sharepoint.invoice_list import (
     InvoiceList,
     InvoiceItem,
 )
