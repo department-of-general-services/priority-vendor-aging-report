@@ -7,7 +7,7 @@ from O365.drive import Drive
 from O365.sharepoint import Site, Sharepoint, SharepointList
 
 from aging_report.config import settings
-from aging_report.sharepoint.invoice_list import InvoiceList
+from aging_report.sharepoint.base_list import BaseList
 from aging_report.sharepoint.archive import ArchiveFolder
 from aging_report.sharepoint.utils import authenticate_account
 
@@ -38,7 +38,7 @@ class SharePoint:
         self.app: Sharepoint = self.account.sharepoint()
         self.site: Site = self.app.get_site(self.config.site_id)
         self.drive: Drive = None
-        self.aging_report: InvoiceList = None
+        self.aging_report: BaseList = None
         self.archive: ArchiveFolder = None
 
     @property
@@ -46,11 +46,12 @@ class SharePoint:
         """Returns True if account is authenticated"""
         return self.account.is_authenticated
 
-    def get_aging_report(self) -> InvoiceList:
-        """Returns InvoiceList instance and stores it in self.aging_report"""
+    def get_aging_report(self) -> BaseList:
+        """Returns BaseList instance and stores it in self.aging_report"""
         report_id = self.config.report_id
         site_list = self.get_list_by_id(report_id)
-        self.aging_report = InvoiceList(site_list)
+        invoice_key = ["PO Number", "Invoice Number"]
+        self.aging_report = BaseList(site_list, key=invoice_key)
         return self.aging_report
 
     def get_archive_folder(self, archive_dir: Path) -> ArchiveFolder:

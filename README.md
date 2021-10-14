@@ -130,7 +130,7 @@ To retrieve a list of all of the invoices in the Priority Vendor Aging SharePoin
 1. Initiate a new Python interpreter in your terminal: `python`
 1. Import the `Client` class: `from aging_report.sharepoint import SharePoint`
 1. Instantiate the `Client` class: `client = SharePoint()`
-1. Get an instance of the `InvoiceList` class: `report = client.get_aging_report()`
+1. Get an instance of the `BaseList` class: `report = client.get_aging_report()`
 1. Query the list of invoices: `invoices = report.get_invoices()`
 1. Print the invoice fields:
 ```

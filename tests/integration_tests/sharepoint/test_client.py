@@ -2,7 +2,7 @@ from O365 import Account
 from O365.drive import Folder
 from O365.sharepoint import Sharepoint, Site, SharepointList
 
-from aging_report.sharepoint import InvoiceList, ArchiveFolder
+from aging_report.sharepoint import BaseList, ArchiveFolder
 
 
 class TestClient:
@@ -26,17 +26,17 @@ class TestClient:
         assert test_sharepoint.is_authenticated
 
     def test_get_aging_report(self, test_sharepoint):
-        """Tests that Client.get_aging_report() returns an InvoiceList instance
+        """Tests that Client.get_aging_report() returns an BaseList instance
 
         Validates the following conditions:
-        - The response returned is an instance of InvoiceList
-        - InvoiceList.list exists and is an instance of O365.SharepointList
+        - The response returned is an instance of BaseList
+        - BaseList.list exists and is an instance of O365.SharepointList
         - The SharePoint list retrieved has the correct name
         """
         # execution
         report = test_sharepoint.get_aging_report()
         # validation
-        assert isinstance(report, InvoiceList)
+        assert isinstance(report, BaseList)
         assert isinstance(report.list, SharepointList)
         assert report.list.name == "Priority Vendor Aging"
 
