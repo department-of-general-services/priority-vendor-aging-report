@@ -7,6 +7,12 @@ INVOICE_KEY = {"PO Number": "P12345:12", "Invoice Number": "12345"}
 QUERY = {"PO Number": ("equals", "P12345:12")}
 
 
+@pytest.fixture(scope="session", name="test_report")
+def fixture_report(test_sharepoint):
+    """Creates an instance of BaseList for use in integration tests"""
+    return test_sharepoint.get_list("Priority Vendor Aging")
+
+
 class TestBaseList:
     """Tests the BaseList methods that make calls to the Graph API"""
 

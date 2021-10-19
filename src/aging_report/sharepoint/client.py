@@ -38,21 +38,12 @@ class SharePoint:
         self.app: Sharepoint = self.account.sharepoint()
         self.site: Site = self.app.get_site(self.config.site_id)
         self.drive: Drive = None
-        self.aging_report: BaseList = None
         self.archive: ArchiveFolder = None
 
     @property
     def is_authenticated(self) -> bool:
         """Returns True if account is authenticated"""
         return self.account.is_authenticated
-
-    def get_aging_report(self) -> BaseList:
-        """Returns BaseList instance and stores it in self.aging_report"""
-        report_id = self.config.report_id
-        site_list = self.get_list_by_id(report_id)
-        invoice_key = ["PO Number", "Invoice Number"]
-        self.aging_report = BaseList(site_list, key=invoice_key)
-        return self.aging_report
 
     def get_archive_folder(self, archive_dir: Path) -> ArchiveFolder:
         """Returns ArchiveFolder instance and stores it in self.archive
@@ -68,29 +59,19 @@ class SharePoint:
         self.archive = ArchiveFolder(folder, archive_dir)
         return self.archive
 
-    def get_list_by_id(self, list_id: str) -> SharepointList:
-        """Find and return SharepointList instance by the list_id
+    def get_list(
+        self,
+        list_name: str,
+        index_cols: list = None,
+    ) -> BaseList:
+        """Returns a BaseList instance for a SharePoint list specified by name
 
         Parameters
         ----------
-        list_id: str
-            The id of the SharePoint list to query
-
-        Returns
-        -------
-        SharepointList
-            An instance of the O365.SharepointList class for the SharePoint
-            list that matches the list_id
+        list_name: str
+            The name of the list to return a BaseList instance for
+        index_cols: list
+            Columns that are indexed for querying data
         """
-        site = self.site
-        # query the endpoint
-        url = site.build_url(f"/lists/{list_id}")
-        response = site.con.get(url)
-        response.raise_for_status()
-        # convert the response into a SharepointList instance
-        # syntax borrowed from O365.Site.get_list_by_name()
-        site_list = site.list_constructor(
-            parent=site,
-            **{site._cloud_data_key: response.json()},  # pylint: disable=W0212
-        )
-        return site_list
+        site_list = self.site.get_list_by_name(list_name)
+        return BaseList(site_list, key=index_cols)
