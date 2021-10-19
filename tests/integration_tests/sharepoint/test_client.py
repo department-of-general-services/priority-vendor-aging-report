@@ -1,3 +1,4 @@
+import pytest
 from O365 import Account
 from O365.drive import Folder
 from O365.sharepoint import Sharepoint, Site, SharepointList
@@ -25,8 +26,12 @@ class TestClient:
         assert "Fiscal" in test_sharepoint.site.web_url
         assert test_sharepoint.is_authenticated
 
-    def test_get_aging_report(self, test_sharepoint):
-        """Tests that Client.get_aging_report() returns an BaseList instance
+    @pytest.mark.parametrize(
+        "list_name",
+        ["Vendors", "Purchase Orders", "Invoices", "Priority Vendor Aging"],
+    )
+    def test_get_list(self, test_sharepoint, list_name):
+        """Tests that Client.get_vendor_list() returns an BaseList instance
 
         Validates the following conditions:
         - The response returned is an instance of BaseList
@@ -34,11 +39,11 @@ class TestClient:
         - The SharePoint list retrieved has the correct name
         """
         # execution
-        report = test_sharepoint.get_aging_report()
+        sp_list = test_sharepoint.get_list(list_name)
         # validation
-        assert isinstance(report, BaseList)
-        assert isinstance(report.list, SharepointList)
-        assert report.list.name == "Priority Vendor Aging"
+        assert isinstance(sp_list, BaseList)
+        assert isinstance(sp_list.list, SharepointList)
+        assert sp_list.list.name == list_name
 
     def test_get_archive_folder(self, test_sharepoint, test_archive_dir):
         """Tests that Client.get_archive_folder() returns an ArchiveFolder instance

@@ -27,12 +27,6 @@ def fixture_test_sharepoint():
     return SharePoint()
 
 
-@pytest.fixture(scope="session", name="test_report")
-def fixture_report(test_sharepoint):
-    """Creates an instance of BaseList for use in integration tests"""
-    return test_sharepoint.get_aging_report()
-
-
 @pytest.fixture(scope="session", name="test_archive_dir")
 def fixture_archive_dir(tmp_path_factory):
     """Sets up a temporary archive directory for testing"""

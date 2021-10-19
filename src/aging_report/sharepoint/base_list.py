@@ -22,7 +22,7 @@ class BaseList:
         of the InvoiceItem class and keyed by the columns in self.key
     """
 
-    def __init__(self, site_list: SharepointList, key: list) -> None:
+    def __init__(self, site_list: SharepointList, key: list = None) -> None:
         """Instantiates the BaseList class"""
         self.list = site_list
         self.key = key
