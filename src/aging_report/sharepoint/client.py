@@ -4,7 +4,7 @@ from pathlib import Path
 from dynaconf import Dynaconf
 from O365 import Account
 from O365.drive import Drive
-from O365.sharepoint import Site, Sharepoint, SharepointList
+from O365.sharepoint import Site, Sharepoint
 
 from aging_report.config import settings
 from aging_report.sharepoint.base_list import BaseList
