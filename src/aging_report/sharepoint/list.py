@@ -26,19 +26,11 @@ class SiteList:
         """Instantiates the SiteList class"""
         self.list = site_list
         self.key = key
-        self._items = {}
 
     @property
     def columns(self) -> dict:
         """Returns the columns in the SharePoint list"""
         return self.list.column_name_cw
-
-    @property
-    def items(self) -> List[ListItem]:
-        """Returns the list of items queried from SharePoint"""
-        if not self._items:
-            raise NotImplementedError("No list items have been quried yet")
-        return list(self._items.values())
 
     def get_items(  # pylint: disable = dangerous-default-value
         self,
@@ -69,9 +61,9 @@ class SiteList:
             q = build_filter_str(self.columns, query)
         results = self.list.get_items(query=q, expand_fields=list(fields))
         if not results:
-            return []
-        items = [self._init_item(item) for item in results]
-        return items
+            raise ValueError("No matching item found for that query")
+        items = [ListItem(self, item) for item in results]
+        return ItemCollection(items, fields)
 
     def get_item_by_key(self, key: dict, fields: Iterable = None) -> ListItem:
         """Returns a single list item that matches the values passed to the key
@@ -87,19 +79,11 @@ class SiteList:
         ListItem
             A ListItem instance for the item that matches the lookup key
         """
-        # search through existing item list
-        results = self.find_items_by_field(key)
-
-        # if no match is found, query it from SharePoint
-        if not results:
-            fields = fields or self.columns.keys()
-            query = {k: ("equals", v) for k, v in key.items()}
-            results = self.get_items(fields, query)
-
-        # if a match still isn't found, raise an error
-        if not results:
-            raise ValueError("No matching item found for that key")
-        return results[0]
+        # get items using key as a query
+        fields = fields or self.columns.keys()
+        query = {k: ("equals", v) for k, v in key.items()}
+        results = self.get_items(fields, query)
+        return results.items[0]
 
     def add_items(self, data: dict) -> List[SharepointListItem]:
         """Inserts a new item into the SharePoint list and returns an instance
@@ -119,27 +103,29 @@ class SiteList:
         """
         pass
 
-    def _init_item(self, item: SharepointListItem) -> None:
-        """Inits list item as an SiteListItem and adds it to self._items
 
-        Parameters
-        ----------
-        item: O365.SharepointListItem
-            Instance of SharepointListItem used to init ListItem
-        fields: Iterable
-            The set of fields that should be added to item
-        """
-        list_item = ListItem(self, item)
-        self._items[item.object_id] = list_item
-        return list_item
+class ItemCollection:
+    """A collection of ListItem instances that support aggregate operations
 
-    def find_items_by_field(self, search_key: dict) -> List[ListItem]:
+    Attributes:
+    items: List[ListItem]
+        A list of instances of the ListItem class that represent items in a
+        SharePoint list returned by SiteList.get_items()
+
+    """
+
+    def __init__(self, items: List[ListItem], cols: list) -> None:
+        """Instantiates the ItemCollection class"""
+        self.items = items
+        self.columns = cols
+
+    def filter_items(self, filter_key: dict) -> List[ListItem]:
         """Searches through self._items to find items based on the value
         of their field(s)
 
         Parameters
         ----------
-        search_key: dict
+        filter_key: dict
             Dictionary of fields and values used to search through self._items
 
         Returns
@@ -148,13 +134,19 @@ class SiteList:
             items were found based on the search key
         """
         matches = []
-        if not self._items:
-            return matches
+
+        # check that the filter key is a valid columns
+        for col in filter_key.keys():
+            if col not in self.columns:
+                raise KeyError(
+                    f"{col} is isn't included in the list of fields"
+                )
+
         # iterate through items
         for item in self._items.values():
             matched = True
             # check the fields against the search key
-            for key, val in search_key.items():
+            for key, val in filter_key.items():
                 # if any don't match, move to the next item
                 if item.get(key) != val:
                     matched = False
