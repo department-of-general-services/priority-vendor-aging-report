@@ -2,7 +2,7 @@ class TestInit:
     """Tests the"""
 
     def test_init_success(self):
-        """Tests that BaseList initializes correctly
+        """Tests that SiteList initializes correctly
 
         Validates the following conditions:
         -

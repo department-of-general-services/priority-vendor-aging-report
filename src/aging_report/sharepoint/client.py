@@ -7,7 +7,7 @@ from O365.drive import Drive
 from O365.sharepoint import Site, Sharepoint
 
 from aging_report.config import settings
-from aging_report.sharepoint.base_list import BaseList
+from aging_report.sharepoint.base_list import SiteList
 from aging_report.sharepoint.archive import ArchiveFolder
 from aging_report.sharepoint.utils import authenticate_account
 
@@ -63,15 +63,15 @@ class SharePoint:
         self,
         list_name: str,
         index_cols: list = None,
-    ) -> BaseList:
-        """Returns a BaseList instance for a SharePoint list specified by name
+    ) -> SiteList:
+        """Returns a SiteList instance for a SharePoint list specified by name
 
         Parameters
         ----------
         list_name: str
-            The name of the list to return a BaseList instance for
+            The name of the list to return a SiteList instance for
         index_cols: list
             Columns that are indexed for querying data
         """
         site_list = self.site.get_list_by_name(list_name)
-        return BaseList(site_list, key=index_cols)
+        return SiteList(site_list, key=index_cols)

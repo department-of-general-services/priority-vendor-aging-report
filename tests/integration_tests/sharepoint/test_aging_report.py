@@ -1,7 +1,7 @@
 # pylint: disable=W0212
 import pytest
 
-from aging_report.sharepoint import BaseItem
+from aging_report.sharepoint import ListItem
 
 INVOICE_KEY = {"PO Number": "P12345:12", "Invoice Number": "12345"}
 QUERY = {"PO Number": ("equals", "P12345:12")}
@@ -9,12 +9,12 @@ QUERY = {"PO Number": ("equals", "P12345:12")}
 
 @pytest.fixture(scope="session", name="test_report")
 def fixture_report(test_sharepoint):
-    """Creates an instance of BaseList for use in integration tests"""
+    """Creates an instance of SiteList for use in integration tests"""
     return test_sharepoint.get_list("Priority Vendor Aging")
 
 
-class TestBaseList:
-    """Tests the BaseList methods that make calls to the Graph API"""
+class TestSiteList:
+    """Tests the SiteList methods that make calls to the Graph API"""
 
     def test_get_items(self, test_report):
         """Tests that the get_items() method executes correctly
@@ -22,19 +22,19 @@ class TestBaseList:
         Validates the following conditions:
         - The response returned is a dictionary of InvoiceItem instances
         - The correct set of invoices are returned
-        - The response matches the value of BaseList.invoices
+        - The response matches the value of SiteList.invoices
         """
         # execution
         invoices = test_report.get_items(query=QUERY)
         print(invoices[0].fields)
         # validation
         assert len(invoices) == 3
-        assert isinstance(invoices[0], BaseItem)
+        assert isinstance(invoices[0], ListItem)
         assert invoices == test_report.items
 
     def test_get_invoice_by_key_existing(self, test_report):
         """Tests that the get_invoice_by_key method executes correctly when
-        the invoice with that key is already in BaseList.invoices
+        the invoice with that key is already in SiteList.invoices
 
         Validates the following conditions
         - The response returned is an instance of InvoiceItem
@@ -47,7 +47,7 @@ class TestBaseList:
         # execution
         invoice = test_report.get_item_by_key(INVOICE_KEY)
         # validation
-        assert isinstance(invoice, BaseItem)
+        assert isinstance(invoice, ListItem)
         assert isinstance(invoice.fields, dict)
         assert invoice == matches[0]
 
@@ -64,11 +64,11 @@ class TestBaseList:
 
     def test_get_invoice_by_key_missing(self, test_report):
         """Tests that the get_invoice_by_key method executes correctly when
-        the invoice with that key isn't in BaseList.invoices
+        the invoice with that key isn't in SiteList.invoices
 
         Validates the following conditions
         - The response returned is an instance of InvoiceItem
-        - The invoice has been added to BaseList.invoices
+        - The invoice has been added to SiteList.invoices
         - The response has the fields attribute set correctly
         """
         # setup
@@ -76,7 +76,7 @@ class TestBaseList:
         # execution
         invoice = test_report.get_item_by_key(INVOICE_KEY)
         # validation
-        assert isinstance(invoice, BaseItem)
+        assert isinstance(invoice, ListItem)
         assert isinstance(invoice.fields, dict)
 
 

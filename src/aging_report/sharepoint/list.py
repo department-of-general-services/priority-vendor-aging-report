@@ -6,7 +6,7 @@ from O365.sharepoint import SharepointList, SharepointListItem
 from aging_report.sharepoint.utils import build_filter_str, get_col_api_name
 
 
-class BaseList:
+class SiteList:
     """Creates an API client for making calls to the SharePoint list resource
 
     Attributes
@@ -23,7 +23,7 @@ class BaseList:
     """
 
     def __init__(self, site_list: SharepointList, key: list = None) -> None:
-        """Instantiates the BaseList class"""
+        """Instantiates the SiteList class"""
         self.list = site_list
         self.key = key
         self._items = {}
@@ -34,7 +34,7 @@ class BaseList:
         return self.list.column_name_cw
 
     @property
-    def items(self) -> List[BaseItem]:
+    def items(self) -> List[ListItem]:
         """Returns the list of items queried from SharePoint"""
         if not self._items:
             raise NotImplementedError("No list items have been quried yet")
@@ -73,7 +73,7 @@ class BaseList:
         items = [self._init_item(item) for item in results]
         return items
 
-    def get_item_by_key(self, key: dict, fields: Iterable = None) -> BaseItem:
+    def get_item_by_key(self, key: dict, fields: Iterable = None) -> ListItem:
         """Returns a single list item that matches the values passed to the key
 
         Parameters
@@ -84,8 +84,8 @@ class BaseList:
 
         Returns
         -------
-        BaseItem
-            A BaseItem instance for the item that matches the lookup key
+        ListItem
+            A ListItem instance for the item that matches the lookup key
         """
         # search through existing item list
         results = self.find_items_by_field(key)
@@ -120,20 +120,20 @@ class BaseList:
         pass
 
     def _init_item(self, item: SharepointListItem) -> None:
-        """Inits list item as an BaseListItem and adds it to self._items
+        """Inits list item as an SiteListItem and adds it to self._items
 
         Parameters
         ----------
         item: O365.SharepointListItem
-            Instance of SharepointListItem used to init BaseItem
+            Instance of SharepointListItem used to init ListItem
         fields: Iterable
             The set of fields that should be added to item
         """
-        list_item = BaseItem(self, item)
+        list_item = ListItem(self, item)
         self._items[item.object_id] = list_item
         return list_item
 
-    def find_items_by_field(self, search_key: dict) -> List[BaseItem]:
+    def find_items_by_field(self, search_key: dict) -> List[ListItem]:
         """Searches through self._items to find items based on the value
         of their field(s)
 
@@ -144,7 +144,7 @@ class BaseList:
 
         Returns
         -------
-            A list of BaseItem instances or an empty list if no matching
+            A list of ListItem instances or an empty list if no matching
             items were found based on the search key
         """
         matches = []
@@ -165,13 +165,13 @@ class BaseList:
         return matches
 
 
-class BaseItem:
+class ListItem:
     """Creates an API client for making calls to the SharePoint list item
 
     Attributes
     ----------
-    parent: Type[BaseList]
-        An instance of the BaseList sub-class that this item belongs to
+    parent: Type[SiteList]
+        An instance of the SiteList sub-class that this item belongs to
     item: o365.SharepointListItem
         An instance of the O365.SharepointListItem class that manages calls to
         the ListItems resource in Graph API
@@ -179,10 +179,10 @@ class BaseItem:
 
     def __init__(
         self,
-        parent: BaseList,
+        parent: SiteList,
         item: SharepointListItem,
     ) -> None:
-        """Instantiates the BaseItem class"""
+        """Instantiates the ListItem class"""
         self.parent = parent
         self.item = item
 
