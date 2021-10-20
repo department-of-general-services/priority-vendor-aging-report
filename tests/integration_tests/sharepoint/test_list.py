@@ -36,7 +36,7 @@ class TestSiteList:
         assert isinstance(test_items.items[0], ListItem)
 
     def test_get_invoice_by_key(self, test_list):
-        """Tests that the get_invoice_by_key method executes correctly
+        """Tests that the get_invoice_by_key() method executes correctly
 
         Validates the following conditions
         - The response returned is an instance of ListItem
@@ -49,13 +49,45 @@ class TestSiteList:
         assert isinstance(invoice.fields, dict)
 
     def test_get_invoice_by_key_no_match(self, test_list):
-        """Tests that the get_invoice_by_key method raises a ValueError if
+        """Tests that the get_invoice_by_key() method raises a ValueError if
         attempting to get an item with no matching key
         """
         # setup
         fake_key = {"PO Number": "Fake", "Invoice Number": "Fake"}
         with pytest.raises(ValueError):
             test_list.get_item_by_key(fake_key)
+
+    def test_add_item(self, test_list):
+        """Tests that the add_items() method executes correctly
+
+        Validates the following conditions:
+        - The item has been created in SharePoint
+        - The method returns the items as an ItemCollection
+        """
+        # setup
+        test_data = {"PO Number": "new item", "Invoice Number": "new item"}
+        # execution
+        item = test_list.add_item(test_data)
+        # validation
+        try:
+            assert isinstance(item, ListItem)
+            for key, val in test_data.items():
+                assert item.get_val(key) == val
+        except AssertionError as err:
+            raise err
+        finally:
+            # cleanup
+            assert item.item.delete()
+
+    def test_add_item_invalid(self, test_list):
+        """Tests that add_item() raises a KeyError when it is provided data
+        that has a key that isn't one of the list's existing columns
+        """
+        # setup
+        test_data = {"Fake Col": "new item", "Invoice Number": "new item"}
+        # validation
+        with pytest.raises(KeyError):
+            test_list.add_item(test_data)
 
 
 class TestItemCollection:
@@ -104,8 +136,8 @@ class TestItemCollection:
         assert "Invoice Number" in df.columns
 
 
-class TestInvoiceItem:
-    """Tests the InvoiceItem methods that make calls to Graph API"""
+class TestListItem:
+    """Tests the ListItem methods that make calls to Graph API"""
 
     def test_update(self, test_list, test_items):
         """Tests that InvoiceItem.update executes successfully

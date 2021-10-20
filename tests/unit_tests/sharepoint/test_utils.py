@@ -1,7 +1,6 @@
 import pytest
 
 from aging_report.sharepoint.utils import build_filter_str
-from aging_report.errors import ColumnNotFoundError
 
 COLS = {"Text Col": "TextCol", "Num Col": "NumCol"}
 
@@ -44,5 +43,5 @@ def test_build_filter_str_error():
     # setup
     input_dict = {"Fake Col": ("equals", "Text")}
     # execution
-    with pytest.raises(ColumnNotFoundError):
+    with pytest.raises(KeyError):
         build_filter_str(COLS, input_dict)

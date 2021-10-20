@@ -86,7 +86,7 @@ class SiteList:
         results = self.get_items(fields, query)
         return results.items[0]
 
-    def add_items(self, data: dict) -> List[SharepointListItem]:
+    def add_item(self, data: dict) -> ListItem:
         """Inserts a new item into the SharePoint list and returns an instance
         of o365.SharepointListItem
 
@@ -99,10 +99,12 @@ class SiteList:
 
         Returns
         -------
-        o365.SharePointListItem
-            A o365.SharepointListItem instance for the item that was created
+        ListItem
+            A ListItem instance for the item that was created in SharePoint
         """
-        pass
+        data = {col_api_name(self.columns, k): v for k, v in data.items()}
+        item = self.list.create_list_item(data)
+        return ListItem(self, item)
 
 
 class ItemCollection:
