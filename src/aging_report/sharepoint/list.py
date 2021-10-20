@@ -160,7 +160,7 @@ class ItemCollection:
             # check the fields against the search key
             for key, val in filter_key.items():
                 # if any don't match, move to the next item
-                if item.get(key) != val:
+                if item.get_val(key) != val:
                     matched = False
                     break
             # if all keys match append it to the list
@@ -225,7 +225,7 @@ class ListItem:
         self.item.update_fields(data)
         self.item.save_updates()
 
-    def get(self, field) -> Any:
+    def get_val(self, field) -> Any:
         """Returns the value of an item's field"""
         col = col_api_name(self.parent.columns, field)
         return self.fields.get(col)

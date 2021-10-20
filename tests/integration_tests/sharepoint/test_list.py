@@ -74,8 +74,8 @@ class TestItemCollection:
         invoices = test_items.filter_items(ITEM_KEY)
         # validation
         assert len(invoices) == 1
-        assert invoices[0].get("PO Number") == "P12345:12"
-        assert invoices[0].get("Invoice Number") == "12345"
+        assert invoices[0].get_val("PO Number") == "P12345:12"
+        assert invoices[0].get_val("Invoice Number") == "12345"
 
     def test_filter_items_invalid_field(self, test_items):
         """Tests that ItemCollection.filter_items() returns a KeyError when
@@ -116,7 +116,7 @@ class TestInvoiceItem:
         """
         # setup - get invoice
         invoice = test_items.filter_items(ITEM_KEY)[0]
-        status = invoice.get("Status")
+        status = invoice.get_val("Status")
         # setup - set update dict
         if status == "8. Paid":
             data = {"Status": "Error"}
@@ -125,7 +125,7 @@ class TestInvoiceItem:
         # execution
         invoice.update(data)
         result = test_list.get_item_by_key(ITEM_KEY)
-        new_status = result.get("Status")
+        new_status = result.get_val("Status")
         # validation
         assert status != new_status
         assert new_status == data["Status"]
