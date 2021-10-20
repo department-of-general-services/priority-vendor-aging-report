@@ -3,8 +3,6 @@ from __future__ import annotations  # prevents NameError for typehints
 from dynaconf import Dynaconf
 from O365 import Account
 
-from aging_report.errors import ColumnNotFoundError
-
 
 QUERY_MAPPING = {
     "equals": ("relation", "eq"),
@@ -72,7 +70,10 @@ def col_api_name(columns: dict, col: str, prefix: str = "") -> str:
         return prefix + columns[col]
     if col in columns.values():
         return prefix + col
-    raise ColumnNotFoundError(col, columns)
+    raise KeyError(
+        f"{col} not in the list of cols. "
+        f"Must be one of the following: {columns}."
+    )
 
 
 def build_filter_str(columns: dict, query_dict: dict) -> str:

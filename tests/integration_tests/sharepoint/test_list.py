@@ -79,6 +79,16 @@ class TestSiteList:
             # cleanup
             assert item.item.delete()
 
+    def test_add_item_invalid(self, test_list):
+        """Tests that add_item() raises a KeyError when it is provided data
+        that has a key that isn't one of the list's existing columns
+        """
+        # setup
+        test_data = {"Fake Col": "new item", "Invoice Number": "new item"}
+        # validation
+        with pytest.raises(KeyError):
+            test_list.add_item(test_data)
+
 
 class TestItemCollection:
     """Tests the ItemCollection class methods"""
