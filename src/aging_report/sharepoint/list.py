@@ -1,9 +1,10 @@
 from __future__ import annotations  # prevents NameError for typehints
 from typing import Dict, List, Iterable, Any
 
+import pandas as pd
 from O365.sharepoint import SharepointList, SharepointListItem
 
-from aging_report.sharepoint.utils import build_filter_str, get_col_api_name
+from aging_report.sharepoint.utils import build_filter_str, col_api_name
 
 
 class SiteList:
@@ -56,14 +57,14 @@ class SiteList:
             of the o365.SharepointListItem class
         """
         # query invoice records from SharePoint
-        fields = fields or self.columns.values()
+        fields = fields or self.columns.keys()
         if query:
             q = build_filter_str(self.columns, query)
         results = self.list.get_items(query=q, expand_fields=list(fields))
         if not results:
             raise ValueError("No matching item found for that query")
         items = [ListItem(self, item) for item in results]
-        return ItemCollection(items, fields)
+        return ItemCollection(self, items, fields)
 
     def get_item_by_key(self, key: dict, fields: Iterable = None) -> ListItem:
         """Returns a single list item that matches the values passed to the key
@@ -108,15 +109,25 @@ class ItemCollection:
     """A collection of ListItem instances that support aggregate operations
 
     Attributes:
+    list: SiteList
+        The instance of SiteList representing the SharePoint list
+        that the ItemCollection was returned from
     items: List[ListItem]
         A list of instances of the ListItem class that represent items in a
         SharePoint list returned by SiteList.get_items()
-
+    columns: list
+        A list of the fields that were returned for each item in the collection
     """
 
-    def __init__(self, items: List[ListItem], cols: list) -> None:
+    def __init__(
+        self,
+        site_list: SiteList,
+        items: List[ListItem],
+        cols: list,
+    ) -> None:
         """Instantiates the ItemCollection class"""
         self.items = items
+        self.list = site_list
         self.columns = cols
 
     def filter_items(self, filter_key: dict) -> List[ListItem]:
@@ -139,11 +150,12 @@ class ItemCollection:
         for col in filter_key.keys():
             if col not in self.columns:
                 raise KeyError(
-                    f"{col} is isn't included in the list of fields"
+                    f"{col} is isn't included in the list of fields "
+                    "returned from SharePoint by SiteList.get_items()"
                 )
 
         # iterate through items
-        for item in self._items.values():
+        for item in self.items:
             matched = True
             # check the fields against the search key
             for key, val in filter_key.items():
@@ -155,6 +167,16 @@ class ItemCollection:
             if matched:
                 matches.append(item)
         return matches
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Exports the list of items and their fields as a dataframe"""
+        # convert items to dataframe
+        items = [item.fields for item in self.items]
+        df = pd.DataFrame(items)
+        # rename the columns
+        cols = self.list.columns
+        rename_cols = {col_api_name(cols, c): c for c in self.columns}
+        return df.rename(columns=rename_cols)
 
 
 class ListItem:
@@ -193,7 +215,7 @@ class ListItem:
         """
         # gets api name for each field in update data
         cols = self.parent.columns
-        data = {get_col_api_name(cols, col): val for col, val in data.items()}
+        data = {col_api_name(cols, col): val for col, val in data.items()}
         # adds field to self.fields to avoid update error
         for field in data:
             if field not in self.fields:
@@ -205,5 +227,5 @@ class ListItem:
 
     def get(self, field) -> Any:
         """Returns the value of an item's field"""
-        col = get_col_api_name(self.parent.columns, field)
+        col = col_api_name(self.parent.columns, field)
         return self.fields.get(col)
