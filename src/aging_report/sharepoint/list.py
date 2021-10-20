@@ -1,12 +1,13 @@
 from __future__ import annotations  # prevents NameError for typehints
 from typing import Dict, List, Iterable, Any
 
+import pandas as pd
 from O365.sharepoint import SharepointList, SharepointListItem
 
-from aging_report.sharepoint.utils import build_filter_str, get_col_api_name
+from aging_report.sharepoint.utils import build_filter_str, col_api_name
 
 
-class BaseList:
+class SiteList:
     """Creates an API client for making calls to the SharePoint list resource
 
     Attributes
@@ -23,22 +24,14 @@ class BaseList:
     """
 
     def __init__(self, site_list: SharepointList, key: list = None) -> None:
-        """Instantiates the BaseList class"""
+        """Instantiates the SiteList class"""
         self.list = site_list
         self.key = key
-        self._items = {}
 
     @property
     def columns(self) -> dict:
         """Returns the columns in the SharePoint list"""
         return self.list.column_name_cw
-
-    @property
-    def items(self) -> List[BaseItem]:
-        """Returns the list of items queried from SharePoint"""
-        if not self._items:
-            raise NotImplementedError("No list items have been quried yet")
-        return list(self._items.values())
 
     def get_items(  # pylint: disable = dangerous-default-value
         self,
@@ -64,16 +57,16 @@ class BaseList:
             of the o365.SharepointListItem class
         """
         # query invoice records from SharePoint
-        fields = fields or self.columns.values()
+        fields = fields or self.columns.keys()
         if query:
             q = build_filter_str(self.columns, query)
         results = self.list.get_items(query=q, expand_fields=list(fields))
         if not results:
-            return []
-        items = [self._init_item(item) for item in results]
-        return items
+            raise ValueError("No matching item found for that query")
+        items = [ListItem(self, item) for item in results]
+        return ItemCollection(self, items, fields)
 
-    def get_item_by_key(self, key: dict, fields: Iterable = None) -> BaseItem:
+    def get_item_by_key(self, key: dict, fields: Iterable = None) -> ListItem:
         """Returns a single list item that matches the values passed to the key
 
         Parameters
@@ -84,22 +77,14 @@ class BaseList:
 
         Returns
         -------
-        BaseItem
-            A BaseItem instance for the item that matches the lookup key
+        ListItem
+            A ListItem instance for the item that matches the lookup key
         """
-        # search through existing item list
-        results = self.find_items_by_field(key)
-
-        # if no match is found, query it from SharePoint
-        if not results:
-            fields = fields or self.columns.keys()
-            query = {k: ("equals", v) for k, v in key.items()}
-            results = self.get_items(fields, query)
-
-        # if a match still isn't found, raise an error
-        if not results:
-            raise ValueError("No matching item found for that key")
-        return results[0]
+        # get items using key as a query
+        fields = fields or self.columns.keys()
+        query = {k: ("equals", v) for k, v in key.items()}
+        results = self.get_items(fields, query)
+        return results.items[0]
 
     def add_items(self, data: dict) -> List[SharepointListItem]:
         """Inserts a new item into the SharePoint list and returns an instance
@@ -119,44 +104,63 @@ class BaseList:
         """
         pass
 
-    def _init_item(self, item: SharepointListItem) -> None:
-        """Inits list item as an BaseListItem and adds it to self._items
 
-        Parameters
-        ----------
-        item: O365.SharepointListItem
-            Instance of SharepointListItem used to init BaseItem
-        fields: Iterable
-            The set of fields that should be added to item
-        """
-        list_item = BaseItem(self, item)
-        self._items[item.object_id] = list_item
-        return list_item
+class ItemCollection:
+    """A collection of ListItem instances that support aggregate operations
 
-    def find_items_by_field(self, search_key: dict) -> List[BaseItem]:
+    Attributes:
+    list: SiteList
+        The instance of SiteList representing the SharePoint list
+        that the ItemCollection was returned from
+    items: List[ListItem]
+        A list of instances of the ListItem class that represent items in a
+        SharePoint list returned by SiteList.get_items()
+    columns: list
+        A list of the fields that were returned for each item in the collection
+    """
+
+    def __init__(
+        self,
+        site_list: SiteList,
+        items: List[ListItem],
+        cols: list,
+    ) -> None:
+        """Instantiates the ItemCollection class"""
+        self.items = items
+        self.list = site_list
+        self.columns = cols
+
+    def filter_items(self, filter_key: dict) -> List[ListItem]:
         """Searches through self._items to find items based on the value
         of their field(s)
 
         Parameters
         ----------
-        search_key: dict
+        filter_key: dict
             Dictionary of fields and values used to search through self._items
 
         Returns
         -------
-            A list of BaseItem instances or an empty list if no matching
+            A list of ListItem instances or an empty list if no matching
             items were found based on the search key
         """
         matches = []
-        if not self._items:
-            return matches
+
+        # check that the filter key is a valid columns
+        for col in filter_key.keys():
+            if col not in self.columns:
+                raise KeyError(
+                    f"{col} is isn't included in the list of fields "
+                    "returned from SharePoint by SiteList.get_items()"
+                )
+
         # iterate through items
-        for item in self._items.values():
+        for item in self.items:
             matched = True
             # check the fields against the search key
-            for key, val in search_key.items():
+            for key, val in filter_key.items():
                 # if any don't match, move to the next item
-                if item.get(key) != val:
+                if item.get_val(key) != val:
                     matched = False
                     break
             # if all keys match append it to the list
@@ -164,14 +168,24 @@ class BaseList:
                 matches.append(item)
         return matches
 
+    def to_dataframe(self) -> pd.DataFrame:
+        """Exports the list of items and their fields as a dataframe"""
+        # convert items to dataframe
+        items = [item.fields for item in self.items]
+        df = pd.DataFrame(items)
+        # rename the columns
+        cols = self.list.columns
+        rename_cols = {col_api_name(cols, c): c for c in self.columns}
+        return df.rename(columns=rename_cols)
 
-class BaseItem:
+
+class ListItem:
     """Creates an API client for making calls to the SharePoint list item
 
     Attributes
     ----------
-    parent: Type[BaseList]
-        An instance of the BaseList sub-class that this item belongs to
+    parent: Type[SiteList]
+        An instance of the SiteList sub-class that this item belongs to
     item: o365.SharepointListItem
         An instance of the O365.SharepointListItem class that manages calls to
         the ListItems resource in Graph API
@@ -179,10 +193,10 @@ class BaseItem:
 
     def __init__(
         self,
-        parent: BaseList,
+        parent: SiteList,
         item: SharepointListItem,
     ) -> None:
-        """Instantiates the BaseItem class"""
+        """Instantiates the ListItem class"""
         self.parent = parent
         self.item = item
 
@@ -201,7 +215,7 @@ class BaseItem:
         """
         # gets api name for each field in update data
         cols = self.parent.columns
-        data = {get_col_api_name(cols, col): val for col, val in data.items()}
+        data = {col_api_name(cols, col): val for col, val in data.items()}
         # adds field to self.fields to avoid update error
         for field in data:
             if field not in self.fields:
@@ -211,7 +225,7 @@ class BaseItem:
         self.item.update_fields(data)
         self.item.save_updates()
 
-    def get(self, field) -> Any:
+    def get_val(self, field) -> Any:
         """Returns the value of an item's field"""
-        col = get_col_api_name(self.parent.columns, field)
+        col = col_api_name(self.parent.columns, field)
         return self.fields.get(col)

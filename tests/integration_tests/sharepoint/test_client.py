@@ -3,7 +3,7 @@ from O365 import Account
 from O365.drive import Folder
 from O365.sharepoint import Sharepoint, Site, SharepointList
 
-from aging_report.sharepoint import BaseList, ArchiveFolder
+from aging_report.sharepoint import SiteList, ArchiveFolder
 
 
 class TestClient:
@@ -31,17 +31,17 @@ class TestClient:
         ["Vendors", "Purchase Orders", "Invoices", "Priority Vendor Aging"],
     )
     def test_get_list(self, test_sharepoint, list_name):
-        """Tests that Client.get_vendor_list() returns an BaseList instance
+        """Tests that Client.get_vendor_list() returns an SiteList instance
 
         Validates the following conditions:
-        - The response returned is an instance of BaseList
-        - BaseList.list exists and is an instance of O365.SharepointList
+        - The response returned is an instance of SiteList
+        - SiteList.list exists and is an instance of O365.SharepointList
         - The SharePoint list retrieved has the correct name
         """
         # execution
         sp_list = test_sharepoint.get_list(list_name)
         # validation
-        assert isinstance(sp_list, BaseList)
+        assert isinstance(sp_list, SiteList)
         assert isinstance(sp_list.list, SharepointList)
         assert sp_list.list.name == list_name
 

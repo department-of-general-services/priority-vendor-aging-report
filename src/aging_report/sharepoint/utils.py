@@ -44,7 +44,7 @@ def authenticate_account(config: Dynaconf) -> Account:
     return account
 
 
-def get_col_api_name(columns: dict, col: str, prefix: str = "") -> str:
+def col_api_name(columns: dict, col: str, prefix: str = "") -> str:
     """Returns the API name of a column with optional prefix for querying and
     updating data via Graph API
 
@@ -105,7 +105,7 @@ def build_filter_str(columns: dict, query_dict: dict) -> str:
     # iteratively create filters
     filters = []
     for col, condition in query_dict.items():
-        field = get_col_api_name(columns, col, prefix)
+        field = col_api_name(columns, col, prefix)
         # build filter using odata syntax mapping
         operator, value = condition
         if isinstance(value, str):
