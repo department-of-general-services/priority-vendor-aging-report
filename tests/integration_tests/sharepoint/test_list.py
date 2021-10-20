@@ -15,6 +15,7 @@ def fixture_list(test_sharepoint):
 
 @pytest.fixture(scope="module", name="test_items")
 def fixture_items(test_list):
+    """Returns an instance of ItemCollection for testing"""
     return test_list.get_items(query=QUERY)
 
 
