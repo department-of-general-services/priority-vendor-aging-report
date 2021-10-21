@@ -4,10 +4,11 @@ on: [push, pull_request]
 
 jobs:
   build:
-
+    # runs test on windows to avoid error with xlwings
     runs-on: windows-latest
     strategy:
       matrix:
+        # runs checks on each of the following python versions
         python-version: [3.7, 3.8, 3.9]
 
     steps:
@@ -17,9 +18,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
+        # change directory into the app folder and install dependencies
         run: |
+          cd app
           python -m pip install --upgrade pip
           pip install tox
+        # run code quality checks
       - name: Run tox
         run: |
           tox
