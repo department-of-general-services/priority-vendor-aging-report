@@ -9,12 +9,17 @@
   - [About this Project](#about-this-project)
     - [Made With](#made-with)
     - [Relevant Documents](#relevant-documents)
+    - [Project Structure](#project-structure)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
     - [Secret Configuration](#secret-configuration)
   - [Usage](#usage)
-    - [Get all invoices](#get-all-invoices)
+    - [Reading and Writing Data to SharePoint](#reading-and-writing-data-to-sharepoint)
+      - [Working with SharePoint lists](#working-with-sharepoint-lists)
+      - [Working with SharePoint Document Libraries](#working-with-sharepoint-document-libraries)
+    - [Retrieving data from CitiBuy](#retrieving-data-from-citibuy)
+    - [Retrieving data from](#retrieving-data-from)
   - [Vision and Roadmap](#vision-and-roadmap)
   - [Contributing](#contributing)
   - [License](#license)
@@ -31,14 +36,18 @@ The Priority Vendor Aging Report is a weekly report that allows the DGS Fiscal t
 
 ### Made With
 
-<!-- TODO: Replace this list with your most critical dependencies -->
 
-- [tox](https://tox.readthedocs.io/en/latest/) - Automates and standardizes the creation of testing environments.
-- [pytest](https://docs.pytest.org/en/6.2.x/) - Simplifies the design and execution of both unit and integration testing.
-- [black](https://black.readthedocs.io/en/stable/) - Autoformats code for consistent styling.
-- [flake8](https://flake8.pycqa.org/en/latest/) - Checks that code complies with PEP8 style guidelines.
-- [pylint](https://www.pylint.org/) - Checks that code follows idiomatic best practices for Python.
-- [pre-commit](https://pre-commit.com/) - Runs code quality checks before code is committed.
+- **Project Dependencies**
+  - [O365](https://github.com/O365/python-o365) - A third party package for managing calls to the Microsoft Graph API
+  - [SQLAlchemy](https://github.com/sqlalchemy/sqlalchemy) - A python toolkit and Object Relational Mapper (ORM) for managing connections to relational databases
+  - [pandas](https://github.com/pandas-dev/pandas) - A python toolkit commonly used to manipulate and analyze tabular data
+- **Development Dependencies**
+  - [tox](https://tox.readthedocs.io/en/latest/) - Automates and standardizes the creation of testing environments.
+  - [pytest](https://docs.pytest.org/en/6.2.x/) - Simplifies the design and execution of both unit and integration testing.
+  - [black](https://black.readthedocs.io/en/stable/) - Autoformats code for consistent styling.
+  - [flake8](https://flake8.pycqa.org/en/latest/) - Checks that code complies with PEP8 style guidelines.
+  - [pylint](https://www.pylint.org/) - Checks that code follows idiomatic best practices for Python.
+  - [pre-commit](https://pre-commit.com/) - Runs code quality checks before code is committed.
 
 ### Relevant Documents
 
@@ -46,6 +55,21 @@ The Priority Vendor Aging Report is a weekly report that allows the DGS Fiscal t
 - [Architecture Decision Records](docs/adrs)
 - [Project Scoping Document](docs/project-scope.md)
 - [Data Dictionary](docs/data-dictionary.md)
+
+### Project Structure
+
+The list below represents a summary of important files and directories within the project.
+
+- `.github/` Contains templates for issues and pull requests as well as configuration files for GitHub Actions
+- `app/` Contains the scripts and other files that comprise the main codebase for this project
+  - `src/dgs_fiscal/` The main python package for this project
+  - `tests/` Contains the unit and integration tests used to assess the quality of the code base
+  - `setup.py` Details about the package in `src/dgs_fiscal/` and the file that facilitates installation of that package
+  - `requirements.txt` The project's development dependencies
+- `docs/` Contains documentation about the project
+  - `adr/` Contains key architectural decisions for the project
+  - `diagrams/` Contains diagrams referenced in the docs and in the `README.md`
+  - `project-scope.md` An overview of the project and its goals
 
 ## Getting Started
 
@@ -67,7 +91,7 @@ If you receive an error message, or the version of python you have installed is 
 ### Installation
 
 1. [Clone the repository](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github/cloning-a-repository) on your local machine: `git clone https://github.com/department-of-general-services/priority-vendor-aging-report.git`
-1. Change directory into the cloned project: `cd priority-vendor-aging-report`
+1. Change directory into the `app/` sub-directory of the cloned project: `cd priority-vendor-aging-report/app`
 1. Create a new virtual environment: `python -m venv env`
 1. Activate the virtual environment
    - On Mac/Linux: `source env/bin/activate`
@@ -88,7 +112,7 @@ If you receive an error message, or the version of python you have installed is 
 ### Secret Configuration
 
 1. Contact Billy Daly to receive access to the credentials for the Microsoft Daemon app that has permissions use the Graph API for this project.
-1. Create a file called `.secrets.toml` at the root of the project directory:
+1. Create a file called `.secrets.toml` at the root of the `app/` sub-directory:
    - On Mac/Linux: `touch .secrets.toml`
    - On Windows: `echo > .secrets.toml`
 1. Open that new file in your text editor and add the credentials to it. The format should look something like this:
@@ -100,7 +124,7 @@ If you receive an error message, or the version of python you have installed is 
    site_id = "acme.sharepoint.com,12345,67890"
    host_name = "acme.sharepoint.com"
    site_name = "AcmeSite"
-   report_id = "45678"
+   drive_id = "45678"
    ```
 1. Test that the config variables are loading correctly. Enter all of the lines that begin with a `$` or `>>>`
    ```bash
@@ -116,39 +140,101 @@ If you receive an error message, or the version of python you have installed is 
    ```
    ======================== test session starts ==============================
    collected 5 items
-   tests/integration_tests/test_aging_report.py .....                   [100%]
+   tests/integration_tests/sharepoint/test_list.py .....                [100%]
 
    ======================== 5 passed in 1.86s ================================
    ```
 
 ## Usage
 
-### Get all invoices
+### Reading and Writing Data to SharePoint
 
-To retrieve a list of all of the invoices in the Priority Vendor Aging SharePoint list complete the following steps:
+SharePoint is one of the core systems used by the DGS Fiscal team to manage its workflows. SharePoint lists are used to store things like records of invoices and vendors, while SharePoint document libraries are used to store archived copies of reports.
 
-1. Initiate a new Python interpreter in your terminal: `python`
-1. Import the `Client` class: `from aging_report.sharepoint import SharePoint`
-1. Instantiate the `Client` class: `client = SharePoint()`
-1. Get an instance of the `SiteList` class: `report = client.get_aging_report()`
-1. Query the list of invoices: `invoices = report.get_invoices()`
-1. Print the invoice fields:
-```
-for invoice in invoices:
-    print(invoice.fields)
-```
+#### Working with SharePoint lists
 
-The full example looks like this:
+To access a SharePoint list client that will allow you to query, add, and update items in that list, you can use the `SharePoint.get_list()` method which will return an instance of the `SiteList` class:
 
 ```python
-from aging_report.sharepoint import SharePoint
+from dgs_fiscal.systems import SharePoint
 
-client = SharePoint()
-report = client.get_aging_report()
-invoices = report.get_invoices()
-for i in invoices:
-    print(invoice.fields)
+# instantiate the SharePoint client
+sp_client = SharePoint()
+
+# get an instance of SiteList for the following lists
+vendor_list = sp_client.get_list("Vendors")
+po_list = sp_client.get_list("Purchase Orders")
+invoice_list = sp_client.get_list("Invoices")
 ```
+
+To query a set of items from the list, you can use the `SiteList.get_items()` which will return an `ItemCollection` instance:
+
+```python
+from dgs_fiscal import SharePoint
+
+# get a client for the Purchase Order SharePoint list
+sp_client = SharePoint()
+po_list = sp_client.get_list("Purchase Orders")
+
+# query Purchase Orders with the "3PCO - Closed" status
+query = {"Status": "3PPR - Partial Receipt"}
+po_partial = po_list.get_items(filter_dict=query)
+
+# filter the results for a specific PO Number
+filter_key = {"PO Number": "P12345", "Release Number": 10}
+po = po_partial.filter_items(filter_key)[0]
+
+# export all of the POs to a dataframe
+df_po = po_partial.to_dataframe()
+```
+
+Alternatively you can also retrieve a single list item directly from SharePoint using its key:
+
+```python
+from dgs_fiscal import SharePoint
+
+# get a client for the Purchase Order SharePoint list
+sp_client = SharePoint()
+po_list = sp_client.get_list("Purchase Orders")
+
+# get a PO with the following key
+po_key = {"PO Number": "P12345", "Release Number": 10}
+po = po_list.get_item_by_key(po_key)
+```
+
+Once you have an individual list item you can print it's current fields or update the value of those fields in SharePoint:
+
+```python
+# same code as previous example
+po = po_list.get_item_by_key(po_key)
+
+# print the current fields
+old_fields = po.fields
+print(old_fields)
+
+# update the fields in SharePoint
+po.update({"Status": "3PCO - Closed"})
+
+# double check that the values changed
+po = po_list.get_item_by_key(po_key)
+assert old_fields != po.fields
+```
+
+#### Working with SharePoint Document Libraries
+
+TODO: Add documentation here
+
+
+### Retrieving data from CitiBuy
+
+
+TODO: Add documentation here
+
+
+### Retrieving data from CoreIntegrator
+
+TODO: Add documentation here
+
 
 ## Vision and Roadmap
 
