@@ -1,10 +1,19 @@
 from __future__ import annotations  # prevents NameError for typehints
-from typing import Dict, List, Iterable, Any
+from typing import Dict, List, Iterable, Any, Optional
+from dataclasses import dataclass, field
 
 import pandas as pd
 from O365.sharepoint import SharepointList, SharepointListItem
 
 from dgs_fiscal.systems.sharepoint.utils import build_filter_str, col_api_name
+
+
+@dataclass
+class BatchedChanges:
+    """Data class for grouping bulk changes to a SharePoint list"""
+
+    updates: Optional[Dict[dict]] = field(default_factory=dict)
+    inserts: Optional[List[dict]] = field(default_factory=list)
 
 
 class SiteList:
@@ -105,6 +114,17 @@ class SiteList:
         data = {col_api_name(self.columns, k): v for k, v in data.items()}
         item = self.list.create_list_item(data)
         return ListItem(self, item)
+
+    def batch_upsert(self, changes: BatchedChanges) -> None:
+        """Submits batch requests to update or insert list items
+
+        Parameters
+        ----------
+        changes: BatchedChanges
+            Instance of BatchedChanges dataclass which contains the items
+            to update or insert into this SharePoint list
+        """
+        pass
 
 
 class ItemCollection:
@@ -219,15 +239,15 @@ class ListItem:
         cols = self.parent.columns
         data = {col_api_name(cols, col): val for col, val in data.items()}
         # adds field to self.fields to avoid update error
-        for field in data:
-            if field not in self.fields:
-                self.fields[field] = None
+        for col in data:
+            if col not in self.fields:
+                self.fields[col] = None
 
         # update and save field
         self.item.update_fields(data)
         self.item.save_updates()
 
-    def get_val(self, field) -> Any:
+    def get_val(self, column) -> Any:
         """Returns the value of an item's field"""
-        col = col_api_name(self.parent.columns, field)
+        col = col_api_name(self.parent.columns, column)
         return self.fields.get(col)
