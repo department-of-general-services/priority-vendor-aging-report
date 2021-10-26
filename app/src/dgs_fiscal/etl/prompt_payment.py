@@ -2,7 +2,8 @@ from __future__ import annotations  # prevents NameError for typehints
 
 import pandas as pd
 
-from dgs_fiscal.systems.core_integrator import CoreIntegrator
+from dgs_fiscal.systems import CoreIntegrator, SharePoint
+from dgs_fiscal.systems.sharepoint import BatchedChanges
 
 
 class PromptPayment:
@@ -14,28 +15,72 @@ class PromptPayment:
     core_integrator: CoreIntegrator
         Instance of CoreIntegrator class used to scrape Prompt Payment Report
         from the CoreIntegrator website
-    df: pd.DataFrame
-        A dataframe of the current Prompt Payment Report l
+    sharepoint: SharePoint
+        Instance of SharePoint class used to read and write to the SharePoint
+        lists and archive folder associated with the Prompt Payment workflow
     """
 
     def __init__(self) -> None:
         """Inits the PromptPayment class"""
         self.core_integrator = CoreIntegrator()
-        self.df: pd.DataFrame = None
+        self.sharepoint = SharePoint()
 
-    def scrape(self) -> pd.DataFrame:
-        """Downloads the current version of the Prompt Payment report from
-        CoreIntegrator then loads as a pandas DataFrame
+    def get_new_report(self) -> pd.DataFrame:
+        """Downloads the most recent Prompt Payment report from CoreIntegrator,
+        uploads it to the archive folder, then loads it as a dataframe
+
+        This
 
         Returns
         -------
         pd.DataFrame
-            DataFrame of the Prompt Payment Report
+            DataFrame of the Prompt Payment Report from CoreIntegrator
         """
         pass
 
-    def archive(self) -> None:
-        """Uploads an archive of the current Prompt Payment Report to the
-        Archives folder in the Fiscal SharePoint site
+    def get_old_report(self) -> pd.DataFrame:
+        """Retrieves the previous Prompt Payment report from SharePoint,
+        uploads it to the archive, then loads it as a DataFrame
+
+        Returns
+        -------
+        pd.DataFrame
+            A dataframe of the Prompt Payment report pulled from SharePoint
+        """
+        pass
+
+    def reconcile_reports(
+        self,
+        new_report,
+        old_report,
+    ) -> BatchedChanges:
+        """Merges the old report from SharePoint with the new report scraped
+        from CoreIntegrator and return a list of the changes
+
+        Parameters
+        ----------
+        new_report: pd.DataFrame
+            A DataFrame of the new Prompt Payment report that was scraped from
+            CoreIntegrator
+        old_report: pd.DataFrame
+            A DataFrame of the records added or updated in SharePoint in the
+            previous run of the Prompt Payment report
+
+        Returns
+        -------
+        BatchedChanges
+
+        """
+        pass
+
+    def update_sharepoint(self, changes: BatchedChanges) -> None:
+        """Updates sharepoint with the set of changes returned by the
+        self.reconcile_reports() method
+
+        Parameters
+        ----------
+        changes: BatchedChanges
+            An instance of BatchedChanges that contains the list changes that
+            need to be made to the Invoices list in SharePoint
         """
         pass
