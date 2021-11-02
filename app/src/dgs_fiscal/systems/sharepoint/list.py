@@ -10,7 +10,17 @@ from dgs_fiscal.systems.sharepoint.utils import build_filter_str, col_api_name
 
 @dataclass
 class BatchedChanges:
-    """Data class for grouping bulk changes to a SharePoint list"""
+    """Data class for grouping bulk changes to a SharePoint list
+
+    Attributes
+    ----------
+    updates: Dict[dict], optional
+        A dictionary of the updates with the following format:
+        {"list item id": {"field name": "new value"}}
+    inserts: List[dict], optional
+        A list of the new items to insert into the list, with the following
+        format: [{"field name": "value", "field name": "value"}]
+    """
 
     updates: Optional[Dict[dict]] = field(default_factory=dict)
     inserts: Optional[List[dict]] = field(default_factory=list)
@@ -111,11 +121,11 @@ class SiteList:
         ListItem
             A ListItem instance for the item that was created in SharePoint
         """
-        data = {col_api_name(self.columns, k): v for k, v in data.items()}
+        data = self._format_request_data(data)
         item = self.list.create_list_item(data)
         return ListItem(self, item)
 
-    def batch_upsert(self, changes: BatchedChanges) -> None:
+    def batch_upsert(self, changes: BatchedChanges) -> dict:
         """Submits batch requests to update or insert list items
 
         Parameters
@@ -123,8 +133,57 @@ class SiteList:
         changes: BatchedChanges
             Instance of BatchedChanges dataclass which contains the items
             to update or insert into this SharePoint list
+
+        Returns
+        -------
+        dict
+            A dictionary of the JSON response from a batch request
         """
-        pass
+        batch_url = "https://graph.microsoft.com/v1.0/$batch"
+        base_url = f"/{self.list.main_resource}"
+        requests = []
+        counter = 0
+
+        if changes.updates:
+            for item_id, data in changes.updates.items():
+                counter += 1
+                url = base_url + f"/items/{item_id}/fields"
+                request = self._build_request(counter, data, url, "PATCH")
+                requests.append(request)
+
+        if changes.inserts:
+            for data in changes.inserts:
+                counter += 1
+                url = base_url + "/items"
+                request = self._build_request(counter, data, url, "POST")
+                requests.append(request)
+
+        response = self.list.con.post(batch_url, {"requests": requests})
+        return response.json()
+
+    def _build_request(
+        self,
+        counter: int,
+        data: dict,
+        url: str,
+        method: str,
+    ) -> dict:
+        """Builds an entry to add to a batch request entry"""
+        request_data = self._format_request_data(data)
+        if method == "POST":
+            request_data = {"fields": request_data}
+        request = {
+            "id": str(counter),
+            "url": url,
+            "method": method,
+            "body": request_data,
+            "headers": {"Content-Type": "application/json"},
+        }
+        return request
+
+    def _format_request_data(self, data) -> dict:
+        """Get the API col name for each column in the request data"""
+        return {col_api_name(self.columns, k): v for k, v in data.items()}
 
 
 class ItemCollection:
