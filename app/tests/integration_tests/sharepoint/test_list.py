@@ -1,7 +1,13 @@
+from pprint import pprint
+
 import pytest
 import pandas as pd
 
-from dgs_fiscal.systems.sharepoint.list import ListItem, ItemCollection
+from dgs_fiscal.systems.sharepoint.list import (
+    ListItem,
+    ItemCollection,
+    BatchedChanges,
+)
 
 ITEM_KEY = {"PO Number": "P12345:12", "Invoice Number": "12345"}
 QUERY = {"PO Number": ("equals", "P12345:12")}
@@ -88,6 +94,25 @@ class TestSiteList:
         # validation
         with pytest.raises(KeyError):
             test_list.add_item(test_data)
+
+    def test_batch_upsert(self, test_list):
+        """Tests the the batch_upsert() method
+
+        Validates the following conditions:
+        - Each request in the batch response has status 200 or 201
+        - An "id" for a list item is included with each request
+        """
+        # setup
+        updates = {"2": {"Status": "8. Paid"}}
+        inserts = [{"PO Number": "new val", "Vendor ID": "new val"}]
+        changes = BatchedChanges(updates=updates, inserts=inserts)
+        # execution
+        results = test_list.batch_upsert(changes)
+        pprint(results)
+        # validation
+        for request in results["responses"]:
+            assert request["status"] in (200, 201)
+            assert "id" in request["body"]
 
 
 class TestItemCollection:
