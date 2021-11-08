@@ -5,21 +5,27 @@ from O365.drive import Folder, File
 
 
 class ArchiveFolder:
-    """Creates an API client for the Archive folder in the DGS Fiscal site"""
+    """Creates an API client for the Archive folder in the DGS Fiscal site
+
+    Attributes
+    ----------
+    folder: Folder
+        An instance of O365.Folder for the Archive folder in SharePoint
+    archive_dir: Path
+        The path to the local archive directory
+    tmp_dir: Path
+        A temporary directory in the archive directory used for downloading and
+        manipulating files
+    sub_folders: List[Folder]
+        A list of instances of O365.Folder for each sub-folder in the Archive
+    """
 
     def __init__(self, folder: Folder, archive_dir: Path = None) -> None:
         """Inits the Archive class"""
         self.folder = folder
         self.archive_dir = archive_dir or (Path.cwd() / "archives")
         self.tmp_dir = self.archive_dir / "tmp"
-        self.subfolders = []
-
-    def get_subfolders(self):
-        """Gets sub-folders from the Archive folder in SharePoint and adds them
-        to the self.subfolders attribute
-        """
         self.subfolders = list(self.folder.get_child_folders())
-        return self.subfolders
 
     def upload_file(
         self,
@@ -124,8 +130,6 @@ class ArchiveFolder:
         """Returns an O365.Folder instance of the sub-folder that matches the
         name passed as a parameter
         """
-        if not self.subfolders:
-            self.get_subfolders()
         folder = next((f for f in self.subfolders if f.name == name), None)
         if not folder:
             raise KeyError(f"No sub-folder found with the name {name}")

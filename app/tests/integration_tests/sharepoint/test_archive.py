@@ -10,7 +10,7 @@ TEST_FOLDER = "test"
 class TestArchiveFolder:
     """Tests the ArchiveFolder class"""
 
-    def test_get_subfolders(self, test_archive):
+    def test_init(self, test_archive):
         """Tests that the ArchiveFolder.get_subfolders() method returns the
         correct set of sub-folders and stores them in self.subfolders
 
@@ -30,12 +30,11 @@ class TestArchiveFolder:
             "test",
         ]
         # execution
-        folders = test_archive.get_subfolders()
+        folders = test_archive.subfolders
         folder_names = [f.name for f in folders]
         print(folder_names)
         # validation
         assert isinstance(folders[0], Folder)
-        assert folders == test_archive.subfolders
         assert folder_names == expected
 
     def test_get_sub_folder_error(self, test_archive):
