@@ -78,8 +78,8 @@ class SiteList:
         # query invoice records from SharePoint
         fields = fields or self.columns.keys()
         if query:
-            q = build_filter_str(self.columns, query)
-        results = self.list.get_items(query=q, expand_fields=list(fields))
+            query = build_filter_str(self.columns, query)
+        results = self.list.get_items(query=query, expand_fields=list(fields))
         if not results:
             raise ValueError("No matching item found for that query")
         items = [ListItem(self, item) for item in results]
