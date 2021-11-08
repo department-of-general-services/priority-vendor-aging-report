@@ -1,4 +1,5 @@
 from __future__ import annotations  # prevents NameError for typehints
+from pathlib import Path
 
 import pandas as pd
 
@@ -20,23 +21,22 @@ class PromptPayment:
         lists and archive folder associated with the Prompt Payment workflow
     """
 
-    def __init__(self) -> None:
+    def __init__(self, local_archive: Path = None) -> None:
         """Inits the PromptPayment class"""
         self.core_integrator = CoreIntegrator()
         self.sharepoint = SharePoint()
+        self.archive = self.sharepoint.get_archive_folder(local_archive)
 
     def get_new_report(self) -> pd.DataFrame:
         """Downloads the most recent Prompt Payment report from CoreIntegrator,
         uploads it to the archive folder, then loads it as a dataframe
-
-        This
 
         Returns
         -------
         pd.DataFrame
             DataFrame of the Prompt Payment Report from CoreIntegrator
         """
-        pass
+        return self.core_integrator.scrape_report()
 
     def get_old_report(self) -> pd.DataFrame:
         """Retrieves the previous Prompt Payment report from SharePoint,
@@ -47,7 +47,11 @@ class PromptPayment:
         pd.DataFrame
             A dataframe of the Prompt Payment report pulled from SharePoint
         """
-        pass
+        invoice_list = self.sharepoint.get_list("Invoices")
+
+        query = {"Prompt Payment": ("equals", 1)}
+        invoices = invoice_list.get_items(query=query)
+        return invoices.to_dataframe()
 
     def reconcile_reports(
         self,
