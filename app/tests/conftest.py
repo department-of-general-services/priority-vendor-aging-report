@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from dgs_fiscal.config import settings
 from dgs_fiscal.systems.sharepoint import SharePoint
 from dgs_fiscal.systems.core_integrator.driver import Driver
-from dgs_fiscal.systems.citibuy import CitiBuy, models
+from dgs_fiscal.systems.citibuy import models
 from tests.utils.populate_citibuy_db import populate_db
 
 collect_ignore = ["integration_tests"]
@@ -52,12 +52,6 @@ def fixture_driver(test_archive_dir):
     driver.quit()
 
 
-@pytest.fixture(scope="session", name="test_citibuy")
-def fixture_citibuy():
-    """Creates an instance of the CitiBuy class for integration testing"""
-    return CitiBuy()
-
-
 @pytest.fixture(scope="session", name="mock_db")
 def fixture_citibuy_db(test_archive_dir):
     """Creates a local version of the CitiBuy database for testing"""
@@ -72,9 +66,3 @@ def fixture_citibuy_db(test_archive_dir):
     with Session(engine) as session:
         populate_db(session)
     return conn_url
-
-
-@pytest.fixture(scope="session", name="mock_citibuy")
-def fixture_mock_citibuy(mock_db):
-    """Creates a mock instance of CitiBuy class for unit testing"""
-    return CitiBuy(conn_url=mock_db)
