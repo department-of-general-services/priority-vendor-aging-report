@@ -43,10 +43,6 @@ class TestCitiBuy:
         assert isinstance(mock_citibuy.engine, sqlalchemy.engine.Engine)
         with pytest.raises(NotImplementedError):
             print(mock_citibuy.purchase_orders)
-        with pytest.raises(NotImplementedError):
-            print(mock_citibuy.vendors)
-        with pytest.raises(NotImplementedError):
-            print(mock_citibuy.invoices)
 
 
 class TestGetPurchaseOrders:
