@@ -6,6 +6,13 @@ import numpy as np
 import sqlalchemy
 
 from tests.utils import citibuy_data as data
+from dgs_fiscal.systems import CitiBuy
+
+
+@pytest.fixture(scope="session", name="mock_citibuy")
+def fixture_mock_citibuy(mock_db):
+    """Creates a mock instance of CitiBuy class for unit testing"""
+    return CitiBuy(conn_url=mock_db)
 
 
 @pytest.fixture(scope="module", name="mock_po_data")

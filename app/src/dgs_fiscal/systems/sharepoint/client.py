@@ -45,13 +45,13 @@ class SharePoint:
         """Returns True if account is authenticated"""
         return self.account.is_authenticated
 
-    def get_archive_folder(self, archive_dir: Path) -> ArchiveFolder:
+    def get_archive_folder(self, archive_dir: Path = None) -> ArchiveFolder:
         """Returns ArchiveFolder instance and stores it in self.archive
 
         Parameters
         ----------
-        archive_dir: Path
-            Path to local archive directory
+        archive_dir: Path, optional
+            Path to local archive directory. Default is to use archives/
         """
         drive_id = self.config.drive_id
         self.drive = self.site.get_document_library(drive_id)

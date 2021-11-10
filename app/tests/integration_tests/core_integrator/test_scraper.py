@@ -18,10 +18,12 @@ def test_scraper(test_archive_dir):
     faulthandler.disable()
     scraper = CoreIntegrator(test_archive_dir)
     # execution
-    df = scraper.scrape_report(attempts=2)
+    file = scraper.scrape_report(attempts=2)
+    df = scraper.load_report()
     print(df.head())
     faulthandler.enable()
     # validation
+    assert file == scraper.file_path
     assert scraper.file_path.exists()
     assert isinstance(df, pd.DataFrame)
     assert all(pd.notna(df["Execution ID"]))
