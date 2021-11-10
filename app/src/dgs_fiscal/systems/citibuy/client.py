@@ -3,10 +3,10 @@ from typing import List, Dict
 
 import pyodbc
 import sqlalchemy
-from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, aliased
 from sqlalchemy.engine import URL, Row
 from dynaconf import Dynaconf
+import pandas as pd
 
 from dgs_fiscal.config import settings
 from dgs_fiscal.systems.citibuy import models
@@ -40,7 +40,7 @@ class CitiBuy:
             conn_url = URL.create(
                 "mssql+pyodbc", query={"odbc_connect": conn_str}
             )
-        self.engine = create_engine(conn_url)
+        self.engine = sqlalchemy.create_engine(conn_url)
         self._purchase_orders: Records = None
 
     @property
@@ -105,7 +105,7 @@ class CitiBuy:
         con_cols = [getattr(con, col) for col in con.columns]
 
         # build the base query
-        query = select(*po_cols, *ven_cols, *con_cols).limit(limit)
+        query = sqlalchemy.select(*po_cols, *ven_cols, *con_cols).limit(limit)
         query = query.join(po, po.vendor_id == ven.id)
         query = query.join(
             con,
@@ -172,4 +172,4 @@ class DatabaseRows:
     @property
     def records(self) -> List[dict]:
         """Returns the rows as a list of dictionaries"""
-        return [row._mapping for row in self.rows]
+        return [row._asdict() for row in self.rows]
