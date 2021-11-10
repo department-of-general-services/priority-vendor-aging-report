@@ -10,8 +10,8 @@ from dgs_fiscal.etl.prompt_payment import constants
 
 
 class PromptPayment:
-    """Manages access to the Prompt Payment Report in CoreIntegrator, which
-    serves as a data source for updates to the Aging Report in SharePoint
+    """Runs the Prompt Payment workflow, which scrapes the new Prompt Payment
+    report from CoreIntegrator then updates the previous report in SharePoint
 
     Attributes
     ----------
@@ -47,7 +47,7 @@ class PromptPayment:
         Returns
         -------
         pd.DataFrame
-            DataFrame of the Prompt Payment Report from CoreIntegrator
+            DataFrame of the new Prompt Payment Report from CoreIntegrator
         """
         dtypes = constants.NEW_REPORT["dtypes"]
         columns = constants.NEW_REPORT["columns"]
@@ -88,7 +88,7 @@ class PromptPayment:
         Returns
         -------
         pd.DataFrame
-            A dataframe of the Prompt Payment report pulled from SharePoint
+            A dataframe of the old Prompt Payment report pulled from SharePoint
         """
         invoice_list = self.sharepoint.get_list("Invoices")
 
@@ -102,7 +102,7 @@ class PromptPayment:
         old_report,
     ) -> BatchedChanges:
         """Merges the old report from SharePoint with the new report scraped
-        from CoreIntegrator and return a list of the changes
+        from CoreIntegrator and return a list of the changes to make
 
         Parameters
         ----------
