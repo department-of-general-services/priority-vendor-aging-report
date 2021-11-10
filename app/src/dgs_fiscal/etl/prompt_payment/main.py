@@ -1,10 +1,12 @@
 from __future__ import annotations  # prevents NameError for typehints
 from pathlib import Path
+from datetime import datetime
 
 import pandas as pd
 
 from dgs_fiscal.systems import CoreIntegrator, SharePoint
 from dgs_fiscal.systems.sharepoint import BatchedChanges
+from dgs_fiscal.etl.prompt_payment import constants
 
 
 class PromptPayment:
@@ -19,7 +21,18 @@ class PromptPayment:
     sharepoint: SharePoint
         Instance of SharePoint class used to read and write to the SharePoint
         lists and archive folder associated with the Prompt Payment workflow
+    archive: ArchiveFolder
+        Instance of ArchiveFolder class that reads from and writes to the
+        archive folder in SharePoint
     """
+
+    DGS_LOCATIONS = (
+        "DGS - Building Mtce",
+        "DGS - CitiBuy",
+        "DGS--Fiscal",
+        "DGS--Fleet AP",
+        "Dept of Gen Serv",
+    )
 
     def __init__(self, local_archive: Path = None) -> None:
         """Inits the PromptPayment class"""
@@ -36,7 +49,37 @@ class PromptPayment:
         pd.DataFrame
             DataFrame of the Prompt Payment Report from CoreIntegrator
         """
-        return self.core_integrator.scrape_report()
+        dtypes = constants.NEW_REPORT["dtypes"]
+        columns = constants.NEW_REPORT["columns"]
+
+        # read scraped report as a dataframe
+        file = self.core_integrator.scrape_report()
+        df = pd.read_excel(file, dtype=dtypes, engine="openpyxl")
+
+        # zfill vendor_id to 8 characters
+        df["Vendor ID"] = df["Vendor ID"].str.zfill(8)
+
+        # filter for invoices in DGS employee queue
+        dgs_location = df["Location"].isin(self.DGS_LOCATIONS)
+        dgs_status = df["Status"] == "Awaiting Agency Contact"
+        df = df[dgs_location & dgs_status].copy()
+
+        # calculate date invoice was assigned to DGS
+        today = pd.Series(datetime.today(), df.index)
+        status_age = pd.to_timedelta(df["Status Age (days)"], unit="D")
+        df["Assigned Date (Core)"] = today - status_age
+
+        # convert Julian Excel date to datetime
+        julian = df["Creation Date"] + 2415018
+        julian = pd.to_datetime(julian, unit="D", origin="julian")
+        df["Creation Date"] = julian.dt.date.astype("datetime64")
+
+        # TODO: matches DGS staff names to O365 profile
+
+        # preserve and rename a subset of columns for matching
+        df = df[columns.keys()]
+        df.columns = columns.values()
+        return df
 
     def get_old_report(self) -> pd.DataFrame:
         """Retrieves the previous Prompt Payment report from SharePoint,
