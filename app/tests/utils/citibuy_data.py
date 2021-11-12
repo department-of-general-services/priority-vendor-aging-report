@@ -1,3 +1,5 @@
+from datetime import datetime
+
 VENDORS = {
     "acme": {
         "vendor_id": "111",
@@ -22,7 +24,7 @@ PO_RECORDS = {
         "vendor_id": "111",
         "status": "3PS",
         "agency": "DGS",
-        "cost": None,
+        "cost": 0.00,
         "date": None,
     },
     "po1_1": {
@@ -86,6 +88,15 @@ PO_RECORDS = {
         "status": "3PS",
         "agency": "DPW",
         "cost": 20.00,
+        "date": None,
+    },
+    "po7": {
+        "po_nbr": "777",
+        "release_nbr": 0,
+        "vendor_id": "222",
+        "status": "3PCO",
+        "agency": "DGS",
+        "cost": 0.00,
         "date": None,
     },
 }
@@ -178,8 +189,8 @@ CONTRACTS = {
         "po_nbr": "111",
         "release_nbr": 0,
         "contract_agency": "DGS",
-        "start_date": None,
-        "end_date": None,
+        "start_date": datetime(2020, 7, 1),
+        "end_date": datetime(2050, 7, 1),
         "dollar_limit": 1000.00,
         "dollar_spent": 50.00,
     },
@@ -187,10 +198,19 @@ CONTRACTS = {
         "po_nbr": "444",
         "release_nbr": 0,
         "contract_agency": "AGY",
-        "start_date": None,
-        "end_date": None,
+        "start_date": datetime(2021, 7, 1),
+        "end_date": datetime(2050, 7, 1),
         "dollar_limit": 500.00,
         "dollar_spent": 10.00,
+    },
+    "blanket7": {
+        "po_nbr": "777",
+        "release_nbr": 0,
+        "contract_agency": "DGS",
+        "start_date": datetime(2010, 7, 1),
+        "end_date": datetime(2020, 7, 1),
+        "dollar_limit": 500.00,
+        "dollar_spent": 20.00,
     },
 }
 
@@ -201,7 +221,7 @@ PO_RESULTS = [
     {**CONTRACTS["blanket4"], **PO_RECORDS["po4_1"], **VENDORS["disney"]},
     {
         **PO_RECORDS["po5"],
-        **VENDORS["disney"],
+        **VENDORS["acme"],
         "contract_agency": None,
         "start_date": None,
         "end_date": None,

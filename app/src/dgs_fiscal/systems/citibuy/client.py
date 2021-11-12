@@ -1,5 +1,6 @@
 from __future__ import annotations  # prevents NameError for typehints
 from typing import List, Dict
+from datetime import date, timedelta
 
 import pyodbc
 import sqlalchemy
@@ -81,7 +82,10 @@ class CitiBuy:
         """Converts SQLAlchemy rows to a list of dicts keyed by column name"""
         return [row._asdict() for row in cursor.all()]
 
-    def get_purchase_orders(self, limit: int = 100) -> Records:
+    def get_purchase_orders(  # pylint: disable=too-many-locals
+        self,
+        limit: int = 10000,
+    ) -> Records:
         """Gets a list of POs from CitiBuy and returns them as a list of dicts
 
         Parameters
@@ -104,17 +108,24 @@ class CitiBuy:
         ven_cols = [getattr(ven, col) for col in ven.columns]
         con_cols = [getattr(con, col) for col in con.columns]
 
-        # build the base query
+        # builds the base query
         query = sqlalchemy.select(*po_cols, *ven_cols, *con_cols).limit(limit)
         query = query.join(po, po.vendor_id == ven.vendor_id)
         query = query.join(con, po.po_nbr == con.po_nbr, isouter=True)
-        query = query.where(
-            (con.contract_agency.in_(("DGS", "AGY")))
-            | (con.contract_agency.is_(None))
-        )
-        query = query.where((po.agency == "DGS") | (po.release_nbr == 0))
+
+        # filters for recent blanket contracts and open market POs
+        open_market = con.contract_agency.is_(None)
+        not_closed = con.end_date > (date.today() - timedelta(90))
+        query = query.where(open_market | not_closed)
+
+        # filters for DGS releases or agency umbrella POs
+        dgs_release = po.agency == "DGS"
+        blanket_po = po.release_nbr == 0
+        umbrella_contract = con.contract_agency == "AGY"
+        query = query.where(dgs_release | (blanket_po & umbrella_contract))
+
+        # filters out POs and releases that are closed
         query = query.where(po.status.notin_(("3PCO", "3PCA")))
-        print(query)
 
         with Session(self.engine) as session:
             cursor = session.execute(query)

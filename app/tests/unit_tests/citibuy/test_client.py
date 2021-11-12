@@ -1,8 +1,6 @@
 from pprint import pprint
 
 import pytest
-import pandas as pd
-import numpy as np
 import sqlalchemy
 
 from tests.utils import citibuy_data as data
