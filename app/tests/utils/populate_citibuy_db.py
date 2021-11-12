@@ -29,10 +29,10 @@ def populate_db(session: Session) -> None:
     session: Session
         A SQLAlchemy session object passed to this function by the fixture
     """
-    vendors = [models.Vendor(**vendor) for vendor in data.VENDORS]
-    pos = [models.PurchaseOrder(**po) for po in data.PURCHASE_ORDERS]
-    invoices = [models.Invoice(**invoice) for invoice in data.INVOICES]
-    contracts = [models.BlanketContract(**c) for c in data.BLANKET_CONTRACTS]
+    vendors = [models.Vendor(**vendor) for vendor in data.VENDORS.values()]
+    pos = [models.PurchaseOrder(**po) for po in data.PO_RECORDS.values()]
+    invoices = [models.Invoice(**inv) for inv in data.INVOICES.values()]
+    contracts = [models.BlanketContract(**c) for c in data.CONTRACTS.values()]
     add_to_session(session, vendors)
     add_to_session(session, pos)
     add_to_session(session, invoices)

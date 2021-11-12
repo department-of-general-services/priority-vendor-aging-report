@@ -15,11 +15,12 @@ class TestCitiBuy:
 
     def test_init(self, test_citibuy):
         """Tests that the mock CitiBuy db was populated correctly"""
+        # setup
+        query = "SELECT TOP 5 PO_NBR, RELEASE_NBR FROM PO_HEADER"
+        # execution
+        results = test_citibuy.execute_stmt(query)
+        print(results.records)
         # validation
         assert isinstance(test_citibuy.engine, sqlalchemy.engine.Engine)
-        with pytest.raises(NotImplementedError):
-            print(test_citibuy.purchase_orders)
-        with pytest.raises(NotImplementedError):
-            print(test_citibuy.vendors)
-        with pytest.raises(NotImplementedError):
-            print(test_citibuy.invoices)
+        assert isinstance(results.records, list)
+        assert len(results.records) == 5

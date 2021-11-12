@@ -1,11 +1,13 @@
 from __future__ import annotations  # prevents NameError for typehints
 from typing import List, Dict
+from datetime import date, timedelta
 
 import pyodbc
-from sqlalchemy import create_engine, select
+import sqlalchemy
 from sqlalchemy.orm import Session, aliased
-from sqlalchemy.engine import URL
+from sqlalchemy.engine import URL, Row
 from dynaconf import Dynaconf
+import pandas as pd
 
 from dgs_fiscal.config import settings
 from dgs_fiscal.systems.citibuy import models
@@ -39,10 +41,8 @@ class CitiBuy:
             conn_url = URL.create(
                 "mssql+pyodbc", query={"odbc_connect": conn_str}
             )
-        self.engine = create_engine(conn_url)
+        self.engine = sqlalchemy.create_engine(conn_url)
         self._purchase_orders: Records = None
-        self._vendors: Records = None
-        self._invoices: Records = None
 
     @property
     def purchase_orders(self):
@@ -54,31 +54,38 @@ class CitiBuy:
             )
         return self._purchase_orders
 
-    @property
-    def vendors(self):
-        """Returns the list of vendors"""
-        if not self._vendors:
-            raise NotImplementedError(
-                "The list of vendors hasn't been queried yet. "
-                "Use CitiBuy.get_vendors() to retrieve that list."
-            )
-        return self._vendors
+    def execute_stmt(self, query_str: str) -> DatabaseRows:
+        """Executes a SQL query against the CitiBuy database
 
-    @property
-    def invoices(self):
-        """Returns the list of vendors"""
-        if not self._invoices:
-            raise NotImplementedError(
-                "The list of invoices hasn't been queried yet. "
-                "Use CitiBuy.get_invoices() to retrieve that list."
-            )
-        return self._vendors
+        Parameters
+        ----------
+        query_str: str
+            A string with valid SQL syntax
+        fetch: FetchOpts
+            How many rows should be fetched from the cursor, either all or
+            just the first. Default is to return all.
+
+        Returns
+        -------
+        DatabaseRows
+            An instance of DatabaseRows with the results from the query
+        """
+        try:
+            with self.engine.connect() as conn:
+                query = sqlalchemy.text(query_str)
+                rows = conn.execute(query).fetchall()
+        except sqlalchemy.exc.ProgrammingError as error:
+            raise error
+        return DatabaseRows(rows)
 
     def _rows_to_dicts(self, cursor):
         """Converts SQLAlchemy rows to a list of dicts keyed by column name"""
         return [row._asdict() for row in cursor.all()]
 
-    def get_purchase_orders(self, limit: int = 100) -> Records:
+    def get_purchase_orders(  # pylint: disable=too-many-locals
+        self,
+        limit: int = 10000,
+    ) -> Records:
         """Gets a list of POs from CitiBuy and returns them as a list of dicts
 
         Parameters
@@ -101,15 +108,24 @@ class CitiBuy:
         ven_cols = [getattr(ven, col) for col in ven.columns]
         con_cols = [getattr(con, col) for col in con.columns]
 
-        # build the base query
-        query = select(*po_cols, *ven_cols, *con_cols).limit(limit)
-        query = query.join(po, po.vendor_id == ven.id)
-        query = query.join(
-            con,
-            (po.po_nbr == con.po_nbr) & (po.release_nbr == con.release_nbr),
-            isouter=True,
-        )
-        query = query.where(po.agency.in_(("DGS", "AGY")))
+        # builds the base query
+        query = sqlalchemy.select(*po_cols, *ven_cols, *con_cols).limit(limit)
+        query = query.join(po, po.vendor_id == ven.vendor_id)
+        query = query.join(con, po.po_nbr == con.po_nbr, isouter=True)
+
+        # filters for recent blanket contracts and open market POs
+        open_market = con.contract_agency.is_(None)
+        not_closed = con.end_date > (date.today() - timedelta(90))
+        query = query.where(open_market | not_closed)
+
+        # filters for DGS releases or agency umbrella POs
+        dgs_release = po.agency == "DGS"
+        blanket_po = po.release_nbr == 0
+        umbrella_contract = con.contract_agency == "AGY"
+        query = query.where(dgs_release | (blanket_po & umbrella_contract))
+
+        # filters out POs and releases that are closed
+        query = query.where(po.status.notin_(("3PCO", "3PCA")))
 
         with Session(self.engine) as session:
             cursor = session.execute(query)
@@ -138,3 +154,35 @@ class CitiBuy:
             A list of results as a dictionary keyed by the column names
         """
         pass
+
+
+class DatabaseRows:
+    """A class that provides simplified access to the results of a SQL query
+
+    Attributes
+    ----------
+    rows: List[Row]
+        A list of SQLAlchemy Row instances that are returned by a query
+    row_type: str
+        The type of values included in each row, "columns" indicates that each
+        row is a named tuple of the columns returned from a query, while "orm"
+        indicates that each row is a named tuple of the orm models returned.
+    cols: tuple
+        A tuple of the names of the columns returned by the query
+    """
+
+    def __init__(self, rows: List[Row], row_type: str = "columns") -> None:
+        """Inits the DatabaseRows class"""
+        self.rows = rows
+        self.row_type = row_type
+        self.cols = rows[0]._fields
+
+    @property
+    def dataframe(self) -> pd.DataFrame:
+        """Returns the rows as a pandas dataframe"""
+        return pd.DataFrame(self.rows, columns=self.cols)
+
+    @property
+    def records(self) -> List[dict]:
+        """Returns the rows as a list of dictionaries"""
+        return [row._asdict() for row in self.rows]

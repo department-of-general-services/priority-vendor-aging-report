@@ -7,7 +7,7 @@ class Vendor(db.Base):
     __tablename__ = "VENDOR"
 
     # columns
-    id = db.Column("VENDOR_NBR", db.String, primary_key=True)
+    vendor_id = db.Column("VENDOR_NBR", db.String, primary_key=True)
     name = db.Column("NAME", db.String)
     contact = db.Column("EMA_CONTACT_NAME", db.String)
     email = db.Column("EMA_EMAIL", db.String)
