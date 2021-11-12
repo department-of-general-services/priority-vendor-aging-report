@@ -106,13 +106,15 @@ class CitiBuy:
 
         # build the base query
         query = sqlalchemy.select(*po_cols, *ven_cols, *con_cols).limit(limit)
-        query = query.join(po, po.vendor_id == ven.id)
-        query = query.join(
-            con,
-            (po.po_nbr == con.po_nbr) & (po.release_nbr == con.release_nbr),
-            isouter=True,
+        query = query.join(po, po.vendor_id == ven.vendor_id)
+        query = query.join(con, po.po_nbr == con.po_nbr, isouter=True)
+        query = query.where(
+            (con.contract_agency.in_(("DGS", "AGY")))
+            | (con.contract_agency.is_(None))
         )
-        query = query.where(po.agency.in_(("DGS", "AGY")))
+        query = query.where((po.agency == "DGS") | (po.release_nbr == 0))
+        query = query.where(po.status.notin_(("3PCO", "3PCA")))
+        print(query)
 
         with Session(self.engine) as session:
             cursor = session.execute(query)
