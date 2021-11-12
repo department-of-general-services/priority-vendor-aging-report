@@ -107,24 +107,26 @@ class CitiBuy:
         po_cols = [getattr(po, col) for col in po.columns]
         ven_cols = [getattr(ven, col) for col in ven.columns]
         con_cols = [getattr(con, col) for col in con.columns]
-
-        # builds the base query
         query = sqlalchemy.select(*po_cols, *ven_cols, *con_cols).limit(limit)
-        query = query.join(po, po.vendor_id == ven.vendor_id)
-        query = query.join(con, po.po_nbr == con.po_nbr, isouter=True)
 
-        # filters for recent blanket contracts and open market POs
+        # join the contract and vendor tables
+        dgs_contract = con.contract_agency.in_(("AGY", "DGS"))
+        fkey_contract = (dgs_contract) & (po.po_nbr == con.po_nbr)
+        fkey_vendor = po.vendor_id == ven.vendor_id
+        query = query.join(po, fkey_vendor)
+        query = query.join(con, fkey_contract, isouter=True)
+
+        # filter for recent blanket contracts and open market POs
         open_market = con.contract_agency.is_(None)
         not_closed = con.end_date > (date.today() - timedelta(90))
         query = query.where(open_market | not_closed)
 
-        # filters for DGS releases or agency umbrella POs
+        # filter for DGS releases or blanket POs available to DGS
         dgs_release = po.agency == "DGS"
         blanket_po = po.release_nbr == 0
-        umbrella_contract = con.contract_agency == "AGY"
-        query = query.where(dgs_release | (blanket_po & umbrella_contract))
+        query = query.where(dgs_release | (blanket_po & dgs_contract))
 
-        # filters out POs and releases that are closed
+        # filter out POs and releases that are closed
         query = query.where(po.status.notin_(("3PCO", "3PCA")))
 
         with Session(self.engine) as session:
