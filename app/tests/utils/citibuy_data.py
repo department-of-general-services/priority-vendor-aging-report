@@ -1,22 +1,22 @@
-VENDORS = [
-    {
-        "id": "111",
+VENDORS = {
+    "acme": {
+        "vendor_id": "111",
         "name": "Acme",
         "contact": "Jane Doe",
         "email": "jane.doe@acme.com",
         "phone": "(111) 111-1111",
     },
-    {
-        "id": "222",
+    "disney": {
+        "vendor_id": "222",
         "name": "Disney",
         "contact": "Anthony Williams",
         "email": "anthony.williams@disney.com",
         "phone": "(222) 222-2222",
     },
-]
+}
 
-PURCHASE_ORDERS = [
-    {
+PO_RECORDS = {
+    "po1": {
         "po_nbr": "111",
         "release_nbr": 0,
         "vendor_id": "111",
@@ -25,7 +25,7 @@ PURCHASE_ORDERS = [
         "cost": None,
         "date": None,
     },
-    {
+    "po1_1": {
         "po_nbr": "111",
         "release_nbr": 1,
         "vendor_id": "111",
@@ -34,7 +34,16 @@ PURCHASE_ORDERS = [
         "cost": 75.00,
         "date": None,
     },
-    {
+    "po1_2": {
+        "po_nbr": "111",
+        "release_nbr": 2,
+        "vendor_id": "222",
+        "status": "3PPR",
+        "agency": "DPW",
+        "cost": 20.00,
+        "date": None,
+    },
+    "po2": {
         "po_nbr": "222",
         "release_nbr": 0,
         "vendor_id": "222",
@@ -43,16 +52,7 @@ PURCHASE_ORDERS = [
         "cost": 15.50,
         "date": None,
     },
-    {
-        "po_nbr": "333",
-        "release_nbr": 0,
-        "vendor_id": "222",
-        "status": "3PPR",
-        "agency": "AGY",
-        "cost": 20.00,
-        "date": None,
-    },
-    {
+    "po4": {
         "po_nbr": "444",
         "release_nbr": 0,
         "vendor_id": "222",
@@ -61,19 +61,37 @@ PURCHASE_ORDERS = [
         "cost": 0.00,
         "date": None,
     },
-    {
+    "po4_1": {
         "po_nbr": "444",
         "release_nbr": 1,
         "vendor_id": "222",
-        "status": "3PCO",
-        "agency": "DPW",
+        "status": "3PPR",
+        "agency": "DGS",
         "cost": 10.00,
         "date": None,
     },
-]
+    "po5": {
+        "po_nbr": "555",
+        "release_nbr": 0,
+        "vendor_id": "111",
+        "status": "3PS",
+        "agency": "DGS",
+        "cost": 20.00,
+        "date": None,
+    },
+    "po6": {
+        "po_nbr": "666",
+        "release_nbr": 0,
+        "vendor_id": "111",
+        "status": "3PS",
+        "agency": "DPW",
+        "cost": 20.00,
+        "date": None,
+    },
+}
 
-INVOICES = [
-    {
+INVOICES = {
+    "inv1": {
         "id": "invoice1",
         "po_nbr": "111",
         "release_nbr": 1,
@@ -83,7 +101,7 @@ INVOICES = [
         "amount": 10.25,
         "invoice_date": None,
     },
-    {
+    "inv2": {
         "id": "invoice2",
         "po_nbr": "111",
         "release_nbr": 1,
@@ -93,7 +111,7 @@ INVOICES = [
         "amount": 25.00,
         "invoice_date": None,
     },
-    {
+    "inv3": {
         "id": "invoice3",
         "po_nbr": "111",
         "release_nbr": 1,
@@ -103,7 +121,7 @@ INVOICES = [
         "amount": 25.00,
         "invoice_date": None,
     },
-    {
+    "inv4": {
         "id": "invoice4",
         "po_nbr": "111",
         "release_nbr": 1,
@@ -113,7 +131,7 @@ INVOICES = [
         "amount": 10.50,
         "invoice_date": None,
     },
-    {
+    "disney_inv5": {
         "id": "invoice5",
         "po_nbr": "222",
         "release_nbr": 0,
@@ -123,7 +141,7 @@ INVOICES = [
         "amount": 10.50,
         "invoice_date": None,
     },
-    {
+    "disney_inv6": {
         "id": "invoice6",
         "po_nbr": "222",
         "release_nbr": 0,
@@ -133,7 +151,7 @@ INVOICES = [
         "amount": 5.00,
         "invoice_date": None,
     },
-    {
+    "disney_inv7": {
         "id": "invoice7",
         "po_nbr": "333",
         "release_nbr": 0,
@@ -143,7 +161,7 @@ INVOICES = [
         "amount": 5.00,
         "invoice_date": None,
     },
-    {
+    "disney_inv8": {
         "id": "invoice8",
         "po_nbr": "444",
         "release_nbr": 1,
@@ -153,10 +171,10 @@ INVOICES = [
         "amount": 10.00,
         "invoice_date": None,
     },
-]
+}
 
-BLANKET_CONTRACTS = [
-    {
+CONTRACTS = {
+    "blanket1": {
         "po_nbr": "111",
         "release_nbr": 0,
         "contract_agency": "DGS",
@@ -165,13 +183,29 @@ BLANKET_CONTRACTS = [
         "dollar_limit": 1000.00,
         "dollar_spent": 50.00,
     },
-    {
+    "blanket4": {
         "po_nbr": "444",
         "release_nbr": 0,
-        "contract_agency": "DPW",
+        "contract_agency": "AGY",
         "start_date": None,
         "end_date": None,
         "dollar_limit": 500.00,
         "dollar_spent": 10.00,
+    },
+}
+
+PO_RESULTS = [
+    {**CONTRACTS["blanket1"], **PO_RECORDS["po1"], **VENDORS["acme"]},
+    {**CONTRACTS["blanket1"], **PO_RECORDS["po1_1"], **VENDORS["acme"]},
+    {**CONTRACTS["blanket4"], **PO_RECORDS["po4"], **VENDORS["disney"]},
+    {**CONTRACTS["blanket4"], **PO_RECORDS["po4_1"], **VENDORS["disney"]},
+    {
+        **PO_RECORDS["po5"],
+        **VENDORS["disney"],
+        "contract_agency": None,
+        "start_date": None,
+        "end_date": None,
+        "dollar_limit": None,
+        "dollar_spent": None,
     },
 ]
