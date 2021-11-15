@@ -1,8 +1,12 @@
 from __future__ import annotations  # prevents NameError for typehints
 from typing import List
+from dataclasses import dataclass
+
+import pandas as pd
 
 from dgs_fiscal.systems import CitiBuy, SharePoint
 from dgs_fiscal.systems.sharepoint import BatchedChanges
+from dgs_fiscal.etl.contract_management import constants
 
 
 class ContractManagement:
@@ -19,16 +23,36 @@ class ContractManagement:
         lists and folders associated with the Contract Management workflow
     """
 
-    def __init__(self) -> None:
+    def __init__(self, citibuy_url: str = None) -> None:
         """Inits the ContractManagement class"""
-        self.citibuy = CitiBuy()
+        self.citibuy = CitiBuy(conn_url=citibuy_url)
         self.sharepoint = SharePoint()
 
-    def get_citibuy_data(self, dataset: str) -> List[dict]:
+    def get_citibuy_data(self) -> ContractData:
         """Gets the list of active or recently closed Purchase Orders and the
         unique list of DGS vendors from CitiBuy
+
+        Return
+        ------
+        ContractData
+            A ContractData instance of the PO and vendor data from CitiBuy
         """
-        pass
+        po_cols = constants.CITIBUY["po_cols"]
+        ven_cols = constants.CITIBUY["vendor_cols"]
+
+        # get PO data from citibuy
+        df = self.citibuy.get_purchase_orders().dataframe
+
+        # isolate and format the PO dataframe
+        df_po = df[po_cols.keys()]
+        df_po.columns = po_cols.values()
+
+        # isolate and format Vendor dataframe
+        df_ven = df[ven_cols.keys()]
+        df_ven = df_ven.drop_duplicates()
+        df_ven.columns = ven_cols.values()
+
+        return ContractData(po=df_po, vendor=df_ven)
 
     def get_sharepoint_data(self, dataset: str) -> List[dict]:
         """Get current POs and Vendors from their respective SharePoint lists"""
@@ -64,3 +88,11 @@ class ContractManagement:
             need to be made to the Invoices list in SharePoint
         """
         pass
+
+
+@dataclass
+class ContractData:
+    """Stores PO and Vendor data as a set of dataframes"""
+
+    po: pd.DataFrame
+    vendor: pd.DataFrame

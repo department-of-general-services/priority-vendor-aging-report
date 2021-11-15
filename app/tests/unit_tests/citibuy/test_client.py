@@ -20,8 +20,6 @@ class TestCitiBuy:
         """Tests that the mock CitiBuy db was populated correctly"""
         # validation
         assert isinstance(mock_citibuy.engine, sqlalchemy.engine.Engine)
-        with pytest.raises(NotImplementedError):
-            print(mock_citibuy.purchase_orders)
 
 
 class TestGetPurchaseOrders:
@@ -40,7 +38,7 @@ class TestGetPurchaseOrders:
         # setup
         expected = data.PO_RESULTS
         # execution
-        output = mock_citibuy.get_purchase_orders()
+        output = mock_citibuy.get_purchase_orders().records
         print("OUTPUT")
         pprint(output)
         print("EXPECTED")
@@ -50,7 +48,6 @@ class TestGetPurchaseOrders:
         assert isinstance(output[0], dict)
         assert len(output) == len(expected)
         assert output == expected
-        assert output == mock_citibuy.purchase_orders
 
     def test_get_records_limit(self, mock_citibuy):
         """Tests that the limit parameter works as expected when passed to
@@ -62,7 +59,7 @@ class TestGetPurchaseOrders:
         # setup
         expected = data.PO_RESULTS[:1]
         # execution
-        output = mock_citibuy.get_purchase_orders(limit=1)
+        output = mock_citibuy.get_purchase_orders(limit=1).records
         print("OUTPUT")
         pprint(output)
         print("EXPECTED")

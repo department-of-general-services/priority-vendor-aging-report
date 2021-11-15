@@ -12,8 +12,6 @@ import pandas as pd
 from dgs_fiscal.config import settings
 from dgs_fiscal.systems.citibuy import models
 
-Records = List[dict]
-
 
 class CitiBuy:
     """Client that interfaces with the CitiBuy backend
@@ -42,17 +40,6 @@ class CitiBuy:
                 "mssql+pyodbc", query={"odbc_connect": conn_str}
             )
         self.engine = sqlalchemy.create_engine(conn_url)
-        self._purchase_orders: Records = None
-
-    @property
-    def purchase_orders(self):
-        """Returns the list of purchase orders"""
-        if not self._purchase_orders:
-            raise NotImplementedError(
-                "The list of Purchase Orders hasn't been queried yet. "
-                "Use CitiBuy.get_purchase_orders() to retrieve that list."
-            )
-        return self._purchase_orders
 
     def execute_stmt(self, query_str: str) -> DatabaseRows:
         """Executes a SQL query against the CitiBuy database
@@ -78,14 +65,10 @@ class CitiBuy:
             raise error
         return DatabaseRows(rows)
 
-    def _rows_to_dicts(self, cursor):
-        """Converts SQLAlchemy rows to a list of dicts keyed by column name"""
-        return [row._asdict() for row in cursor.all()]
-
     def get_purchase_orders(  # pylint: disable=too-many-locals
         self,
         limit: int = 10000,
-    ) -> Records:
+    ) -> DatabaseRows:
         """Gets a list of POs from CitiBuy and returns them as a list of dicts
 
         Parameters
@@ -95,8 +78,8 @@ class CitiBuy:
 
         Returns
         -------
-        Records
-            A list of results as a dictionary keyed by the column names
+        DatabaseRows
+            An instance of DatabaseRows for the purchase order records
         """
         # create aliases for the tables
         po = aliased(models.PurchaseOrder, name="po")
@@ -107,36 +90,37 @@ class CitiBuy:
         po_cols = [getattr(po, col) for col in po.columns]
         ven_cols = [getattr(ven, col) for col in ven.columns]
         con_cols = [getattr(con, col) for col in con.columns]
-
-        # builds the base query
         query = sqlalchemy.select(*po_cols, *ven_cols, *con_cols).limit(limit)
-        query = query.join(po, po.vendor_id == ven.vendor_id)
-        query = query.join(con, po.po_nbr == con.po_nbr, isouter=True)
 
-        # filters for recent blanket contracts and open market POs
+        # join the contract and vendor tables
+        dgs_contract = con.contract_agency.in_(("AGY", "DGS"))
+        fkey_contract = (dgs_contract) & (po.po_nbr == con.po_nbr)
+        fkey_vendor = po.vendor_id == ven.vendor_id
+        query = query.join(po, fkey_vendor)
+        query = query.join(con, fkey_contract, isouter=True)
+
+        # filter for recent blanket contracts and open market POs
         open_market = con.contract_agency.is_(None)
         not_closed = con.end_date > (date.today() - timedelta(90))
         query = query.where(open_market | not_closed)
 
-        # filters for DGS releases or agency umbrella POs
+        # filter for DGS releases or blanket POs available to DGS
         dgs_release = po.agency == "DGS"
         blanket_po = po.release_nbr == 0
-        umbrella_contract = con.contract_agency == "AGY"
-        query = query.where(dgs_release | (blanket_po & umbrella_contract))
+        query = query.where(dgs_release | (blanket_po & dgs_contract))
 
-        # filters out POs and releases that are closed
+        # filter out POs and releases that are closed
         query = query.where(po.status.notin_(("3PCO", "3PCA")))
 
         with Session(self.engine) as session:
-            cursor = session.execute(query)
-            self._purchase_orders = self._rows_to_dicts(cursor)
-        return self.purchase_orders
+            rows = session.execute(query).fetchall()
+        return DatabaseRows(rows)
 
     def get_invoices(
         self,
         limit: int = 100,
         filter_dict: Dict[str, tuple] = None,
-    ) -> Records:
+    ) -> DatabaseRows:
         """Gets a list of Invoices from CitiBuy and returns them as a list
         of dictionaries
 
@@ -150,8 +134,8 @@ class CitiBuy:
 
         Returns
         -------
-        Records
-            A list of results as a dictionary keyed by the column names
+        DatabaseRows
+            An instance of DatabaseRows for the purchase order records
         """
         pass
 

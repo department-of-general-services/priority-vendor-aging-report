@@ -185,13 +185,22 @@ INVOICES = {
 }
 
 CONTRACTS = {
-    "blanket1": {
+    "blanket1_DGS": {
         "po_nbr": "111",
         "release_nbr": 0,
         "contract_agency": "DGS",
         "start_date": datetime(2020, 7, 1),
         "end_date": datetime(2050, 7, 1),
-        "dollar_limit": 1000.00,
+        "dollar_limit": 750.00,
+        "dollar_spent": 50.00,
+    },
+    "blanket1_DPW": {
+        "po_nbr": "111",
+        "release_nbr": 0,
+        "contract_agency": "DPW",
+        "start_date": datetime(2020, 7, 1),
+        "end_date": datetime(2050, 7, 1),
+        "dollar_limit": 250.00,
         "dollar_spent": 50.00,
     },
     "blanket4": {
@@ -215,8 +224,8 @@ CONTRACTS = {
 }
 
 PO_RESULTS = [
-    {**CONTRACTS["blanket1"], **PO_RECORDS["po1"], **VENDORS["acme"]},
-    {**CONTRACTS["blanket1"], **PO_RECORDS["po1_1"], **VENDORS["acme"]},
+    {**CONTRACTS["blanket1_DGS"], **PO_RECORDS["po1"], **VENDORS["acme"]},
+    {**CONTRACTS["blanket1_DGS"], **PO_RECORDS["po1_1"], **VENDORS["acme"]},
     {**CONTRACTS["blanket4"], **PO_RECORDS["po4"], **VENDORS["disney"]},
     {**CONTRACTS["blanket4"], **PO_RECORDS["po4_1"], **VENDORS["disney"]},
     {
