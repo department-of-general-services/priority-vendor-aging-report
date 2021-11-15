@@ -12,8 +12,6 @@ import pandas as pd
 from dgs_fiscal.config import settings
 from dgs_fiscal.systems.citibuy import models
 
-Records = List[dict]
-
 
 class CitiBuy:
     """Client that interfaces with the CitiBuy backend
@@ -42,17 +40,6 @@ class CitiBuy:
                 "mssql+pyodbc", query={"odbc_connect": conn_str}
             )
         self.engine = sqlalchemy.create_engine(conn_url)
-        self._purchase_orders: Records = None
-
-    @property
-    def purchase_orders(self):
-        """Returns the list of purchase orders"""
-        if not self._purchase_orders:
-            raise NotImplementedError(
-                "The list of Purchase Orders hasn't been queried yet. "
-                "Use CitiBuy.get_purchase_orders() to retrieve that list."
-            )
-        return self._purchase_orders
 
     def execute_stmt(self, query_str: str) -> DatabaseRows:
         """Executes a SQL query against the CitiBuy database
@@ -78,14 +65,10 @@ class CitiBuy:
             raise error
         return DatabaseRows(rows)
 
-    def _rows_to_dicts(self, cursor):
-        """Converts SQLAlchemy rows to a list of dicts keyed by column name"""
-        return [row._asdict() for row in cursor.all()]
-
     def get_purchase_orders(  # pylint: disable=too-many-locals
         self,
         limit: int = 10000,
-    ) -> Records:
+    ) -> DatabaseRows:
         """Gets a list of POs from CitiBuy and returns them as a list of dicts
 
         Parameters
@@ -95,8 +78,8 @@ class CitiBuy:
 
         Returns
         -------
-        Records
-            A list of results as a dictionary keyed by the column names
+        DatabaseRows
+            An instance of DatabaseRows for the purchase order records
         """
         # create aliases for the tables
         po = aliased(models.PurchaseOrder, name="po")
@@ -130,15 +113,14 @@ class CitiBuy:
         query = query.where(po.status.notin_(("3PCO", "3PCA")))
 
         with Session(self.engine) as session:
-            cursor = session.execute(query)
-            self._purchase_orders = self._rows_to_dicts(cursor)
-        return self.purchase_orders
+            rows = session.execute(query).fetchall()
+        return DatabaseRows(rows)
 
     def get_invoices(
         self,
         limit: int = 100,
         filter_dict: Dict[str, tuple] = None,
-    ) -> Records:
+    ) -> DatabaseRows:
         """Gets a list of Invoices from CitiBuy and returns them as a list
         of dictionaries
 
@@ -152,8 +134,8 @@ class CitiBuy:
 
         Returns
         -------
-        Records
-            A list of results as a dictionary keyed by the column names
+        DatabaseRows
+            An instance of DatabaseRows for the purchase order records
         """
         pass
 
