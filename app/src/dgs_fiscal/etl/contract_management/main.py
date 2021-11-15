@@ -19,9 +19,9 @@ class ContractManagement:
         lists and folders associated with the Contract Management workflow
     """
 
-    def __init__(self) -> None:
+    def __init__(self, citibuy_url: str = None) -> None:
         """Inits the ContractManagement class"""
-        self.citibuy = CitiBuy()
+        self.citibuy = CitiBuy(conn_url=citibuy_url)
         self.sharepoint = SharePoint()
 
     def get_citibuy_data(self, dataset: str) -> List[dict]:
