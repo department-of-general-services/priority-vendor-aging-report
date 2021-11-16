@@ -249,10 +249,13 @@ class ItemCollection:
                 matches.append(item)
         return matches
 
-    def to_dataframe(self) -> pd.DataFrame:
+    def to_dataframe(self, include_id=False) -> pd.DataFrame:
         """Exports the list of items and their fields as a dataframe"""
         # convert items to dataframe
-        items = [item.fields for item in self.items]
+        if include_id:
+            items = [{"id": item.id, **item.fields} for item in self.items]
+        else:
+            items = [item.fields for item in self.items]
         df = pd.DataFrame(items)
         # rename the columns
         cols = self.list.columns
@@ -285,6 +288,11 @@ class ListItem:
     def fields(self) -> dict:
         """Returns the fields associated with this list item"""
         return self.item.fields
+
+    @property
+    def id(self) -> dict:
+        """Returns the SharePoint id for this list item"""
+        return self.item.object_id
 
     def update(self, data: dict) -> None:
         """Updates the list item in SharePoint
