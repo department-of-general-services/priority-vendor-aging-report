@@ -3,6 +3,7 @@ from typing import List
 from dataclasses import dataclass
 
 import pandas as pd
+import numpy as np
 
 from dgs_fiscal.systems import CitiBuy, SharePoint
 from dgs_fiscal.systems.sharepoint import BatchedChanges
@@ -32,8 +33,8 @@ class ContractManagement:
         """Gets the list of active or recently closed Purchase Orders and the
         unique list of DGS vendors from CitiBuy
 
-        Return
-        ------
+        Returns
+        -------
         ContractData
             A ContractData instance of the PO and vendor data from CitiBuy
         """
@@ -43,7 +44,15 @@ class ContractManagement:
         # get PO data from citibuy
         df = self.citibuy.get_purchase_orders().dataframe
 
-        # isolate and format the PO dataframe
+        # set the PO title
+        release = df["release_nbr"].astype(str)
+        df["po_title"] = np.where(
+            release == "0",  # when release number is 0
+            "P" + df["po_nbr"],  # drop it from the title: 'P12345'
+            "P" + df["po_nbr"] + ":" + release,  # otherwise: 'P12345:1'
+        )
+
+        # isloate and format PO dataframe
         df_po = df[po_cols.keys()]
         df_po.columns = po_cols.values()
 

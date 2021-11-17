@@ -1,8 +1,10 @@
 CITIBUY = {
     "po_cols": {
+        "po_title": "Title",
         "po_nbr": "PO Number",
         "release_nbr": "Release Number",
         "vendor_id": "Vendor ID",
+        "name": "Vendor",
         "status": "PO Status",
         "agency": "PO Agency",
         "cost": "Actual Cost",
@@ -14,8 +16,8 @@ CITIBUY = {
         "end_date": "Contract End Date",
     },
     "vendor_cols": {
+        "name": "Title",
         "vendor_id": "Vendor ID",
-        "name": "Vendor Name",
         "contact": "Contact",
         "email": "Email",
         "phone": "Phone",

@@ -27,15 +27,26 @@ class TestContractManagement:
 
         Validates the following conditions:
         - The return type is ContractData
-        - The columns of ContractData.po match the constants
-        - The columns of ContractData.vendor match the constants
+        - The columns of ContractData.po match the CITIBUY constants
+        - The columns of ContractData.vendor match the CITIBUY constants
         - The dataframe in ContractData.vendor has been deduped
         """
         # setup
         po_cols = list(constants.CITIBUY["po_cols"].values())
         ven_cols = list(constants.CITIBUY["vendor_cols"].values())
-        # validation
+        # execution
         output = mock_contract.get_citibuy_data()
+        df_po = output.po
+        df_ven = output.vendor
+        blanket_title = df_po.loc[0, "Title"]
+        release_title = df_po.loc[1, "Title"]
+        # validation
+        assert isinstance(output, ContractData)
+        assert list(df_po.columns) == po_cols
+        assert list(df_ven.columns) == ven_cols
+        assert len(df_ven) == 2
+        assert blanket_title == "P111"
+        assert release_title == "P111:1"
         # validation
         assert isinstance(output, ContractData)
         assert list(output.po.columns) == po_cols
