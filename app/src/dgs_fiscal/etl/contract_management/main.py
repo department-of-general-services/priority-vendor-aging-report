@@ -3,6 +3,7 @@ from typing import List
 from dataclasses import dataclass
 
 import pandas as pd
+import numpy as np
 
 from dgs_fiscal.systems import CitiBuy, SharePoint
 from dgs_fiscal.systems.sharepoint import BatchedChanges
@@ -32,8 +33,8 @@ class ContractManagement:
         """Gets the list of active or recently closed Purchase Orders and the
         unique list of DGS vendors from CitiBuy
 
-        Return
-        ------
+        Returns
+        -------
         ContractData
             A ContractData instance of the PO and vendor data from CitiBuy
         """
@@ -43,7 +44,15 @@ class ContractManagement:
         # get PO data from citibuy
         df = self.citibuy.get_purchase_orders().dataframe
 
-        # isolate and format the PO dataframe
+        # set the PO title
+        release = df["release_nbr"].astype(str)
+        df["po_title"] = np.where(
+            release == "0",  # when release number is 0
+            "P" + df["po_nbr"],  # drop it from the title: 'P12345'
+            "P" + df["po_nbr"] + ":" + release,  # otherwise: 'P12345:1'
+        )
+
+        # isloate and format PO dataframe
         df_po = df[po_cols.keys()]
         df_po.columns = po_cols.values()
 
@@ -54,9 +63,28 @@ class ContractManagement:
 
         return ContractData(po=df_po, vendor=df_ven)
 
-    def get_sharepoint_data(self, dataset: str) -> List[dict]:
-        """Get current POs and Vendors from their respective SharePoint lists"""
-        pass
+    def get_sharepoint_data(self) -> ContractData:
+        """Get current POs and Vendors from their respective SharePoint lists
+
+        Returns
+        -------
+        ContractData
+            A ContractData instance of the PO and vendor data from CitiBuy
+        """
+
+        # get the SharePoint list clients
+        ven_list = self.sharepoint.get_list("Vendors")
+        po_list = self.sharepoint.get_list("Purchase Orders")
+
+        # retrieve the list of vendors
+        df_ven = ven_list.get_items().to_dataframe(include_id=True)
+
+        # retrieve the list of POs
+        # TODO: Add support for "not in" filter
+        po_open = {"Status": ("not equals", "3PCO - Closed")}
+        df_po = po_list.get_items(query=po_open).to_dataframe(include_id=True)
+
+        return ContractData(po=df_po, vendor=df_ven)
 
     def reconcile_lists(
         self,
