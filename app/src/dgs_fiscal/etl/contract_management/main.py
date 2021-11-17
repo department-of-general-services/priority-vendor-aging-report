@@ -63,9 +63,28 @@ class ContractManagement:
 
         return ContractData(po=df_po, vendor=df_ven)
 
-    def get_sharepoint_data(self, dataset: str) -> List[dict]:
-        """Get current POs and Vendors from their respective SharePoint lists"""
-        pass
+    def get_sharepoint_data(self) -> ContractData:
+        """Get current POs and Vendors from their respective SharePoint lists
+
+        Returns
+        -------
+        ContractData
+            A ContractData instance of the PO and vendor data from CitiBuy
+        """
+
+        # get the SharePoint list clients
+        ven_list = self.sharepoint.get_list("Vendors")
+        po_list = self.sharepoint.get_list("Purchase Orders")
+
+        # retrieve the list of vendors
+        df_ven = ven_list.get_items().to_dataframe(include_id=True)
+
+        # retrieve the list of POs
+        # TODO: Add support for "not in" filter
+        po_open = {"Status": ("not equals", "3PCO - Closed")}
+        df_po = po_list.get_items(query=po_open).to_dataframe(include_id=True)
+
+        return ContractData(po=df_po, vendor=df_ven)
 
     def reconcile_lists(
         self,

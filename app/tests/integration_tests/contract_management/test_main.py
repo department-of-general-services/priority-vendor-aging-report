@@ -47,8 +47,26 @@ class TestContractManagement:
         assert len(df_ven) == 2
         assert blanket_title == "P111"
         assert release_title == "P111:1"
+
+    def test_get_sharepoint_data(self, mock_contract):
+        """Tests the get_sharepoint_data() method executes correctly
+
+        Validates the following conditions:
+        - The return type is ContractData
+        - The Vendor column in the PO data has been matched with Vendor ID
+        - The names of the columns match the output of get_citibuy_data()
+        """
+        # setup
+        po_cols = list(constants.CITIBUY["po_cols"].values())
+        ven_cols = list(constants.CITIBUY["vendor_cols"].values())
+        po_cols.remove("Vendor ID")
+        # execution
+        output = mock_contract.get_sharepoint_data()
+        print(output.po)
+        print(output.vendor)
         # validation
         assert isinstance(output, ContractData)
-        assert list(output.po.columns) == po_cols
-        assert list(output.vendor.columns) == ven_cols
-        assert len(output.vendor) == 2
+        for col in ven_cols:
+            assert col in output.vendor.columns
+        for col in po_cols:
+            assert col in output.po.columns
