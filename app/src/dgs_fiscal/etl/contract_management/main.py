@@ -52,6 +52,13 @@ class ContractManagement:
             "P" + df["po_nbr"] + ":" + release,  # otherwise: 'P12345:1'
         )
 
+        # sets the PO type
+        blanket_po = (release == "0") & (df["start_date"].notna())
+        open_market = (release == "0") & (df["start_date"].isna())
+        df["po_type"] = "Release"
+        df.loc[blanket_po, "po_type"] = "Master Blanket"
+        df.loc[open_market, "po_type"] = "Open Market"
+
         # isloate and format PO dataframe
         df_po = df[po_cols.keys()]
         df_po.columns = po_cols.values()
@@ -71,7 +78,6 @@ class ContractManagement:
         ContractData
             A ContractData instance of the PO and vendor data from CitiBuy
         """
-
         # get the SharePoint list clients
         ven_list = self.sharepoint.get_list("Vendors")
         po_list = self.sharepoint.get_list("Purchase Orders")
