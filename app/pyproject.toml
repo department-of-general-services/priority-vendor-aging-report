@@ -62,3 +62,6 @@ disable = [
   "W0511",  # Disables fix me
   "R0801",  # Disables similar lines
 ]
+
+[tool.pylint."DESIGN"]
+max-locals=20
