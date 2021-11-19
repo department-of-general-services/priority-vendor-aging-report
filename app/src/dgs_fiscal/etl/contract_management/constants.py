@@ -3,6 +3,7 @@ CITIBUY = {
         "po_title": "Title",
         "po_nbr": "PO Number",
         "release_nbr": "Release Number",
+        "po_type": "PO Type",
         "vendor_id": "Vendor ID",
         "name": "Vendor",
         "status": "Status",

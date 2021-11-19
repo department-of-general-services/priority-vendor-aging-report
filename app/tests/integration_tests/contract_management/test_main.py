@@ -1,7 +1,10 @@
 import pytest
+import pandas as pd
 
 from dgs_fiscal.etl import ContractManagement
 from dgs_fiscal.etl.contract_management import ContractData, constants
+
+from tests.integration_tests.contract_management import data
 
 
 @pytest.fixture(scope="session", name="mock_contract")
@@ -30,14 +33,24 @@ class TestContractManagement:
         - The columns of ContractData.po match the CITIBUY constants
         - The columns of ContractData.vendor match the CITIBUY constants
         - The dataframe in ContractData.vendor has been deduped
+        - The PO Type has been set correctly
         """
         # setup
         po_cols = list(constants.CITIBUY["po_cols"].values())
         ven_cols = list(constants.CITIBUY["vendor_cols"].values())
+        po_types = [
+            "Master Blanket",
+            "Release",
+            "Master Blanket",
+            "Release",
+            "Open Market",
+        ]
         # execution
         output = mock_contract.get_citibuy_data()
         df_po = output.po
         df_ven = output.vendor
+        print(df_po.dtypes)
+        print(df_ven.dtypes)
         blanket_title = df_po.loc[0, "Title"]
         release_title = df_po.loc[1, "Title"]
         # validation
@@ -47,6 +60,7 @@ class TestContractManagement:
         assert len(df_ven) == 2
         assert blanket_title == "P111"
         assert release_title == "P111:1"
+        assert list(df_po["PO Type"]) == po_types
 
     def test_get_sharepoint_data(self, mock_contract):
         """Tests the get_sharepoint_data() method executes correctly
@@ -66,7 +80,28 @@ class TestContractManagement:
         print(output.vendor)
         # validation
         assert isinstance(output, ContractData)
+        assert "id" in output.po.columns
+        assert "id" in output.vendor.columns
         for col in ven_cols:
             assert col in output.vendor.columns
         for col in po_cols:
             assert col in output.po.columns
+
+    def test_reconcile_lists(self, mock_contract):
+        """Tests that the reconcile_lists() method executes correctly
+
+        Validates the following conditions:
+        -
+        """
+        # setup
+        po_citibuy = pd.DataFrame(data.CITIBUY["po"])
+        ven_citibuy = pd.DataFrame(data.CITIBUY["vendor"])
+        po_sharepoint = pd.DataFrame(data.SHAREPOINT["po"])
+        ven_sharepoint = pd.DataFrame(data.SHAREPOINT["vendor"])
+        citibuy = ContractData(po=po_citibuy, vendor=ven_citibuy)
+        sharepoint = ContractData(po=po_sharepoint, vendor=ven_sharepoint)
+        # execution
+        output = mock_contract.update_sharepoint(citibuy, sharepoint)
+        print(output)
+        # validation
+        assert 0
