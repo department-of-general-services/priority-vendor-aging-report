@@ -1,7 +1,10 @@
 import pytest
+import pandas as pd
 
 from dgs_fiscal.etl import ContractManagement
 from dgs_fiscal.etl.contract_management import ContractData, constants
+
+from tests.integration_tests.contract_management import data
 
 
 @pytest.fixture(scope="session", name="mock_contract")
@@ -77,7 +80,28 @@ class TestContractManagement:
         print(output.vendor)
         # validation
         assert isinstance(output, ContractData)
+        assert "id" in output.po.columns
+        assert "id" in output.vendor.columns
         for col in ven_cols:
             assert col in output.vendor.columns
         for col in po_cols:
             assert col in output.po.columns
+
+    def test_reconcile_lists(self, mock_contract):
+        """Tests that the reconcile_lists() method executes correctly
+
+        Validates the following conditions:
+        -
+        """
+        # setup
+        po_citibuy = pd.DataFrame(data.CITIBUY["po"])
+        ven_citibuy = pd.DataFrame(data.CITIBUY["vendor"])
+        po_sharepoint = pd.DataFrame(data.SHAREPOINT["po"])
+        ven_sharepoint = pd.DataFrame(data.SHAREPOINT["vendor"])
+        citibuy = ContractData(po=po_citibuy, vendor=ven_citibuy)
+        sharepoint = ContractData(po=po_sharepoint, vendor=ven_sharepoint)
+        # execution
+        output = mock_contract.update_sharepoint(citibuy, sharepoint)
+        print(output)
+        # validation
+        assert 0
