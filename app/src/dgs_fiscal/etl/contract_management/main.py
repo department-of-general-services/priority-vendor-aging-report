@@ -123,6 +123,47 @@ class ContractManagement:
         """
         pass
 
+    def detect_changes(
+        self,
+        old_items: List[dict],
+        new_items: List[dict],
+        key_col: str,
+    ) -> BatchedChanges:
+        """Detects new items that need to be added to SharePoint and existing
+        items whose field values have changed and adds them to BatchedChanges
+
+        Parameters
+        ----------
+        old_items: List[dict]
+            List of dictionaries for each existing item in SharePoint
+        new_items: List[dict]
+            List of dictionaries for each new item from CitiBuy
+        key_col: str
+            The name of the column that can be used to check if an new item
+            already exists in the list of old items
+        """
+        # init changes and index old_items by key_col
+        changes = BatchedChanges()
+        old_items = {item[key_col]: item for item in old_items}
+
+        # iterate through new items
+        for item in new_items:
+            key = item[key_col]
+            existing = old_items.pop(key, None)
+
+            # add items that don't already exist to the insert list
+            if not existing:
+                changes.inserts.append(item)
+                continue
+
+            # add items whose values have changed to update list
+            for field, new_val in item.items():
+                if existing[field] != new_val:
+                    changes.updates[existing["id"]] = item
+                    break
+
+        return changes
+
 
 @dataclass
 class ContractData:
