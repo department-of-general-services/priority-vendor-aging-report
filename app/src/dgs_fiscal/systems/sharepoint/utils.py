@@ -1,4 +1,5 @@
 from __future__ import annotations  # prevents NameError for typehints
+import re
 
 from dynaconf import Dynaconf
 from O365 import Account
@@ -69,6 +70,10 @@ def col_api_name(columns: dict, col: str, prefix: str = "") -> str:
     if col in columns:
         return prefix + columns[col]
     if col in columns.values():
+        return prefix + col
+    # check if it's a lookup column
+    lookup_col = re.match(r"(\w+)LookupId", col)
+    if lookup_col and lookup_col.group(1) in columns.values():
         return prefix + col
     raise KeyError(
         f"{col} not in the list of cols. "

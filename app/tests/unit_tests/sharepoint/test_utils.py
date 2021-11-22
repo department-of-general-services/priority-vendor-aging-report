@@ -1,6 +1,6 @@
 import pytest
 
-from dgs_fiscal.systems.sharepoint.utils import build_filter_str
+from dgs_fiscal.systems.sharepoint.utils import build_filter_str, col_api_name
 
 COLS = {"Text Col": "TextCol", "Num Col": "NumCol"}
 
@@ -45,3 +45,34 @@ def test_build_filter_str_error():
     # execution
     with pytest.raises(KeyError):
         build_filter_str(COLS, input_dict)
+
+
+@pytest.mark.parametrize(
+    "input_col, expected",
+    [
+        ("Text Col", "TextCol"),
+        ("TextCol", "TextCol"),
+        ("TextColLookupId", "TextColLookupId"),
+    ],
+)
+def test_col_api_name(input_col, expected):
+    """Tests that col_api_name() executes successfully
+
+    Validates the following conditions:
+    - Display name passed to function
+    - API name passed to function
+    - LookupId passed to function
+    """
+    # execution
+    output = col_api_name(COLS, input_col)
+    # validation
+    assert output == expected
+
+
+def test_col_api_name_error():
+    """Tests that col_api_name() raises a KeyError if a column name is passed
+    that isn't in the list of columns
+    """
+    # validation
+    with pytest.raises(KeyError):
+        col_api_name(COLS, "fake_col")
