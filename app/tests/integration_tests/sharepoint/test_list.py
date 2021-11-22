@@ -85,6 +85,17 @@ class TestSiteList:
             # cleanup
             assert item.item.delete()
 
+    def test_add_item_lookup(self, test_sharepoint):
+        """Tests that a lookup field is set correctly by add_item() method"""
+        # setup
+        test_data = {"Title": "Lookup", "VendorLookupId": "1"}
+        test_list = test_sharepoint.get_list("API Test")
+        # execution
+        output = test_list.add_item(test_data)
+        pprint(output.fields)
+        # validation
+        assert output.fields["VendorLookupId"] == "1"
+
     def test_add_item_invalid(self, test_list):
         """Tests that add_item() raises a KeyError when it is provided data
         that has a key that isn't one of the list's existing columns
