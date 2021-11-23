@@ -26,6 +26,22 @@ class BatchedChanges:
     inserts: Optional[List[dict]] = field(default_factory=list)
 
 
+@dataclass
+class BatchResults:
+    """Data class for storing the results to a series of batch requests
+
+    Attributes
+    ----------
+    updates: List[list], optional
+        A list of the JSON responses from each batch update request
+    inserts: List[list], optional
+        A list of the JSON responses from each batch update request
+    """
+
+    updates: Optional[Dict[dict]] = field(default_factory=list)
+    inserts: Optional[List[dict]] = field(default_factory=list)
+
+
 class SiteList:
     """Creates an API client for making calls to the SharePoint list resource
 
