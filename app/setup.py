@@ -18,6 +18,7 @@ setup(
         "selenium",
         "xlwings",
         "openpyxl",
+        "more-itertools",
     ],
     include_package_data=True,
     package_dir={"": "src"},  # this is required to access code in src/

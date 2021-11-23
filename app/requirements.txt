@@ -16,3 +16,4 @@ xlwings==0.24.9
 openpyxl==3.0.7
 sqlalchemy==1.4.25
 pyodbc==4.0.32
+more-itertools==8.11.0
