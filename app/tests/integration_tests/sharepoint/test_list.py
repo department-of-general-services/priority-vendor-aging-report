@@ -119,11 +119,13 @@ class TestSiteList:
         changes = BatchedChanges(updates=updates, inserts=inserts)
         # execution
         results = test_list.batch_upsert(changes)
-        pprint(results)
+        updates = results.updates
+        inserts = results.inserts
         # validation
-        for request in results["responses"]:
-            assert request["status"] in (200, 201)
-            assert "id" in request["body"]
+        for batch in updates + inserts:
+            for request in batch:
+                assert request["status"] in (200, 201)
+                assert "id" in request["body"]
 
 
 class TestItemCollection:
