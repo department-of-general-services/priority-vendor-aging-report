@@ -9,10 +9,9 @@ CITIBUY = {
         "status": "Status",
         "cost": "Actual Cost",
         "date": "PO Date",
-        "dollar_limit": "Contract Dollar Limit",
-        "dollar_spent": "Contract Amount Spent",
-        "start_date": "Contract Start Date",
-        "end_date": "Contract End Date",
+        # "desc": "Description",
+        # "location": "Location",
+        # "buyer": "Buyer",
     },
     "vendor_cols": {
         "name": "Title",
@@ -20,5 +19,13 @@ CITIBUY = {
         "contact": "Point of Contact",
         "email": "Email",
         "phone": "Phone",
+    },
+    "contract_cols": {
+        "contract_title": "Title",
+        "po_nbr": "PO Number",
+        "dollar_limit": "Dollar Limit",
+        "dollar_spent": "Amount Spent",
+        "start_date": "Start Date",
+        "end_date": "End Date",
     },
 }

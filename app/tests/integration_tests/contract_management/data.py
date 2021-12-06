@@ -21,20 +21,6 @@ CITIBUY = {
             datetime(2020, 7, 1),
             datetime(2020, 7, 1),
         ],
-        "Contract Dollar Limit": [0, 150, 100, None],
-        "Contract Amount Spent": [0, 100, 80, None],
-        "Contract Start Date": [
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
-            None,
-        ],
-        "Contract End Date": [
-            datetime(2050, 7, 1),
-            datetime(2050, 7, 1),
-            datetime(2050, 7, 1),
-            None,
-        ],
     },
     "vendor": {
         "Title": ["Acme", "Apple"],
@@ -42,6 +28,13 @@ CITIBUY = {
         "Point of Contact": ["Alice Williams", "Steve Jobs"],
         "Email": ["alice@acme.com", "steve@apple.com"],
         "Phone": ["111-111-1111", "333-333-3333"],
+    },
+    "contract": {
+        "PO Number": ["P111"],
+        "Dollar Limit": [150],
+        "Amount Spent": [0],
+        "Start Date": [datetime(2020, 7, 1)],
+        "End Date": [datetime(2050, 7, 1)],
     },
 }
 
@@ -67,20 +60,6 @@ SHAREPOINT = {
             datetime(2020, 7, 1),
             datetime(2020, 7, 1),
         ],
-        "Contract Dollar Limit": [0, 150, 150, None],
-        "Contract Amount Spent": [0, 100, 100, None],
-        "Contract Start Date": [
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
-            None,
-        ],
-        "Contract End Date": [
-            datetime(2050, 7, 1),
-            datetime(2050, 7, 1),
-            datetime(2050, 7, 1),
-            None,
-        ],
     },
     "vendor": {
         "id": ["1", "2"],
@@ -92,5 +71,12 @@ SHAREPOINT = {
         "Email": ["john@acme.com", "mickey@disney.com"],
         "Phone": ["111-111-1111", "222-222-2222"],
         "Vendor ID": ["111", "222"],
+    },
+    "contract": {
+        "Title": "P111",
+        "Dollar Limit": [150],
+        "Amount Spent": [100],
+        "Start Date": [datetime(2020, 7, 1)],
+        "End Date": [datetime(2050, 7, 1)],
     },
 }

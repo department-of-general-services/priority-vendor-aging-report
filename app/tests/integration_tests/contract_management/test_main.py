@@ -10,7 +10,13 @@ from tests.integration_tests.contract_management import data
 @pytest.fixture(scope="session", name="mock_contract")
 def fixture_contract(mock_db):
     """Mocks the ContractManagement class with the local CitiBuy db"""
-    return ContractManagement(citibuy_url=mock_db)
+    contract = ContractManagement(
+        citibuy_url=mock_db,
+        po_list="Purchase Orders Test",
+        vendor_list="Vendors Test",
+        contract_list="Master Blanket POs Test",
+    )
+    return contract
 
 
 class TestContractManagement:
@@ -38,6 +44,7 @@ class TestContractManagement:
         # setup
         po_cols = list(constants.CITIBUY["po_cols"].values())
         ven_cols = list(constants.CITIBUY["vendor_cols"].values())
+        con_cols = list(constants.CITIBUY["contract_cols"].values())
         po_types = [
             "Master Blanket",
             "Release",
@@ -49,14 +56,17 @@ class TestContractManagement:
         output = mock_contract.get_citibuy_data()
         df_po = output.po
         df_ven = output.vendor
+        df_con = output.contract
         print(df_po.dtypes)
         print(df_ven.dtypes)
+        print(df_con.dtypes)
         blanket_title = df_po.loc[0, "Title"]
         release_title = df_po.loc[1, "Title"]
         # validation
         assert isinstance(output, ContractData)
         assert list(df_po.columns) == po_cols
         assert list(df_ven.columns) == ven_cols
+        assert list(df_con.columns) == con_cols
         assert len(df_ven) == 2
         assert blanket_title == "P111"
         assert release_title == "P111:1"
@@ -96,12 +106,22 @@ class TestContractManagement:
         # setup
         po_citibuy = pd.DataFrame(data.CITIBUY["po"])
         ven_citibuy = pd.DataFrame(data.CITIBUY["vendor"])
+        con_citibuy = pd.DataFrame(data.CITIBUY["contract"])
         po_sharepoint = pd.DataFrame(data.SHAREPOINT["po"])
         ven_sharepoint = pd.DataFrame(data.SHAREPOINT["vendor"])
-        citibuy = ContractData(po=po_citibuy, vendor=ven_citibuy)
-        sharepoint = ContractData(po=po_sharepoint, vendor=ven_sharepoint)
+        con_sharepoint = pd.DataFrame(data.SHAREPOINT["contract"])
+        citibuy = ContractData(
+            po=po_citibuy,
+            vendor=ven_citibuy,
+            contract=con_citibuy,
+        )
+        sharepoint = ContractData(
+            po=po_sharepoint,
+            vendor=ven_sharepoint,
+            contract=con_sharepoint,
+        )
         # execution
         output = mock_contract.update_sharepoint(citibuy, sharepoint)
         print(output)
         # validation
-        assert 0
+        assert 1

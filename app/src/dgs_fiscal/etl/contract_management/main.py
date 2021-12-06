@@ -23,12 +23,27 @@ class ContractManagement:
     sharepoint: SharePoint
         Instance of SharePoint class used to read and write to the SharePoint
         lists and folders associated with the Contract Management workflow
+    po_list: str
+        The name of the SharePoint list for Purchase Orders
+    vend_list: str
+        The name of the SharePoint list for Vendors
+    con_list: str
+        The name of the SharePoint list for Master Blanket Contracts
     """
 
-    def __init__(self, citibuy_url: str = None) -> None:
+    def __init__(
+        self,
+        citibuy_url: str = None,
+        vendor_list: str = "Vendors",
+        po_list: str = "Purchase Orders",
+        contract_list: str = "Master Blanket POs",
+    ) -> None:
         """Inits the ContractManagement class"""
         self.citibuy = CitiBuy(conn_url=citibuy_url)
         self.sharepoint = SharePoint()
+        self.po_list = po_list
+        self.vendor_list = vendor_list
+        self.contract_list = contract_list
 
     def get_citibuy_data(self) -> ContractData:
         """Gets the list of active or recently closed Purchase Orders and the
@@ -41,17 +56,19 @@ class ContractManagement:
         """
         po_cols = constants.CITIBUY["po_cols"]
         ven_cols = constants.CITIBUY["vendor_cols"]
+        con_cols = constants.CITIBUY["contract_cols"]
 
         # get PO data from citibuy
         df = self.citibuy.get_purchase_orders().dataframe
 
-        # set the PO title
+        # set the PO and Blanket title
         release = df["release_nbr"].astype(str)
         df["po_title"] = np.where(
             release == "0",  # when release number is 0
             "P" + df["po_nbr"],  # drop it from the title: 'P12345'
             "P" + df["po_nbr"] + ":" + release,  # otherwise: 'P12345:1'
         )
+        df["contract_title"] = df["po_nbr"] + "- Blanket"
 
         # sets the PO type
         blanket_po = (release == "0") & (df["start_date"].notna())
@@ -60,16 +77,12 @@ class ContractManagement:
         df.loc[blanket_po, "po_type"] = "Master Blanket"
         df.loc[open_market, "po_type"] = "Open Market"
 
-        # isloate and format PO dataframe
-        df_po = df[po_cols.keys()]
-        df_po.columns = po_cols.values()
+        # isloate and format separate dataframes
+        df_po = self._get_unique(df, po_cols)
+        df_ven = self._get_unique(df, ven_cols)
+        df_con = self._get_unique(df, con_cols)
 
-        # isolate and format Vendor dataframe
-        df_ven = df[ven_cols.keys()]
-        df_ven = df_ven.drop_duplicates()
-        df_ven.columns = ven_cols.values()
-
-        return ContractData(po=df_po, vendor=df_ven)
+        return ContractData(po=df_po, vendor=df_ven, contract=df_con)
 
     def get_sharepoint_data(self) -> ContractData:
         """Get current POs and Vendors from their respective SharePoint lists
@@ -80,18 +93,18 @@ class ContractManagement:
             A ContractData instance of the PO and vendor data from CitiBuy
         """
         # get the SharePoint list clients
-        ven_list = self.sharepoint.get_list("Vendors")
-        po_list = self.sharepoint.get_list("Purchase Orders")
+        ven_list = self.sharepoint.get_list(self.vendor_list)
+        con_list = self.sharepoint.get_list(self.contract_list)
+        po_list = self.sharepoint.get_list(self.po_list)
 
-        # retrieve the list of vendors
+        # retrieve records from each list
         df_ven = ven_list.get_items().to_dataframe(include_id=True)
-
-        # retrieve the list of POs
+        df_con = con_list.get_items().to_dataframe(include_id=True)
         # TODO: Add support for "not in" filter
         po_open = {"Status": ("not equals", "3PCO - Closed")}
         df_po = po_list.get_items(query=po_open).to_dataframe(include_id=True)
 
-        return ContractData(po=df_po, vendor=df_ven)
+        return ContractData(po=df_po, vendor=df_ven, contract=df_con)
 
     def update_sharepoint(
         self,
@@ -117,7 +130,7 @@ class ContractManagement:
         old_ven = sharepoint_data.vendor
 
         # update the list of vendors
-        ven_changes = self.detect_changes(
+        ven_changes = self._detect_changes(
             old_ven.to_dict("records"),
             new_ven.to_dict("records"),
             key_col="Vendor ID",
@@ -167,7 +180,7 @@ class ContractManagement:
         pprint(po_inserts.inserts)
 
         # update existing POs
-        po_changes = self.detect_changes(
+        po_changes = self._detect_changes(
             old_po.to_dict("records"),
             po_exists.to_dict("records"),
             key_col="Title",
@@ -175,7 +188,13 @@ class ContractManagement:
         print("PO CHANGES")
         pprint(po_changes.updates)
 
-    def detect_changes(
+    def _get_unique(self, df: pd.DataFrame, cols: dict) -> pd.DataFrame:
+        """Isolates and dedupes a subset of the colums from a dataframe"""
+        df_new = df[cols.keys()].drop_duplicates()
+        df_new.columns = cols.values()
+        return df_new
+
+    def _detect_changes(
         self,
         old_items: List[dict],
         new_items: List[dict],
@@ -223,3 +242,4 @@ class ContractData:
 
     po: pd.DataFrame
     vendor: pd.DataFrame
+    contract: pd.DataFrame
