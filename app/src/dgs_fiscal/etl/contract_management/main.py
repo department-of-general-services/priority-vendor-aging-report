@@ -223,3 +223,4 @@ class ContractData:
 
     po: pd.DataFrame
     vendor: pd.DataFrame
+    contract: pd.DataFrame
