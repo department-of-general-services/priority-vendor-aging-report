@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import pytest
 import pandas as pd
 
@@ -9,14 +7,14 @@ from dgs_fiscal.systems.sharepoint.list import (
     BatchedChanges,
 )
 
-ITEM_KEY = {"PO Number": "P12345:12", "Invoice Number": "12345"}
-QUERY = {"PO Number": ("equals", "P12345:12")}
+ITEM_KEY = {"Title": "Alice"}
+QUERY = {"YesNo": ("equals", 1)}
 
 
 @pytest.fixture(scope="module", name="test_list")
 def fixture_list(test_sharepoint):
     """Creates an instance of SiteList for use in integration tests"""
-    return test_sharepoint.get_list("Priority Vendor Aging")
+    return test_sharepoint.get_list("API Test")
 
 
 @pytest.fixture(scope="module", name="test_items")
@@ -32,7 +30,7 @@ class TestSiteList:
         """Tests that the get_items() method executes correctly
 
         Validates the following conditions:
-        - The response returned is a dictionary of InvoiceItem instances
+        - The response returned is an ItemCollection instance
         - The correct set of items are returned
         """
         # validation
@@ -41,25 +39,25 @@ class TestSiteList:
         assert isinstance(test_items, ItemCollection)
         assert isinstance(test_items.items[0], ListItem)
 
-    def test_get_invoice_by_key(self, test_list):
-        """Tests that the get_invoice_by_key() method executes correctly
+    def test_get_item_by_key(self, test_list):
+        """Tests that the get_item_by_key() method executes correctly
 
         Validates the following conditions
         - The response returned is an instance of ListItem
         - The response has the fields attribute set correctly
         """
         # execution
-        invoice = test_list.get_item_by_key(ITEM_KEY)
+        item = test_list.get_item_by_key(ITEM_KEY)
         # validation
-        assert isinstance(invoice, ListItem)
-        assert isinstance(invoice.fields, dict)
+        assert isinstance(item, ListItem)
+        assert isinstance(item.fields, dict)
 
-    def test_get_invoice_by_key_no_match(self, test_list):
-        """Tests that the get_invoice_by_key() method raises a ValueError if
+    def test_get_item_by_key_no_match(self, test_list):
+        """Tests that the get_item_by_key() method raises a ValueError if
         attempting to get an item with no matching key
         """
         # setup
-        fake_key = {"PO Number": "Fake", "Invoice Number": "Fake"}
+        fake_key = {"Title": "Fake"}
         with pytest.raises(ValueError):
             test_list.get_item_by_key(fake_key)
 
@@ -68,10 +66,21 @@ class TestSiteList:
 
         Validates the following conditions:
         - The item has been created in SharePoint
-        - The method returns the items as an ItemCollection
+        - The method returns the items as a ListItem
+        - All of the values were correctly set
         """
         # setup
-        test_data = {"PO Number": "new item", "Invoice Number": "new item"}
+        test_data = {
+            "Title": "new item",
+            "Text": "cat",
+            "Favorite Candy": "Butterfinger",
+            "YesNo": True,
+            "Number": 12,
+            # TODO: Figure out how to set Person field
+            # "Person": "Daly, William (DGS)",
+            "VendorLookupId": "1",
+            "Date": "2021-06-22T00:00:00Z",
+        }
         # execution
         item = test_list.add_item(test_data)
         # validation
@@ -84,17 +93,6 @@ class TestSiteList:
         finally:
             # cleanup
             assert item.item.delete()
-
-    def test_add_item_lookup(self, test_sharepoint):
-        """Tests that a lookup field is set correctly by add_item() method"""
-        # setup
-        test_data = {"Title": "Lookup", "VendorLookupId": "1"}
-        test_list = test_sharepoint.get_list("API Test")
-        # execution
-        output = test_list.add_item(test_data)
-        pprint(output.fields)
-        # validation
-        assert output.fields["VendorLookupId"] == "1"
 
     def test_add_item_invalid(self, test_list):
         """Tests that add_item() raises a KeyError when it is provided data
@@ -114,8 +112,8 @@ class TestSiteList:
         - An "id" for a list item is included with each request
         """
         # setup
-        updates = {"2": {"Status": "8. Paid"}}
-        inserts = [{"PO Number": "new val", "Vendor ID": "new val"}]
+        updates = {"2": {"Favorite Candy": "Butterfinger"}}
+        inserts = [{"Title": "Insert 1", "Text": "new val"}]
         changes = BatchedChanges(updates=updates, inserts=inserts)
         # execution
         results = test_list.batch_upsert(changes)
@@ -136,16 +134,16 @@ class TestItemCollection:
         passed a valid filter_key
 
         Validates the following conditions:
-        - The correct number of invoices are returned
-        - The invoices returned have fields that match the values passed in the
+        - The correct number of items are returned
+        - The items returned have fields that match the values passed in the
           filter key
         """
         # execution
-        invoices = test_items.filter_items(ITEM_KEY)
+        items = test_items.filter_items(ITEM_KEY)
         # validation
-        assert len(invoices) == 1
-        assert invoices[0].get_val("PO Number") == "P12345:12"
-        assert invoices[0].get_val("Invoice Number") == "12345"
+        assert len(items) == 1
+        assert items[0].get_val("Title") == "Alice"
+        assert items[0].get_val("Text") == "Foo"
 
     def test_filter_items_invalid_field(self, test_items):
         """Tests that ItemCollection.filter_items() returns a KeyError when
@@ -170,32 +168,31 @@ class TestItemCollection:
         # validation
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 3
-        assert "PO Number" in df.columns
-        assert "Invoice Number" in df.columns
+        assert "Favorite Candy" in df.columns
 
 
 class TestListItem:
     """Tests the ListItem methods that make calls to Graph API"""
 
     def test_update(self, test_list, test_items):
-        """Tests that InvoiceItem.update executes successfully
+        """Tests that ListItem.update executes successfully
 
         Validates the following conditions:
-        - InvoiceItem.update() doesn't throw an error
+        - ListItem.update() doesn't throw an error
         - The field was successfully updated in SharePoint
         """
-        # setup - get invoice
-        invoice = test_items.filter_items(ITEM_KEY)[0]
-        status = invoice.get_val("Status")
+        # setup - get item
+        item = test_items.filter_items(ITEM_KEY)[0]
+        status = item.get_val("Favorite Candy")
         # setup - set update dict
-        if status == "8. Paid":
-            data = {"Status": "Error"}
+        if status == "MilkyWay":
+            data = {"Favorite Candy": "Snickers"}
         else:
-            data = {"Status": "8. Paid"}
+            data = {"Favorite Candy": "MilkyWay"}
         # execution
-        invoice.update(data)
+        item.update(data)
         result = test_list.get_item_by_key(ITEM_KEY)
-        new_status = result.get_val("Status")
+        new_status = result.get_val("Favorite Candy")
         # validation
         assert status != new_status
-        assert new_status == data["Status"]
+        assert new_status == data["Favorite Candy"]
