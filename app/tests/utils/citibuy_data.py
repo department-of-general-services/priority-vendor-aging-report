@@ -26,6 +26,9 @@ PO_RECORDS = {
         "agency": "DGS",
         "cost": 0.00,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
     "po1_1": {
         "po_nbr": "111",
@@ -35,6 +38,9 @@ PO_RECORDS = {
         "agency": "DGS",
         "cost": 75.00,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
     "po1_2": {
         "po_nbr": "111",
@@ -44,6 +50,9 @@ PO_RECORDS = {
         "agency": "DPW",
         "cost": 20.00,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
     "po2": {
         "po_nbr": "222",
@@ -53,6 +62,9 @@ PO_RECORDS = {
         "agency": "DGS",
         "cost": 15.50,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
     "po4": {
         "po_nbr": "444",
@@ -62,6 +74,9 @@ PO_RECORDS = {
         "agency": "DPW",
         "cost": 0.00,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
     "po4_1": {
         "po_nbr": "444",
@@ -71,6 +86,9 @@ PO_RECORDS = {
         "agency": "DGS",
         "cost": 10.00,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
     "po5": {
         "po_nbr": "555",
@@ -80,6 +98,9 @@ PO_RECORDS = {
         "agency": "DGS",
         "cost": 20.00,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
     "po6": {
         "po_nbr": "666",
@@ -89,6 +110,9 @@ PO_RECORDS = {
         "agency": "DPW",
         "cost": 20.00,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
     "po7": {
         "po_nbr": "777",
@@ -98,6 +122,9 @@ PO_RECORDS = {
         "agency": "DGS",
         "cost": 0.00,
         "date": None,
+        "buyer": "JOHNSMITH",
+        "desc": "description",
+        "location": "DGS",
     },
 }
 

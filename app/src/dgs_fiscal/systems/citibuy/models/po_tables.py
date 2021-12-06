@@ -13,6 +13,9 @@ class PurchaseOrder(db.Base):
     status = db.Column("CURRENT_HDR_STATUS", db.String)
     date = db.Column("PO_DATE", db.DateTime)
     cost = db.Column("ACTUAL_COST", db.Float(precision=2))
+    desc = db.Column("SHORT_DESC", db.String)
+    buyer = db.Column("PURCHASER", db.String)
+    location = db.Column("LOC_ID", db.String)
     vendor_id = db.Column(
         "VEND_ID",
         db.String,
@@ -28,6 +31,9 @@ class PurchaseOrder(db.Base):
         "date",
         "cost",
         "vendor_id",
+        "desc",
+        "location",
+        "buyer",
     )
 
 
