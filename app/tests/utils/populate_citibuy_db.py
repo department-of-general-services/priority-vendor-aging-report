@@ -33,8 +33,14 @@ def populate_db(session: Session) -> None:
     pos = [models.PurchaseOrder(**po) for po in data.PO_RECORDS.values()]
     invoices = [models.Invoice(**inv) for inv in data.INVOICES.values()]
     contracts = [models.BlanketContract(**c) for c in data.CONTRACTS.values()]
+    addresses = [models.Address(**a) for a in data.ADDRESSES.values()]
+    vendor_addresses = [
+        models.VendorAddress(**va) for va in data.VEN_ADDRESS.values()
+    ]
     add_to_session(session, vendors)
     add_to_session(session, pos)
     add_to_session(session, invoices)
     add_to_session(session, contracts)
+    add_to_session(session, addresses)
+    add_to_session(session, vendor_addresses)
     session.commit()
