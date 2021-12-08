@@ -56,3 +56,6 @@ class Address(db.Base):
     contact = db.Column("CONTACT", db.String)
     phone = db.Column("PH_NBR", db.String)
     email = db.Column("INTERNET_ADDRESS", db.String)
+
+    # column list for query
+    columns = ("address_id", "contact", "phone", "email")

@@ -20,7 +20,7 @@ VENDORS = {
 VEN_ADDRESS = {
     "acme_mail": {
         "vendor_id": "111",
-        "address_id": "222",
+        "address_id": "111",
         "address_type": "M",
         "default": "Y",
     },
@@ -293,13 +293,34 @@ CONTRACTS = {
 }
 
 PO_RESULTS = [
-    {**CONTRACTS["blanket1_DGS"], **PO_RECORDS["po1"], **VENDORS["acme"]},
-    {**CONTRACTS["blanket1_DGS"], **PO_RECORDS["po1_1"], **VENDORS["acme"]},
-    {**CONTRACTS["blanket4"], **PO_RECORDS["po4"], **VENDORS["disney"]},
-    {**CONTRACTS["blanket4"], **PO_RECORDS["po4_1"], **VENDORS["disney"]},
+    {
+        **CONTRACTS["blanket1_DGS"],
+        **PO_RECORDS["po1"],
+        **VENDORS["acme"],
+        **ADDRESSES["acme_mail"],
+    },
+    {
+        **CONTRACTS["blanket1_DGS"],
+        **PO_RECORDS["po1_1"],
+        **VENDORS["acme"],
+        **ADDRESSES["acme_mail"],
+    },
+    {
+        **CONTRACTS["blanket4"],
+        **PO_RECORDS["po4"],
+        **VENDORS["disney"],
+        **ADDRESSES["disney_mail"],
+    },
+    {
+        **CONTRACTS["blanket4"],
+        **PO_RECORDS["po4_1"],
+        **VENDORS["disney"],
+        **ADDRESSES["disney_mail"],
+    },
     {
         **PO_RECORDS["po5"],
         **VENDORS["acme"],
+        **ADDRESSES["acme_mail"],
         "contract_agency": None,
         "start_date": None,
         "end_date": None,
