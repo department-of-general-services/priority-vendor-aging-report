@@ -85,19 +85,32 @@ class CitiBuy:
         po = aliased(models.PurchaseOrder, name="po")
         ven = aliased(models.Vendor, name="v")
         con = aliased(models.BlanketContract, name="c")
+        addr = aliased(models.Address, name="a")
+        va = aliased(models.VendorAddress, name="va")
 
         # extract the columns to include in the query
-        po_cols = [getattr(po, col) for col in po.columns]
-        ven_cols = [getattr(ven, col) for col in ven.columns]
-        con_cols = [getattr(con, col) for col in con.columns]
-        query = sqlalchemy.select(*po_cols, *ven_cols, *con_cols).limit(limit)
+        query = sqlalchemy.select(
+            *[getattr(po, col) for col in po.columns],  # PO columns
+            *[getattr(ven, col) for col in ven.columns],  # Vendor cols
+            *[getattr(con, col) for col in con.columns],  # Contract cols
+            *[getattr(addr, col) for col in addr.columns],  # Address cols
+        ).limit(limit)
 
-        # join the contract and vendor tables
+        # join the contract, vendor, and address tables
         dgs_contract = con.contract_agency.in_(("AGY", "DGS"))
         fkey_contract = (dgs_contract) & (po.po_nbr == con.po_nbr)
         fkey_vendor = po.vendor_id == ven.vendor_id
+        fkey_address = addr.address_id == va.address_id
+        fkey_va = (
+            (va.vendor_id == ven.vendor_id)
+            & (va.address_type == "M")
+            & (va.default == "Y")
+        )
         query = query.join(po, fkey_vendor)
         query = query.join(con, fkey_contract, isouter=True)
+        query = query.join(va, fkey_va, isouter=True)
+        query = query.join(addr, fkey_address, isouter=True)
+        print(query)
 
         # filter for recent blanket contracts and open market POs
         open_market = con.contract_agency.is_(None)

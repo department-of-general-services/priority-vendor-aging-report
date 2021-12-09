@@ -4,13 +4,55 @@ VENDORS = {
     "acme": {
         "vendor_id": "111",
         "name": "Acme",
-        "contact": "Jane Doe",
-        "email": "jane.doe@acme.com",
-        "phone": "(111) 111-1111",
+        "emg_contact": "Jane Doe",
+        "emg_email": "jane.doe@acme.com",
+        "emg_phone": "(111) 111-1111",
     },
     "disney": {
         "vendor_id": "222",
         "name": "Disney",
+        "emg_contact": "Anthony Williams",
+        "emg_email": "anthony.williams@disney.com",
+        "emg_phone": "(222) 222-2222",
+    },
+}
+
+VEN_ADDRESS = {
+    "acme_mail": {
+        "vendor_id": "111",
+        "address_id": "111",
+        "address_type": "M",
+        "default": "Y",
+    },
+    "acme_extra": {
+        "vendor_id": "111",
+        "address_id": "222",
+        "address_type": "R",
+        "default": "Y",
+    },
+    "disney": {
+        "vendor_id": "222",
+        "address_id": "333",
+        "address_type": "M",
+        "default": "Y",
+    },
+}
+
+ADDRESSES = {
+    "acme_mail": {
+        "address_id": "111",
+        "contact": "Jane Doe",
+        "email": "jane.doe@acme.com",
+        "phone": "(111) 111-1111",
+    },
+    "acme_extra": {
+        "address_id": "222",
+        "contact": "John Doe",
+        "email": "john.doe@acme.com",
+        "phone": "(111) 111-1111",
+    },
+    "disney_mail": {
+        "address_id": "333",
         "contact": "Anthony Williams",
         "email": "anthony.williams@disney.com",
         "phone": "(222) 222-2222",
@@ -251,13 +293,34 @@ CONTRACTS = {
 }
 
 PO_RESULTS = [
-    {**CONTRACTS["blanket1_DGS"], **PO_RECORDS["po1"], **VENDORS["acme"]},
-    {**CONTRACTS["blanket1_DGS"], **PO_RECORDS["po1_1"], **VENDORS["acme"]},
-    {**CONTRACTS["blanket4"], **PO_RECORDS["po4"], **VENDORS["disney"]},
-    {**CONTRACTS["blanket4"], **PO_RECORDS["po4_1"], **VENDORS["disney"]},
+    {
+        **CONTRACTS["blanket1_DGS"],
+        **PO_RECORDS["po1"],
+        **VENDORS["acme"],
+        **ADDRESSES["acme_mail"],
+    },
+    {
+        **CONTRACTS["blanket1_DGS"],
+        **PO_RECORDS["po1_1"],
+        **VENDORS["acme"],
+        **ADDRESSES["acme_mail"],
+    },
+    {
+        **CONTRACTS["blanket4"],
+        **PO_RECORDS["po4"],
+        **VENDORS["disney"],
+        **ADDRESSES["disney_mail"],
+    },
+    {
+        **CONTRACTS["blanket4"],
+        **PO_RECORDS["po4_1"],
+        **VENDORS["disney"],
+        **ADDRESSES["disney_mail"],
+    },
     {
         **PO_RECORDS["po5"],
         **VENDORS["acme"],
+        **ADDRESSES["acme_mail"],
         "contract_agency": None,
         "start_date": None,
         "end_date": None,

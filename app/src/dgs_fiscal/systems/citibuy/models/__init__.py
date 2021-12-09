@@ -6,4 +6,8 @@ from dgs_fiscal.systems.citibuy.models.po_tables import (
     PurchaseOrder,
     BlanketContract,
 )
-from dgs_fiscal.systems.citibuy.models.vendor_tables import Vendor
+from dgs_fiscal.systems.citibuy.models.vendor_tables import (
+    Vendor,
+    VendorAddress,
+    Address,
+)
