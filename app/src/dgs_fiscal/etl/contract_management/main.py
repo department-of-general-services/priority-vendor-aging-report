@@ -106,87 +106,85 @@ class ContractManagement:
 
         return ContractData(po=df_po, vendor=df_ven, contract=df_con)
 
-    def update_sharepoint(
+    def update_vendor_list(
         self,
-        citibuy_data: pd.DataFrame,
-        sharepoint_data: pd.DataFrame,
-    ) -> BatchedChanges:
-        """Compares the lists of vendors pulled from CitiBuy to the vendors
-        in SharePoint and returns a list of the changes to make in SharePoint
-
-        Parameters
-        ----------
-        citibuy_data: ContractData
-            An instance of ContractData for the new PO and Vendor records
-            retrieved from CitiBuy
-        sharepoint_data: ContractData
-            An instance of ContractData for the existing PO and Vendor records
-            in SharePoint
+        old: pd.Dataframe,
+        new: pd.DataFrame,
+    ) -> dict:
+        """Updates the list of vendors in sharepoint and returns a mapping of
+        vendor IDs to SharePoint list item IDs
         """
-        # extract the old and new datasets
-        new_po = citibuy_data.po.replace({np.nan: None})
-        old_po = sharepoint_data.po.replace({np.nan: None})
-        new_ven = citibuy_data.vendor
-        old_ven = sharepoint_data.vendor
+        ven_list = self.sharepoint.get_list(self.vendor_list)
 
-        # update the list of vendors
-        ven_changes = self._detect_changes(
-            old_ven.to_dict("records"),
-            new_ven.to_dict("records"),
+        # update sharepoint with changes and additions to vendor list
+        changes = self._detect_changes(
+            old.to_dict("records"),
+            new.to_dict("records"),
             key_col="Vendor ID",
         )
-        print("VEN UPDATES")
-        pprint(ven_changes.updates)
-        print("VEN INSERTS")
-        pprint(ven_changes.inserts)
-        # ven_updates = ven_list.batch_upsert(changes)
+        results = ven_list.batch_upsert(changes)
 
-        # # extract new lookup ids from batch upsert
-        # new_lookup_ids = {}
-        # for update in ven_updates:
-        #     if update["status"] == 201:
-        #         # TODO: Extract Vendor ID and lookup id
-        #         pass
+        # build vendor ID mapping for PO lookup
+        lookups = dict(zip(old["Vendor ID"], old["id"]))
+        for batch in results.inserts:
+            for request in batch:
+                if request["status"] == 201:
+                    ven_id = request["body"]["fields"]["VendorID"]
+                    lookups[ven_id] = request["body"]["id"]
 
-        # create mapping for VendorLookupId
-        # which is needed to populate a lookup field in SharePoint
-        ven_ids = old_ven[["id", "Vendor ID"]].to_dict("records")
-        old_lookup_ids = {item["Vendor ID"]: item["id"] for item in ven_ids}
-        ven_lookup = {**old_lookup_ids}
+        return lookups
 
-        # filter for POs that were closed in CitiBuy since the last run
-        po_closed = old_po[~old_po["Title"].isin(new_po["Title"])].copy()
-        po_closed["Status"] = "3PCO - Closed"
+    def update_contract_list(
+        self,
+        old: pd.Dataframe,
+        new: pd.DataFrame,
+    ) -> dict:
+        """Updates the list of contracts in SharePoint and returns a mapping
+        of contract PO numbers to SharePoint list item IDs
+        """
 
-        # filter for POs that were created in CitiBuy since the last run
-        po_created = new_po[~new_po["Title"].isin(old_po["Title"])].copy()
-        po_created["Vendor ID"] = po_created["Vendor ID"].replace(ven_lookup)
-        po_created = po_created.rename(columns={"Vendor ID": "VendorLookupId"})
+    def update_po_list(
+        self,
+        old: pd.Dataframe,
+        new: pd.DataFrame,
+        vendor_lookup: dict,
+    ) -> dict:
+        """Updates the list of Purchase Orders in SharePoint and returns
+        a mapping of PO and Release numbers to list item IDs
+        """
+        # replace NaN with None for Open Market POs
+        old = old.replace({np.nan: None})
+        new = new.replace({np.nan: None})
 
-        # filter for POs that already existed in SharePoint
-        po_exists = new_po[new_po["Title"].isin(old_po["Title"])].copy()
-        po_exists = po_exists.drop(columns="Vendor ID")
+        # map Vendor ID and PO Number to their lookups
+        new["VendorLookupId"] = new["Vendor ID"].map(vendor_lookup)
+        # new["ContractLookupId"] = new["PO Number"].map(contract_lookups)
+        new = new.drop(columns="Vendor ID")
 
-        # update closed POs
-        po_closings = BatchedChanges()
-        for po in po_closed.to_dict("records"):
-            po_closings.updates[po["id"]] = {"Status": po["Status"]}
+        # create filter POs that were added and closed in CitiBuy
+        added = ~new["Title"].isin(old["Title"])
+        closed = ~old["Title"].isin(new["Title"])
+
+        # update POs that were closed since the last run
+        closings = pd.Series("3PCO - Closed", old[closed]["id"])
+        closings = BatchedChanges(updates=closings.to_dict())
         print("CLOSINGS")
-        pprint(po_closings.updates)
+        pprint(closings.updates)
 
-        # insert new POs
-        po_inserts = BatchedChanges(inserts=po_created.to_dict("records"))
+        # add POs that were created since the last run
+        created = BatchedChanges(inserts=new[added].to_dict("records"))
         print("PO INSERTS")
-        pprint(po_inserts.inserts)
+        pprint(created.inserts)
 
-        # update existing POs
-        po_changes = self._detect_changes(
-            old_po.to_dict("records"),
-            po_exists.to_dict("records"),
+        # update POs that already existed in SharePoint
+        exists = new[~added].drop(columns="VendorLookupId")
+        changes = self._detect_changes(
+            old.to_dict("records"),
+            exists.to_dict("records"),
             key_col="Title",
         )
         print("PO CHANGES")
-        pprint(po_changes.updates)
+        pprint(changes.updates)
 
     def _get_unique(self, df: pd.DataFrame, cols: dict) -> pd.DataFrame:
         """Isolates and dedupes a subset of the colums from a dataframe"""

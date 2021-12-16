@@ -97,31 +97,43 @@ class TestContractManagement:
         for col in po_cols:
             assert col in output.po.columns
 
-    def test_reconcile_lists(self, mock_contract):
-        """Tests that the reconcile_lists() method executes correctly
+
+class TestUpdateLists:
+    """Tests the class methods that update the items in sharepoint lists
+    for Vendors, Contracts, and Purchase Orders
+    """
+
+    def test_update_vendor_list(self, mock_contract):
+        """Tests that the update_vendor_list() method executes correctly
 
         Validates the following conditions:
-        -
+        - It returns a dictionary that maps vendor IDs to list item ids
+        - The BatchedChanges instance contains the correct set of updates and
+          inserts
         """
         # setup
-        po_citibuy = pd.DataFrame(data.CITIBUY["po"])
-        ven_citibuy = pd.DataFrame(data.CITIBUY["vendor"])
-        con_citibuy = pd.DataFrame(data.CITIBUY["contract"])
-        po_sharepoint = pd.DataFrame(data.SHAREPOINT["po"])
-        ven_sharepoint = pd.DataFrame(data.SHAREPOINT["vendor"])
-        con_sharepoint = pd.DataFrame(data.SHAREPOINT["contract"])
-        citibuy = ContractData(
-            po=po_citibuy,
-            vendor=ven_citibuy,
-            contract=con_citibuy,
-        )
-        sharepoint = ContractData(
-            po=po_sharepoint,
-            vendor=ven_sharepoint,
-            contract=con_sharepoint,
-        )
+        ven_ids = {"111", "222", "333"}
+        citibuy = pd.DataFrame(data.CITIBUY["vendor"])
+        sharepoint = pd.DataFrame(data.SHAREPOINT["vendor"])
         # execution
-        output = mock_contract.update_sharepoint(citibuy, sharepoint)
-        print(output)
+        output = mock_contract.update_vendor_list(sharepoint, citibuy)
         # validation
-        assert 1
+        assert set(output.keys()) == ven_ids
+        assert output.get("333") is not None
+
+    def test_update_po_list(self, mock_contract):
+        """Tests that the update_vendor_list() method executes correctly
+
+        Validates the following conditions:
+        - It returns a dictionary that maps vendor IDs to list item ids
+        - The BatchedChanges instance contains the correct set of updates and
+          inserts
+        """
+        # setup
+        ven_mapping = {"111": "3", "222": "2", "333": "3"}
+        citibuy = pd.DataFrame(data.CITIBUY["po"])
+        sharepoint = pd.DataFrame(data.SHAREPOINT["po"])
+        # execution
+        mock_contract.update_po_list(sharepoint, citibuy, ven_mapping)
+        # validation
+        assert 0

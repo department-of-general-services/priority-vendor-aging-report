@@ -19,6 +19,9 @@ CITIBUY = {
         "contact": "Point of Contact",
         "email": "Email",
         "phone": "Phone",
+        "emg_contact": "Emergency Contact",
+        "emg_email": "Emergency Email",
+        "emg_phone": "Emergency Phone",
     },
     "contract_cols": {
         "contract_title": "Title",
