@@ -110,7 +110,6 @@ class CitiBuy:
         query = query.join(con, fkey_contract, isouter=True)
         query = query.join(va, fkey_va, isouter=True)
         query = query.join(addr, fkey_address, isouter=True)
-        print(query)
 
         # filter for recent blanket contracts and open market POs
         open_market = con.contract_agency.is_(None)
