@@ -6,6 +6,10 @@ from dgs_fiscal.etl.contract_management import ContractData, constants
 
 from tests.integration_tests.contract_management import data
 
+PO_COLS = list(constants.CITIBUY["po_cols"].values())
+VEN_COLS = list(constants.CITIBUY["vendor_cols"].values())
+CON_COLS = list(constants.CITIBUY["contract_cols"].values())
+
 
 @pytest.fixture(scope="session", name="mock_contract")
 def fixture_contract(mock_db):
@@ -42,9 +46,6 @@ class TestContractManagement:
         - The PO Type has been set correctly
         """
         # setup
-        po_cols = list(constants.CITIBUY["po_cols"].values())
-        ven_cols = list(constants.CITIBUY["vendor_cols"].values())
-        con_cols = list(constants.CITIBUY["contract_cols"].values())
         po_types = [
             "Master Blanket",
             "Release",
@@ -64,9 +65,9 @@ class TestContractManagement:
         release_title = df_po.loc[1, "Title"]
         # validation
         assert isinstance(output, ContractData)
-        assert list(df_po.columns) == po_cols
-        assert list(df_ven.columns) == ven_cols
-        assert list(df_con.columns) == con_cols
+        assert list(df_po.columns) == PO_COLS
+        assert list(df_ven.columns) == VEN_COLS
+        assert list(df_con.columns) == CON_COLS
         assert len(df_ven) == 2
         assert blanket_title == "P111"
         assert release_title == "P111:1"
@@ -80,10 +81,6 @@ class TestContractManagement:
         - The Vendor column in the PO data has been matched with Vendor ID
         - The names of the columns match the output of get_citibuy_data()
         """
-        # setup
-        po_cols = list(constants.CITIBUY["po_cols"].values())
-        ven_cols = list(constants.CITIBUY["vendor_cols"].values())
-        po_cols.remove("Vendor ID")
         # execution
         output = mock_contract.get_sharepoint_data()
         print(output.po)
@@ -92,9 +89,9 @@ class TestContractManagement:
         assert isinstance(output, ContractData)
         assert "id" in output.po.columns
         assert "id" in output.vendor.columns
-        for col in ven_cols:
+        for col in VEN_COLS:
             assert col in output.vendor.columns
-        for col in po_cols:
+        for col in PO_COLS:
             assert col in output.po.columns
 
 
