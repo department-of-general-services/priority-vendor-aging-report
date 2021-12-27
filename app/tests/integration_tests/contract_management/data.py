@@ -3,7 +3,7 @@ from datetime import datetime
 CITIBUY = {
     "po": {
         "Title": ["P111", "P111:2", "P111:3", "P333", "P444"],
-        "PO Number": ["111", "111", "111", "333", "333"],
+        "PO Number": ["P111", "P111", "P111", "P333", "P444"],
         "Release Number": [0, 2, 3, 0, 0],
         "PO Type": [
             "Master Blanket",
