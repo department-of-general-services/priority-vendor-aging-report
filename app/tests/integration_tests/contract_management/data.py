@@ -26,7 +26,7 @@ CITIBUY = {
             datetime(2020, 7, 1),
             datetime(2020, 7, 1),
             datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
+            None,
         ],
     },
     "vendor": {
@@ -84,7 +84,7 @@ SHAREPOINT = {
         "Title": ["P111", "P222"],
         "Dollar Limit": [150, 100],
         "Amount Spent": [100, 100],
-        "Start Date": [datetime(2020, 7, 1), datetime(2020, 7, 1)],
+        "Start Date": [datetime(2020, 7, 1), None],
         "End Date": [datetime(2050, 7, 1), datetime(2050, 7, 1)],
         "Vendor": ["Acme", "Disney"],
     },

@@ -166,11 +166,15 @@ class ContractManagement:
 
         # map Vendor ID to its lookup id
         new["VendorLookupId"] = new["Vendor"].map(vendor_lookup)
+        new = new.replace({np.nan: None})  # replaces NaN to prevent error
 
         # convert datetime cols to string to avoid serialization error
         for col in ["Start Date", "End Date"]:
             for df in [old, new]:
+                df[col] = pd.to_datetime(df[col])
                 df[col] = df[col].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+                # replaces NaT to prevent error
+                df[col] = df[col].replace({pd.NaT: None})
 
         # create filter for contracts that were added in CitiBuy
         added = ~new["Title"].isin(old["Title"])
@@ -211,7 +215,10 @@ class ContractManagement:
 
         # convert datetime cols to string to avoid serialization error
         for df in [old, new]:
+            df["PO Date"] = pd.to_datetime(df["PO Date"])
             df["PO Date"] = df["PO Date"].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+            # replaces NaT to prevent error
+            df["PO Date"] = df["PO Date"].replace({pd.NaT: None})
 
         # create filter for POs that were added and closed in CitiBuy
         added = ~new["Title"].isin(old["Title"])
