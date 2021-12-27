@@ -25,7 +25,6 @@ def fixture_contract(mock_db):
     return contract
 
 
-@pytest.mark.skip
 class TestContractManagement:
     """Tests the ContractManagement class methods"""
 
@@ -105,7 +104,6 @@ class TestUpdateLists:
     for Vendors, Contracts, and Purchase Orders
     """
 
-    @pytest.mark.skip
     def test_update_vendor_list(self, mock_contract):
         """Tests that the update_vendor_list() method executes correctly
 
@@ -132,6 +130,15 @@ class TestUpdateLists:
           inserts
         """
         # setup - create dummy data
+        po_mapping = {
+            "P111",
+            "P111:1",
+            "P111:2",
+            "P222",
+            "P444",
+            "P111:3",
+            "P333",
+        }
         citibuy = pd.DataFrame(data.CITIBUY["po"])
         sharepoint = pd.DataFrame(data.SHAREPOINT["po"])
         # setup - make sure dummy cols match constants
@@ -139,9 +146,17 @@ class TestUpdateLists:
         for col in PO_COLS:
             assert col in sharepoint.columns
         # execution
-        mock_contract.update_po_list(sharepoint, citibuy, VEN_MAPPING)
+        output = mock_contract.update_po_list(
+            sharepoint,
+            citibuy,
+            VEN_MAPPING,
+            CON_MAPPING,
+        )
+        print(output)
         # validation
-        assert 0
+        assert set(output.keys()) == po_mapping
+        for po_nbr in ["P111:3", "P333", "P444"]:
+            assert output.get(po_nbr) is not None
 
     def test_update_contract_list(self, mock_contract):
         """Tests that the update_contract_list() method executes correctly

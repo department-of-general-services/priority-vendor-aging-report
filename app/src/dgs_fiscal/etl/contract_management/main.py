@@ -1,7 +1,6 @@
 from __future__ import annotations  # prevents NameError for typehints
 from typing import List
 from dataclasses import dataclass
-from pprint import pprint
 
 import pandas as pd
 import numpy as np
@@ -65,8 +64,8 @@ class ContractManagement:
         release = df["release_nbr"].astype(str)
         df["po_title"] = np.where(
             release == "0",  # when release number is 0
-            "P" + df["po_nbr"],  # drop it from the title: 'P12345'
-            "P" + df["po_nbr"] + ":" + release,  # otherwise: 'P12345:1'
+            df["po_nbr"],  # exclude it from the title: 'P12345'
+            df["po_nbr"] + ":" + release,  # otherwise append it: 'P12345:1'
         )
 
         # sets the PO type
@@ -187,8 +186,6 @@ class ContractManagement:
 
         # add contracts that were created since the last run
         created = BatchedChanges(inserts=new[added].to_dict("records"))
-        print("INSERTS")
-        pprint(created.inserts)
         created = con_list.batch_upsert(created)
 
         # return mapping of PO Number to list item id: {"P12345": "1"}
@@ -199,36 +196,39 @@ class ContractManagement:
         old: pd.Dataframe,
         new: pd.DataFrame,
         vendor_lookup: dict,
+        contract_lookup: dict,
     ) -> dict:
         """Updates the list of Purchase Orders in SharePoint and returns
         a mapping of PO and Release numbers to list item IDs
         """
-        # replace NaN with None for Open Market POs
-        old = old.replace({np.nan: None})
-        new = new.replace({np.nan: None})
+        # instantiate the list class
+        po_list = self.sharepoint.get_list(self.po_list)
 
         # map Vendor ID and PO Number to their lookups
         new["VendorLookupId"] = new["Vendor"].map(vendor_lookup)
-        # new["ContractLookupId"] = new["PO Number"].map(contract_lookups)
+        new["ContractLookupId"] = new["PO Number"].map(contract_lookup)
+        new = new.replace({np.nan: None})  # replaces NaN to prevent error
 
         # convert datetime cols to string to avoid serialization error
         for df in [old, new]:
-            df["PO Date"] = df["PO Date"].dt.strftime("%Y-%m-%dT%H:%M:%S")
+            df["PO Date"] = df["PO Date"].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         # create filter for POs that were added and closed in CitiBuy
         added = ~new["Title"].isin(old["Title"])
         closed = ~old["Title"].isin(new["Title"])
 
-        # update POs that were closed since the last run
-        closings = pd.Series("3PCO - Closed", old[closed]["id"])
-        closings = BatchedChanges(updates=closings.to_dict())
-        print("CLOSINGS")
-        pprint(closings.updates)
+        # create update dict for closed POs: {"1": {"Status": "3PCO - Closed"}}
+        close_ids = old[closed]["id"]
+        close_status = [{"Status": "3PCO - Closed"}] * len(close_ids)
+        close_updates = dict(zip(close_ids, close_status))
+
+        # update POs that were closed since last run
+        closings = BatchedChanges(updates=close_updates)
+        closings = po_list.batch_upsert(closings)
 
         # add POs that were created since the last run
         created = BatchedChanges(inserts=new[added].to_dict("records"))
-        print("PO INSERTS")
-        pprint(created.inserts)
+        created = po_list.batch_upsert(created)
 
         # update POs that already existed in SharePoint
         exists = new[~added].drop(columns="VendorLookupId")
@@ -237,8 +237,9 @@ class ContractManagement:
             exists.to_dict("records"),
             key_col="Title",
         )
-        print("PO CHANGES")
-        pprint(changes.updates)
+        changes = po_list.batch_upsert(changes)
+
+        return self._map_lookup_ids(old, created, "Title")
 
     def _get_unique(self, df: pd.DataFrame, cols: dict) -> pd.DataFrame:
         """Isolates and dedupes a subset of the colums from a dataframe"""
@@ -319,11 +320,13 @@ class ContractManagement:
         dict
             Returns a dictionary mapping of values to id: {"P12345": "1"}
         """
+        # TODO: More robust solution for API col name
+        api_col = col.replace(" ", "")
         lookups = dict(zip(old_items[col], old_items["id"]))
         for batch in new_items.inserts:
             for request in batch:
                 if request["status"] == 201:
-                    lookup_val = request["body"]["fields"][col]
+                    lookup_val = request["body"]["fields"][api_col]
                     lookups[lookup_val] = request["body"]["id"]
         return lookups
 

@@ -61,7 +61,7 @@ ADDRESSES = {
 
 PO_RECORDS = {
     "po1": {
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 0,
         "vendor_id": "111",
         "status": "3PS",
@@ -73,7 +73,7 @@ PO_RECORDS = {
         "location": "DGS",
     },
     "po1_1": {
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 1,
         "vendor_id": "111",
         "status": "3PPR",
@@ -85,7 +85,7 @@ PO_RECORDS = {
         "location": "DGS",
     },
     "po1_2": {
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 2,
         "vendor_id": "222",
         "status": "3PPR",
@@ -97,7 +97,7 @@ PO_RECORDS = {
         "location": "DGS",
     },
     "po2": {
-        "po_nbr": "222",
+        "po_nbr": "P222",
         "release_nbr": 0,
         "vendor_id": "222",
         "status": "3PCO",
@@ -109,7 +109,7 @@ PO_RECORDS = {
         "location": "DGS",
     },
     "po4": {
-        "po_nbr": "444",
+        "po_nbr": "P444",
         "release_nbr": 0,
         "vendor_id": "222",
         "status": "3PS",
@@ -121,7 +121,7 @@ PO_RECORDS = {
         "location": "DGS",
     },
     "po4_1": {
-        "po_nbr": "444",
+        "po_nbr": "P444",
         "release_nbr": 1,
         "vendor_id": "222",
         "status": "3PPR",
@@ -133,7 +133,7 @@ PO_RECORDS = {
         "location": "DGS",
     },
     "po5": {
-        "po_nbr": "555",
+        "po_nbr": "P555",
         "release_nbr": 0,
         "vendor_id": "111",
         "status": "3PS",
@@ -145,7 +145,7 @@ PO_RECORDS = {
         "location": "DGS",
     },
     "po6": {
-        "po_nbr": "666",
+        "po_nbr": "P666",
         "release_nbr": 0,
         "vendor_id": "111",
         "status": "3PS",
@@ -157,7 +157,7 @@ PO_RECORDS = {
         "location": "DGS",
     },
     "po7": {
-        "po_nbr": "777",
+        "po_nbr": "P777",
         "release_nbr": 0,
         "vendor_id": "222",
         "status": "3PCO",
@@ -173,7 +173,7 @@ PO_RECORDS = {
 INVOICES = {
     "inv1": {
         "id": "invoice1",
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 1,
         "vendor_id": "111",
         "invoice_number": "Invoice#1",
@@ -183,7 +183,7 @@ INVOICES = {
     },
     "inv2": {
         "id": "invoice2",
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 1,
         "vendor_id": "111",
         "invoice_number": "Invoice#2",
@@ -193,7 +193,7 @@ INVOICES = {
     },
     "inv3": {
         "id": "invoice3",
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 1,
         "vendor_id": "111",
         "invoice_number": "Invoice#2",
@@ -203,7 +203,7 @@ INVOICES = {
     },
     "inv4": {
         "id": "invoice4",
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 1,
         "vendor_id": "111",
         "invoice_number": "Invoice#3",
@@ -213,7 +213,7 @@ INVOICES = {
     },
     "disney_inv5": {
         "id": "invoice5",
-        "po_nbr": "222",
+        "po_nbr": "P222",
         "release_nbr": 0,
         "vendor_id": "222",
         "invoice_number": "#1",
@@ -223,7 +223,7 @@ INVOICES = {
     },
     "disney_inv6": {
         "id": "invoice6",
-        "po_nbr": "222",
+        "po_nbr": "P222",
         "release_nbr": 0,
         "vendor_id": "222",
         "invoice_number": "#2",
@@ -233,7 +233,7 @@ INVOICES = {
     },
     "disney_inv7": {
         "id": "invoice7",
-        "po_nbr": "333",
+        "po_nbr": "P333",
         "release_nbr": 0,
         "vendor_id": "222",
         "invoice_number": "#3",
@@ -243,7 +243,7 @@ INVOICES = {
     },
     "disney_inv8": {
         "id": "invoice8",
-        "po_nbr": "444",
+        "po_nbr": "P444",
         "release_nbr": 1,
         "vendor_id": "222",
         "invoice_number": "#4",
@@ -255,7 +255,7 @@ INVOICES = {
 
 CONTRACTS = {
     "blanket1_DGS": {
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 0,
         "contract_agency": "DGS",
         "start_date": datetime(2020, 7, 1),
@@ -264,7 +264,7 @@ CONTRACTS = {
         "dollar_spent": 50.00,
     },
     "blanket1_DPW": {
-        "po_nbr": "111",
+        "po_nbr": "P111",
         "release_nbr": 0,
         "contract_agency": "DPW",
         "start_date": datetime(2020, 7, 1),
@@ -273,7 +273,7 @@ CONTRACTS = {
         "dollar_spent": 50.00,
     },
     "blanket4": {
-        "po_nbr": "444",
+        "po_nbr": "P444",
         "release_nbr": 0,
         "contract_agency": "AGY",
         "start_date": datetime(2021, 7, 1),
@@ -282,7 +282,7 @@ CONTRACTS = {
         "dollar_spent": 10.00,
     },
     "blanket7": {
-        "po_nbr": "777",
+        "po_nbr": "P777",
         "release_nbr": 0,
         "contract_agency": "DGS",
         "start_date": datetime(2010, 7, 1),
