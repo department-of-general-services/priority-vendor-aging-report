@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 from dgs_fiscal.systems import CitiBuy, SharePoint
-from dgs_fiscal.systems.sharepoint import BatchedChanges
+from dgs_fiscal.systems.sharepoint import BatchedChanges, BatchResults
 from dgs_fiscal.etl.contract_management import constants
 
 
@@ -61,14 +61,13 @@ class ContractManagement:
         # get PO data from citibuy
         df = self.citibuy.get_purchase_orders().dataframe
 
-        # set the PO and Blanket title
+        # set the PO title
         release = df["release_nbr"].astype(str)
         df["po_title"] = np.where(
             release == "0",  # when release number is 0
             "P" + df["po_nbr"],  # drop it from the title: 'P12345'
             "P" + df["po_nbr"] + ":" + release,  # otherwise: 'P12345:1'
         )
-        df["contract_title"] = df["po_nbr"] + "- Blanket"
 
         # sets the PO type
         blanket_po = (release == "0") & (df["start_date"].notna())
@@ -113,6 +112,18 @@ class ContractManagement:
     ) -> dict:
         """Updates the list of vendors in sharepoint and returns a mapping of
         vendor IDs to SharePoint list item IDs
+
+        Parameters
+        ----------
+        old: pd.DataFrame
+            A dataframe of the existing vendor data in SharePoint
+        new: pd.DataFrame
+            A dataframe of the new contract data from CitiBuy
+
+        Returns
+        -------
+        dict
+            A lookup dictionary that maps Vendor ID to list item id
         """
         ven_list = self.sharepoint.get_list(self.vendor_list)
 
@@ -124,24 +135,64 @@ class ContractManagement:
         )
         results = ven_list.batch_upsert(changes)
 
-        # build vendor ID mapping for PO lookup
-        lookups = dict(zip(old["Vendor ID"], old["id"]))
-        for batch in results.inserts:
-            for request in batch:
-                if request["status"] == 201:
-                    ven_id = request["body"]["fields"]["VendorID"]
-                    lookups[ven_id] = request["body"]["id"]
-
-        return lookups
+        # return mapping of Vendor ID to list item id: {"54321": "1"}
+        return self._map_lookup_ids(old, results, "Vendor ID")
 
     def update_contract_list(
         self,
         old: pd.Dataframe,
         new: pd.DataFrame,
+        vendor_lookup: dict,
     ) -> dict:
         """Updates the list of contracts in SharePoint and returns a mapping
         of contract PO numbers to SharePoint list item IDs
+
+        Parameters
+        ----------
+        old: pd.DataFrame
+            A dataframe of the existing contract data in SharePoint
+        new: pd.DataFrame
+            A dataframe of the new contract data from CitiBuy
+        vendor_lookup: dict
+            A mapping of Vendor ID to list item id in the Vendors list, this is
+            used to set the value of the Vendor lookup column
+
+        Returns
+        -------
+        dict
+            A lookup dictionary that maps PO Number to list item id
         """
+        # instantiate the list class
+        con_list = self.sharepoint.get_list(self.contract_list)
+
+        # map Vendor ID to its lookup id
+        new["VendorLookupId"] = new["Vendor"].map(vendor_lookup)
+
+        # convert datetime cols to string to avoid serialization error
+        for col in ["Start Date", "End Date"]:
+            for df in [old, new]:
+                df[col] = df[col].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        # create filter for contracts that were added in CitiBuy
+        added = ~new["Title"].isin(old["Title"])
+
+        # update contracts that already existed in SharePoint
+        exists = new[~added].drop(columns="VendorLookupId")
+        changes = self._detect_changes(
+            old.to_dict("records"),
+            exists.to_dict("records"),
+            key_col="Title",
+        )
+        changes = con_list.batch_upsert(changes)
+
+        # add contracts that were created since the last run
+        created = BatchedChanges(inserts=new[added].to_dict("records"))
+        print("INSERTS")
+        pprint(created.inserts)
+        created = con_list.batch_upsert(created)
+
+        # return mapping of PO Number to list item id: {"P12345": "1"}
+        return self._map_lookup_ids(old, created, "Title")
 
     def update_po_list(
         self,
@@ -157,11 +208,14 @@ class ContractManagement:
         new = new.replace({np.nan: None})
 
         # map Vendor ID and PO Number to their lookups
-        new["VendorLookupId"] = new["Vendor ID"].map(vendor_lookup)
+        new["VendorLookupId"] = new["Vendor"].map(vendor_lookup)
         # new["ContractLookupId"] = new["PO Number"].map(contract_lookups)
-        new = new.drop(columns="Vendor ID")
 
-        # create filter POs that were added and closed in CitiBuy
+        # convert datetime cols to string to avoid serialization error
+        for df in [old, new]:
+            df["PO Date"] = df["PO Date"].dt.strftime("%Y-%m-%dT%H:%M:%S")
+
+        # create filter for POs that were added and closed in CitiBuy
         added = ~new["Title"].isin(old["Title"])
         closed = ~old["Title"].isin(new["Title"])
 
@@ -232,6 +286,46 @@ class ContractManagement:
                     break
 
         return changes
+
+    def _map_lookup_ids(
+        self,
+        old_items: pd.Dataframe,
+        new_items: BatchResults,
+        col: str,
+    ) -> dict:
+        """Creates a lookup dictionary that maps a column value to the id of
+        the SharePoint list item with that value
+
+        It's necessary to build this mapping because in order to set a lookup
+        field in a SharePoint list item, we need to pass the id of the item in
+        the parent list. This mapping allows us to substitute the lookup value
+        in the child list with the id of the corresponding item in parent list,
+        e.g. replacing the value of Vendor ID in the Purchase Orders list with
+        the list item id for that vendor in the Vendors List
+
+        Parameters
+        ----------
+        old_items: pd.DataFrame
+            A dataframe of the list items already in SharePoint
+        new_items: BatchResults
+            The BatchResults instance returned after inserting new items into
+            SharePoint
+        col: str
+            The column used to map lookup values in the child list to ids in
+            the parent list
+
+        Returns
+        -------
+        dict
+            Returns a dictionary mapping of values to id: {"P12345": "1"}
+        """
+        lookups = dict(zip(old_items[col], old_items["id"]))
+        for batch in new_items.inserts:
+            for request in batch:
+                if request["status"] == 201:
+                    lookup_val = request["body"]["fields"][col]
+                    lookups[lookup_val] = request["body"]["id"]
+        return lookups
 
 
 @dataclass

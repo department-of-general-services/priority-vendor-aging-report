@@ -37,7 +37,7 @@ CITIBUY = {
         "Phone": ["111-111-1111", "333-333-3333"],
     },
     "contract": {
-        "Title": ["P111", "333"],
+        "Title": ["P111", "P333"],
         "Dollar Limit": [150, 200],
         "Amount Spent": [125, 0],
         "Start Date": [datetime(2020, 7, 1), datetime(2020, 7, 1)],
