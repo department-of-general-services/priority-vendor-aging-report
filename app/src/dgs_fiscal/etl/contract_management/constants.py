@@ -4,8 +4,7 @@ CITIBUY = {
         "po_nbr": "PO Number",
         "release_nbr": "Release Number",
         "po_type": "PO Type",
-        "vendor_id": "Vendor ID",
-        "name": "Vendor",
+        "vendor_id": "Vendor",
         "status": "Status",
         "cost": "Actual Cost",
         "date": "PO Date",
@@ -24,11 +23,11 @@ CITIBUY = {
         "emg_phone": "Emergency Phone",
     },
     "contract_cols": {
-        "contract_title": "Title",
-        "po_nbr": "PO Number",
+        "po_nbr": "Title",
         "dollar_limit": "Dollar Limit",
         "dollar_spent": "Amount Spent",
         "start_date": "Start Date",
         "end_date": "End Date",
+        "vendor_id": "Vendor",
     },
 }

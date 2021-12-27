@@ -2,20 +2,27 @@ from datetime import datetime
 
 CITIBUY = {
     "po": {
-        "Title": ["P111", "P111:2", "P111:3", "P333"],
-        "PO Number": ["111", "111", "111", "333"],
-        "Release Number": [0, 2, 3, 0],
-        "Vendor ID": ["111", "111", "111", "333"],
-        "Vendor": ["Acme", "Acme", "Acme", "Apple"],
+        "Title": ["P111", "P111:2", "P111:3", "P333", "P444"],
+        "PO Number": ["111", "111", "111", "333", "333"],
+        "Release Number": [0, 2, 3, 0, 0],
+        "PO Type": [
+            "Master Blanket",
+            "Release",
+            "Release",
+            "Open Market",
+            "Master Blanket",
+        ],
+        "Vendor": ["111", "111", "111", "333", "333"],
         "Status": [
             "3PS - Sent",
             "3PPR - Partial Receipt",
             "3PPR - Partial Receipt",
             "3PS - Sent",
+            "3PS - Sent",
         ],
-        "PO Type": ["Master Blanket", "Release", "Release", "Open Market"],
-        "Actual Cost": [0, 150, 100, 25],
+        "Actual Cost": [0, 150, 100, 25, 0],
         "PO Date": [
+            datetime(2020, 7, 1),
             datetime(2020, 7, 1),
             datetime(2020, 7, 1),
             datetime(2020, 7, 1),
@@ -30,11 +37,12 @@ CITIBUY = {
         "Phone": ["111-111-1111", "333-333-3333"],
     },
     "contract": {
-        "PO Number": ["P111"],
-        "Dollar Limit": [150],
-        "Amount Spent": [0],
-        "Start Date": [datetime(2020, 7, 1)],
-        "End Date": [datetime(2050, 7, 1)],
+        "Title": ["P111", "P333"],
+        "Dollar Limit": [150, 200],
+        "Amount Spent": [125, 0],
+        "Start Date": [datetime(2020, 7, 1), datetime(2020, 7, 1)],
+        "End Date": [datetime(2050, 7, 1), datetime(2050, 7, 1)],
+        "Vendor": ["111", "333"],
     },
 }
 
@@ -44,8 +52,7 @@ SHAREPOINT = {
         "Title": ["P111", "P111:1", "P111:2", "P222"],
         "PO Number": ["111", "111", "111", "222"],
         "Release Number": [0, 1, 2, 0],
-        "PO Type": ["Master Blanket", "Release", "Release", "Open Market"],
-        "Vendor ID": ["111", "111", "111", "222"],
+        "PO Type": ["Master Blanket", "Release", "Release", "Master Blanket"],
         "Vendor": ["Acme", "Acme", "Acme", "Disney"],
         "Status": [
             "3PS - Sent",
@@ -73,10 +80,12 @@ SHAREPOINT = {
         "Vendor ID": ["111", "222"],
     },
     "contract": {
-        "Title": "P111",
-        "Dollar Limit": [150],
-        "Amount Spent": [100],
-        "Start Date": [datetime(2020, 7, 1)],
-        "End Date": [datetime(2050, 7, 1)],
+        "id": ["1", "2"],
+        "Title": ["P111", "P222"],
+        "Dollar Limit": [150, 100],
+        "Amount Spent": [100, 100],
+        "Start Date": [datetime(2020, 7, 1), datetime(2020, 7, 1)],
+        "End Date": [datetime(2050, 7, 1), datetime(2050, 7, 1)],
+        "Vendor": ["Acme", "Disney"],
     },
 }

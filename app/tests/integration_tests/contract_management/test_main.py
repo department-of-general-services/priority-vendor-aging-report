@@ -6,6 +6,12 @@ from dgs_fiscal.etl.contract_management import ContractData, constants
 
 from tests.integration_tests.contract_management import data
 
+PO_COLS = list(constants.CITIBUY["po_cols"].values())
+VEN_COLS = list(constants.CITIBUY["vendor_cols"].values())
+CON_COLS = list(constants.CITIBUY["contract_cols"].values())
+VEN_MAPPING = {"111": "3", "222": "2", "333": "11"}
+CON_MAPPING = {"P111": "1", "P222": "2", "P333": "3"}
+
 
 @pytest.fixture(scope="session", name="mock_contract")
 def fixture_contract(mock_db):
@@ -19,6 +25,7 @@ def fixture_contract(mock_db):
     return contract
 
 
+@pytest.mark.skip
 class TestContractManagement:
     """Tests the ContractManagement class methods"""
 
@@ -42,9 +49,6 @@ class TestContractManagement:
         - The PO Type has been set correctly
         """
         # setup
-        po_cols = list(constants.CITIBUY["po_cols"].values())
-        ven_cols = list(constants.CITIBUY["vendor_cols"].values())
-        con_cols = list(constants.CITIBUY["contract_cols"].values())
         po_types = [
             "Master Blanket",
             "Release",
@@ -64,9 +68,9 @@ class TestContractManagement:
         release_title = df_po.loc[1, "Title"]
         # validation
         assert isinstance(output, ContractData)
-        assert list(df_po.columns) == po_cols
-        assert list(df_ven.columns) == ven_cols
-        assert list(df_con.columns) == con_cols
+        assert list(df_po.columns) == PO_COLS
+        assert list(df_ven.columns) == VEN_COLS
+        assert list(df_con.columns) == CON_COLS
         assert len(df_ven) == 2
         assert blanket_title == "P111"
         assert release_title == "P111:1"
@@ -80,10 +84,6 @@ class TestContractManagement:
         - The Vendor column in the PO data has been matched with Vendor ID
         - The names of the columns match the output of get_citibuy_data()
         """
-        # setup
-        po_cols = list(constants.CITIBUY["po_cols"].values())
-        ven_cols = list(constants.CITIBUY["vendor_cols"].values())
-        po_cols.remove("Vendor ID")
         # execution
         output = mock_contract.get_sharepoint_data()
         print(output.po)
@@ -92,10 +92,12 @@ class TestContractManagement:
         assert isinstance(output, ContractData)
         assert "id" in output.po.columns
         assert "id" in output.vendor.columns
-        for col in ven_cols:
+        for col in VEN_COLS:
             assert col in output.vendor.columns
-        for col in po_cols:
+        for col in PO_COLS:
             assert col in output.po.columns
+        for col in CON_COLS:
+            assert col in output.contract.columns
 
 
 class TestUpdateLists:
@@ -103,6 +105,7 @@ class TestUpdateLists:
     for Vendors, Contracts, and Purchase Orders
     """
 
+    @pytest.mark.skip
     def test_update_vendor_list(self, mock_contract):
         """Tests that the update_vendor_list() method executes correctly
 
@@ -112,28 +115,56 @@ class TestUpdateLists:
           inserts
         """
         # setup
-        ven_ids = {"111", "222", "333"}
         citibuy = pd.DataFrame(data.CITIBUY["vendor"])
         sharepoint = pd.DataFrame(data.SHAREPOINT["vendor"])
         # execution
         output = mock_contract.update_vendor_list(sharepoint, citibuy)
         # validation
-        assert set(output.keys()) == ven_ids
+        assert set(output.keys()) == set(VEN_MAPPING.keys())
         assert output.get("333") is not None
 
     def test_update_po_list(self, mock_contract):
-        """Tests that the update_vendor_list() method executes correctly
+        """Tests that the update_po_list() method executes correctly
 
         Validates the following conditions:
-        - It returns a dictionary that maps vendor IDs to list item ids
+        - It returns a dictionary that maps Title to list item ids
+        - The BatchedChanges instance contains the correct set of updates and
+          inserts
+        """
+        # setup - create dummy data
+        citibuy = pd.DataFrame(data.CITIBUY["po"])
+        sharepoint = pd.DataFrame(data.SHAREPOINT["po"])
+        # setup - make sure dummy cols match constants
+        assert list(citibuy.columns) == PO_COLS
+        for col in PO_COLS:
+            assert col in sharepoint.columns
+        # execution
+        mock_contract.update_po_list(sharepoint, citibuy, VEN_MAPPING)
+        # validation
+        assert 0
+
+    def test_update_contract_list(self, mock_contract):
+        """Tests that the update_contract_list() method executes correctly
+
+        Validates the following conditions:
+        - It returns a dictionary that maps PO Numbers to list item ids
         - The BatchedChanges instance contains the correct set of updates and
           inserts
         """
         # setup
-        ven_mapping = {"111": "3", "222": "2", "333": "3"}
-        citibuy = pd.DataFrame(data.CITIBUY["po"])
-        sharepoint = pd.DataFrame(data.SHAREPOINT["po"])
+        citibuy = pd.DataFrame(data.CITIBUY["contract"])
+        sharepoint = pd.DataFrame(data.SHAREPOINT["contract"])
+        # setup - make sure dummy cols match constants
+        assert list(citibuy.columns) == CON_COLS
+        for col in CON_COLS:
+            assert col in sharepoint.columns
         # execution
-        mock_contract.update_po_list(sharepoint, citibuy, ven_mapping)
+        output = mock_contract.update_contract_list(
+            sharepoint,
+            citibuy,
+            VEN_MAPPING,
+        )
+        print(output)
         # validation
-        assert 0
+        assert set(output.keys()) == set(CON_MAPPING.keys())
+        assert output.get("P333") is not None
