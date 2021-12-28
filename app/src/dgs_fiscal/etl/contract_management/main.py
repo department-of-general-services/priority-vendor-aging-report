@@ -209,6 +209,7 @@ class ContractManagement:
         po_list = self.sharepoint.get_list(self.po_list)
 
         # map Vendor ID and PO Number to their lookups
+        new["Release Number"] = new["Release Number"].astype("int64")
         new["VendorLookupId"] = new["Vendor"].map(vendor_lookup)
         new["ContractLookupId"] = new["PO Number"].map(contract_lookup)
         new = new.replace({np.nan: None})  # replaces NaN to prevent error
