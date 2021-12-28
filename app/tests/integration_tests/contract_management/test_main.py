@@ -9,7 +9,7 @@ from tests.integration_tests.contract_management import data
 PO_COLS = list(constants.CITIBUY["po_cols"].values())
 VEN_COLS = list(constants.CITIBUY["vendor_cols"].values())
 CON_COLS = list(constants.CITIBUY["contract_cols"].values())
-VEN_MAPPING = {"111": "3", "222": "2", "333": "11"}
+VEN_MAPPING = {"111": "1", "222": "2", "333": "11"}
 CON_MAPPING = {"P111": "1", "P222": "2", "P333": "3"}
 
 
