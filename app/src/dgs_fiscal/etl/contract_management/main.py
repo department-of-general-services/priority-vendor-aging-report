@@ -126,16 +126,23 @@ class ContractManagement:
         """
         ven_list = self.sharepoint.get_list(self.vendor_list)
 
+        # set NaN values to '' to avoid unnecessary updates
+        old = old.fillna("")
+        new = new.fillna("")
+
         # update sharepoint with changes and additions to vendor list
         changes = self._detect_changes(
             old.to_dict("records"),
             new.to_dict("records"),
             key_col="Vendor ID",
         )
+        print(f"Updating {len(changes.updates)} existing vendors")
+        print(f"Inserting {len(changes.inserts)} new vendors")
         results = ven_list.batch_upsert(changes)
 
         # return mapping of Vendor ID to list item id: {"54321": "1"}
-        return self._map_lookup_ids(old, results, "Vendor ID")
+        mapping = self._map_lookup_ids(old, results, "Vendor ID")
+        return mapping, {"upserts": changes}
 
     def update_contract_list(
         self,
@@ -186,10 +193,12 @@ class ContractManagement:
             exists.to_dict("records"),
             key_col="Title",
         )
+        print(f"Updating {len(changes.updates)} existing Blanket POs")
         changes = con_list.batch_upsert(changes)
 
         # add contracts that were created since the last run
         created = BatchedChanges(inserts=new[added].to_dict("records"))
+        print(f"Inserting {len(created.inserts)} new Blanket POs")
         created = con_list.batch_upsert(created)
 
         # return mapping of PO Number to list item id: {"P12345": "1"}

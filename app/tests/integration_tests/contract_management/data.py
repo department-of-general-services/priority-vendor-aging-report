@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import numpy as np
+
 CITIBUY = {
     "po": {
         "Title": ["P111", "P111:2", "P111:3", "P333", "P444"],
@@ -30,11 +32,14 @@ CITIBUY = {
         ],
     },
     "vendor": {
-        "Title": ["Acme", "Apple"],
-        "Vendor ID": ["111", "333"],
-        "Point of Contact": ["Alice Williams", "Steve Jobs"],
-        "Email": ["alice@acme.com", "steve@apple.com"],
-        "Phone": ["111-111-1111", "333-333-3333"],
+        "Title": ["Acme", "Disney", "Apple"],
+        "Vendor ID": ["111", "222", "333"],
+        "Point of Contact": ["Alice Williams", "Mickey Mouse", "Steve Jobs"],
+        "Email": ["alice@acme.com", "mickey@disney.com", "steve@apple.com"],
+        "Phone": ["111-111-1111", "222-222-2222", "333-333-3333"],
+        "Emergency Contact": ["", "", ""],
+        "Emergency Phone": ["", "", ""],
+        "Emergency Email": ["", "", ""],
     },
     "contract": {
         "Title": ["P111", "P333"],
@@ -78,6 +83,9 @@ SHAREPOINT = {
         "Email": ["john@acme.com", "mickey@disney.com"],
         "Phone": ["111-111-1111", "222-222-2222"],
         "Vendor ID": ["111", "222"],
+        "Emergency Contact": [np.nan, np.nan],
+        "Emergency Phone": [np.nan, np.nan],
+        "Emergency Email": [np.nan, np.nan],
     },
     "contract": {
         "id": ["1", "2"],
