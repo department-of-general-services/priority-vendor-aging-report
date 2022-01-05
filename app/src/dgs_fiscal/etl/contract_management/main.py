@@ -78,7 +78,7 @@ class ContractManagement:
         # isloate and format separate dataframes
         df_po = self._get_unique(df, po_cols)
         df_ven = self._get_unique(df, ven_cols)
-        df_con = self._get_unique(df, con_cols)
+        df_con = self._get_unique(df[blanket_po], con_cols)
 
         return ContractData(po=df_po, vendor=df_ven, contract=df_con)
 

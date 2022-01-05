@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import pytest
 import pandas as pd
 
@@ -46,6 +48,7 @@ class TestContractManagement:
         - The columns of ContractData.vendor match the CITIBUY constants
         - The dataframe in ContractData.vendor has been deduped
         - The PO Type has been set correctly
+        - The list of contracts excludes Open Market POs
         """
         # setup
         po_types = [
@@ -71,6 +74,7 @@ class TestContractManagement:
         assert list(df_ven.columns) == VEN_COLS
         assert list(df_con.columns) == CON_COLS
         assert len(df_ven) == 2
+        assert "P555" not in list(df_con["Title"]) #
         assert blanket_title == "P111"
         assert release_title == "P111:1"
         assert list(df_po["PO Type"]) == po_types
