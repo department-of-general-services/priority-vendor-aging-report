@@ -75,7 +75,7 @@ class TestContractManagement:
         assert list(df_ven.columns) == VEN_COLS
         assert list(df_con.columns) == CON_COLS
         assert len(df_ven) == 2
-        assert "P555" not in list(df_con["Title"]) #
+        assert "P555" not in list(df_con["Title"])  #
         assert blanket_title == "P111"
         assert release_title == "P111:1"
         assert list(df_po["PO Type"]) == po_types
@@ -116,6 +116,8 @@ class TestUpdateLists:
         - It returns a dictionary that maps vendor IDs to list item ids
         - The BatchedChanges instance contains the correct set of updates and
           inserts
+        - The method returns a mapping of vendor ids to list item ids and a
+          dictionary the BatchedChanges keyed by type of change
         """
         # setup
         citibuy = pd.DataFrame(data.CITIBUY["vendor"])
@@ -136,7 +138,6 @@ class TestUpdateLists:
         assert len(inserts) == 1
         assert list(updates.keys()) == ["1"]
 
-    @pytest.mark.skip
     def test_update_po_list(self, mock_contract):
         """Tests that the update_po_list() method executes correctly
 
@@ -144,6 +145,8 @@ class TestUpdateLists:
         - It returns a dictionary that maps Title to list item ids
         - The BatchedChanges instance contains the correct set of updates and
           inserts
+        - The method returns a mapping of PO numbers to list item ids and a
+          dictionary the BatchedChanges keyed by type of change
         """
         # setup - create dummy data
         po_mapping = {
@@ -162,17 +165,31 @@ class TestUpdateLists:
         for col in PO_COLS:
             assert col in sharepoint.columns
         # execution
-        output = mock_contract.update_po_list(
-            sharepoint,
-            citibuy,
-            VEN_MAPPING,
-            CON_MAPPING,
+        mapping, changes = mock_contract.update_po_list(
+            old=sharepoint,
+            new=citibuy,
+            vendor_lookup=VEN_MAPPING,
+            contract_lookup=CON_MAPPING,
         )
-        print(output)
+        inserts = changes["inserts"]
+        updates = changes["updates"]
+        closings = changes["closings"]
+        pprint(mapping)
+        pprint(inserts.inserts)
+        pprint(updates.updates)
+        pprint(closings.updates)
         # validation
-        assert set(output.keys()) == po_mapping
+        assert set(mapping.keys()) == po_mapping
         for po_nbr in ["P111:3", "P333", "P444"]:
-            assert output.get(po_nbr) is not None
+            assert mapping.get(po_nbr) is not None
+        assert len(inserts.inserts) == 3
+        assert len(inserts.updates) == 0
+        assert list(updates.updates.keys()) == ["3"]
+        assert len(updates.inserts) == 0
+        assert list(closings.updates.keys()) == ["2", "4"]
+        assert len(closings.inserts) == 0
+        for kind in ["updates", "inserts", "closings"]:
+            assert isinstance(changes[kind], BatchedChanges)
 
     def test_update_contract_list(self, mock_contract):
         """Tests that the update_contract_list() method executes correctly
@@ -181,6 +198,8 @@ class TestUpdateLists:
         - It returns a dictionary that maps PO Numbers to list item ids
         - The BatchedChanges instance contains the correct set of updates and
           inserts
+        - The method returns a mapping of PO numbers to list item ids and a
+          dictionary the BatchedChanges keyed by type of change
         """
         # setup
         citibuy = pd.DataFrame(data.CITIBUY["contract"])
@@ -195,15 +214,17 @@ class TestUpdateLists:
             new=citibuy,
             vendor_lookup=VEN_MAPPING,
         )
-        updates = upserts["updates"].updates
-        inserts = upserts["inserts"].inserts
+        updates = upserts["updates"]
+        inserts = upserts["inserts"]
         pprint(mapping)
-        pprint(updates)
-        pprint(inserts)
+        pprint(updates.updates)
+        pprint(inserts.inserts)
         # validation
         assert set(mapping.keys()) == set(CON_MAPPING.keys())
         assert mapping.get("P333") is not None
-        assert list(updates.keys()) == ["1"]
-        assert len(inserts) == 1
+        assert list(updates.updates.keys()) == ["1"]
+        assert len(updates.inserts) == 0
+        assert len(inserts.inserts) == 1
+        assert len(inserts.updates) == 0
         assert isinstance(upserts["updates"], BatchedChanges)
         assert isinstance(upserts["inserts"], BatchedChanges)

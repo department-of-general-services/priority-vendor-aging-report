@@ -173,7 +173,6 @@ class ContractManagement:
 
         # map Vendor ID to its lookup id
         new["VendorLookupId"] = new["Vendor"].map(vendor_lookup)
-        new = new.drop(columns="Vendor")  # drop col to prevent false updates
         new = new.replace({np.nan: None})  # replaces NaN to prevent error
 
         # convert datetime cols to string to avoid serialization error
@@ -188,7 +187,7 @@ class ContractManagement:
         added = ~new["Title"].isin(old["Title"])
 
         # update contracts that already existed in SharePoint
-        exists = new[~added].drop(columns="VendorLookupId")
+        exists = new[~added].drop(columns=["VendorLookupId", "Vendor"])
         changes = self._detect_changes(
             old.to_dict("records"),
             exists.to_dict("records"),
@@ -244,22 +243,35 @@ class ContractManagement:
 
         # update POs that were closed since last run
         closings = BatchedChanges(updates=close_updates)
-        closings = po_list.batch_upsert(closings)
+        print(f"Closing {len(closings.updates)} existing POs")
+        po_list.batch_upsert(closings)
 
         # add POs that were created since the last run
-        created = BatchedChanges(inserts=new[added].to_dict("records"))
-        created = po_list.batch_upsert(created)
+        inserts = BatchedChanges(inserts=new[added].to_dict("records"))
+        print(f"Inserting {len(inserts.inserts)} new POs")
+        created = po_list.batch_upsert(inserts)
 
         # update POs that already existed in SharePoint
-        exists = new[~added].drop(columns="VendorLookupId")
+        exists = new[~added].drop(
+            # drop these cols to prevent unnecessary updates
+            columns=["Vendor", "VendorLookupId", "ContractLookupId"]
+        )
         changes = self._detect_changes(
             old.to_dict("records"),
             exists.to_dict("records"),
             key_col="Title",
         )
-        changes = po_list.batch_upsert(changes)
+        print(f"Updating {len(changes.updates)} existing POs")
+        po_list.batch_upsert(changes)
 
-        return self._map_lookup_ids(old, created, "Title")
+        # return mapping of PO Number to list item id: {"P12345:12": "1"}
+        mapping = self._map_lookup_ids(old, created, "Title")
+        upserts = {
+            "closings": closings,
+            "updates": changes,
+            "inserts": inserts,
+        }
+        return mapping, upserts
 
     def _get_unique(self, df: pd.DataFrame, cols: dict) -> pd.DataFrame:
         """Isolates and dedupes a subset of the colums from a dataframe"""

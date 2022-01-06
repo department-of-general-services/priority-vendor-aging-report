@@ -59,7 +59,7 @@ SHAREPOINT = {
     "po": {
         "id": ["1", "2", "3", "4"],
         "Title": ["P111", "P111:1", "P111:2", "P222"],
-        "PO Number": ["111", "111", "111", "222"],
+        "PO Number": ["P111", "P111", "P111", "P222"],
         "Release Number": [0, 1, 2, 0],
         "PO Type": ["Master Blanket", "Release", "Release", "Master Blanket"],
         "Vendor": ["Acme", "Acme", "Acme", "Disney"],
