@@ -3,6 +3,7 @@ from pprint import pprint
 import pytest
 import pandas as pd
 
+from dgs_fiscal.systems.sharepoint import BatchedChanges
 from dgs_fiscal.etl import ContractManagement
 from dgs_fiscal.etl.contract_management import ContractData, constants
 
@@ -120,7 +121,10 @@ class TestUpdateLists:
         citibuy = pd.DataFrame(data.CITIBUY["vendor"])
         sharepoint = pd.DataFrame(data.SHAREPOINT["vendor"])
         # execution
-        mapping, changes = mock_contract.update_vendor_list(sharepoint, citibuy)
+        mapping, changes = mock_contract.update_vendor_list(
+            old=sharepoint,
+            new=citibuy,
+        )
         inserts = changes["upserts"].inserts
         updates = changes["upserts"].updates
         print(mapping)
@@ -186,12 +190,20 @@ class TestUpdateLists:
         for col in CON_COLS:
             assert col in sharepoint.columns
         # execution
-        output = mock_contract.update_contract_list(
-            sharepoint,
-            citibuy,
-            VEN_MAPPING,
+        mapping, upserts = mock_contract.update_contract_list(
+            old=sharepoint,
+            new=citibuy,
+            vendor_lookup=VEN_MAPPING,
         )
-        print(output)
+        updates = upserts["updates"].updates
+        inserts = upserts["inserts"].inserts
+        pprint(mapping)
+        pprint(updates)
+        pprint(inserts)
         # validation
-        assert set(output.keys()) == set(CON_MAPPING.keys())
-        assert output.get("P333") is not None
+        assert set(mapping.keys()) == set(CON_MAPPING.keys())
+        assert mapping.get("P333") is not None
+        assert list(updates.keys()) == ["1"]
+        assert len(inserts) == 1
+        assert isinstance(upserts["updates"], BatchedChanges)
+        assert isinstance(upserts["inserts"], BatchedChanges)

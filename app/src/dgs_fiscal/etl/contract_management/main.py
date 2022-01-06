@@ -173,6 +173,7 @@ class ContractManagement:
 
         # map Vendor ID to its lookup id
         new["VendorLookupId"] = new["Vendor"].map(vendor_lookup)
+        new = new.drop(columns="Vendor")  # drop col to prevent false updates
         new = new.replace({np.nan: None})  # replaces NaN to prevent error
 
         # convert datetime cols to string to avoid serialization error
@@ -194,15 +195,17 @@ class ContractManagement:
             key_col="Title",
         )
         print(f"Updating {len(changes.updates)} existing Blanket POs")
-        changes = con_list.batch_upsert(changes)
+        con_list.batch_upsert(changes)
 
         # add contracts that were created since the last run
-        created = BatchedChanges(inserts=new[added].to_dict("records"))
-        print(f"Inserting {len(created.inserts)} new Blanket POs")
-        created = con_list.batch_upsert(created)
+        inserts = BatchedChanges(inserts=new[added].to_dict("records"))
+        print(f"Inserting {len(inserts.inserts)} new Blanket POs")
+        created = con_list.batch_upsert(inserts)
 
         # return mapping of PO Number to list item id: {"P12345": "1"}
-        return self._map_lookup_ids(old, created, "Title")
+        mapping = self._map_lookup_ids(old, created, "Title")
+        upserts = {"updates": changes, "inserts": inserts}
+        return mapping, upserts
 
     def update_po_list(
         self,

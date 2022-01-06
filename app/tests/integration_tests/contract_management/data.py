@@ -42,12 +42,16 @@ CITIBUY = {
         "Emergency Email": ["", "", ""],
     },
     "contract": {
-        "Title": ["P111", "P333"],
-        "Dollar Limit": [150, 200],
-        "Amount Spent": [125, 0],
-        "Start Date": [datetime(2020, 7, 1), datetime(2020, 7, 1)],
-        "End Date": [datetime(2050, 7, 1), datetime(2050, 7, 1)],
-        "Vendor": ["111", "333"],
+        "Title": ["P111", "P222", "P333"],
+        "Dollar Limit": [150, 100, 200],
+        "Amount Spent": [125, 100, 0],
+        "Start Date": [datetime(2020, 7, 1), None, datetime(2020, 7, 1)],
+        "End Date": [
+            datetime(2050, 7, 1),
+            datetime(2050, 7, 1),
+            datetime(2050, 7, 1),
+        ],
+        "Vendor": ["111", "222", "333"],
     },
 }
 
