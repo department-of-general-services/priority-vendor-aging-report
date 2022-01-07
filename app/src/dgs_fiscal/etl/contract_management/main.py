@@ -76,9 +76,9 @@ class ContractManagement:
         df.loc[open_market, "po_type"] = "Open Market"
 
         # isloate and format separate dataframes
-        df_po = self._get_unique(df, po_cols)
-        df_ven = self._get_unique(df, ven_cols)
-        df_con = self._get_unique(df[blanket_po], con_cols)
+        df_po = self._get_unique(df, po_cols, "po_title")
+        df_ven = self._get_unique(df, ven_cols, "vendor_id")
+        df_con = self._get_unique(df[blanket_po], con_cols, "po_nbr")
 
         return ContractData(po=df_po, vendor=df_ven, contract=df_con)
 
@@ -193,6 +193,7 @@ class ContractManagement:
             exists.to_dict("records"),
             key_col="Title",
         )
+        changes.inserts = []  # prevents accidental inserts
         print(f"Updating {len(changes.updates)} existing Blanket POs")
         con_list.batch_upsert(changes)
 
@@ -261,6 +262,7 @@ class ContractManagement:
             exists.to_dict("records"),
             key_col="Title",
         )
+        changes.inserts = []  # prevents accidental inserts
         print(f"Updating {len(changes.updates)} existing POs")
         po_list.batch_upsert(changes)
 
@@ -273,9 +275,14 @@ class ContractManagement:
         }
         return mapping, upserts
 
-    def _get_unique(self, df: pd.DataFrame, cols: dict) -> pd.DataFrame:
+    def _get_unique(
+        self,
+        df: pd.DataFrame,
+        cols: dict,
+        unique_col: str,
+    ) -> pd.DataFrame:
         """Isolates and dedupes a subset of the colums from a dataframe"""
-        df_new = df[cols.keys()].drop_duplicates()
+        df_new = df[cols.keys()].drop_duplicates(unique_col)
         df_new.columns = cols.values()
         return df_new
 

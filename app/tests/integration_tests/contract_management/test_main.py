@@ -38,7 +38,7 @@ class TestContractManagement:
         # execution
         records = mock_contract.citibuy.get_purchase_orders().records
         # validation
-        assert len(records) == 5
+        assert len(records) == 7
 
     def test_get_citibuy_data(self, mock_contract):
         """Tests the get_citibuy_data() method executes correctly
@@ -50,6 +50,7 @@ class TestContractManagement:
         - The dataframe in ContractData.vendor has been deduped
         - The PO Type has been set correctly
         - The list of contracts excludes Open Market POs
+        - The list of records in each dataframe is unique
         """
         # setup
         po_types = [
@@ -79,6 +80,8 @@ class TestContractManagement:
         assert blanket_title == "P111"
         assert release_title == "P111:1"
         assert list(df_po["PO Type"]) == po_types
+        for df in [df_po, df_ven, df_con]:
+            assert len(df) == len(df["Title"].unique())
 
     def test_get_sharepoint_data(self, mock_contract):
         """Tests the get_sharepoint_data() method executes correctly
