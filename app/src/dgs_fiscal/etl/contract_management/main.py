@@ -59,6 +59,12 @@ class ContractManagement:
 
         # get PO data from citibuy
         df = self.citibuy.get_purchase_orders().dataframe
+        df = df.sort_values(
+            # sort by PO and release number
+            # with DGS contracts before AGY contracts
+            by=["po_nbr", "release_nbr", "contract_agency"],
+            ascending=[True, True, False],
+        )
 
         # set the PO title
         release = df["release_nbr"].astype(str)
