@@ -281,6 +281,15 @@ CONTRACTS = {
         "dollar_limit": 500.00,
         "dollar_spent": 10.00,
     },
+    "blanket4_agy": {
+        "po_nbr": "P444",
+        "release_nbr": 0,
+        "contract_agency": "DGS",
+        "start_date": datetime(2021, 7, 1),
+        "end_date": datetime(2050, 7, 1),
+        "dollar_limit": 10000.00,
+        "dollar_spent": 250.00,
+    },
     "blanket7": {
         "po_nbr": "P777",
         "release_nbr": 0,
@@ -312,7 +321,19 @@ PO_RESULTS = [
         **ADDRESSES["disney_mail"],
     },
     {
+        **CONTRACTS["blanket4_agy"],
+        **PO_RECORDS["po4"],
+        **VENDORS["disney"],
+        **ADDRESSES["disney_mail"],
+    },
+    {
         **CONTRACTS["blanket4"],
+        **PO_RECORDS["po4_1"],
+        **VENDORS["disney"],
+        **ADDRESSES["disney_mail"],
+    },
+    {
+        **CONTRACTS["blanket4_agy"],
         **PO_RECORDS["po4_1"],
         **VENDORS["disney"],
         **ADDRESSES["disney_mail"],

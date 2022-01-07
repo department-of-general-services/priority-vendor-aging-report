@@ -24,6 +24,7 @@ CITIBUY = {
     },
     "contract_cols": {
         "po_nbr": "Title",
+        "contract_agency": "Agency",
         "dollar_limit": "Dollar Limit",
         "dollar_spent": "Amount Spent",
         "start_date": "Start Date",
