@@ -43,6 +43,7 @@ CITIBUY = {
     },
     "contract": {
         "Title": ["P111", "P222", "P222", "P333"],
+        "Agency": ["DGS", "DGS", "AGY", "AGY"],
         "Dollar Limit": [150, 100, 200, 200],
         "Amount Spent": [125, 100, 100, 0],
         "Start Date": [
@@ -100,6 +101,7 @@ SHAREPOINT = {
     "contract": {
         "id": ["1", "2"],
         "Title": ["P111", "P222"],
+        "Agency": ["DGS", "DGS"],
         "Dollar Limit": [150, 100],
         "Amount Spent": [100, 100],
         "Start Date": [datetime(2020, 7, 1), None],
