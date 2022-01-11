@@ -126,15 +126,18 @@ class TestUpdateLists:
         citibuy = pd.DataFrame(data.CITIBUY["vendor"])
         sharepoint = pd.DataFrame(data.SHAREPOINT["vendor"])
         # execution
-        mapping, changes = mock_contract.update_vendor_list(
+        output = mock_contract.update_vendor_list(
             old=sharepoint,
             new=citibuy,
         )
-        inserts = changes["upserts"].inserts
-        updates = changes["upserts"].updates
-        print(mapping)
-        print(inserts)
-        print(updates)
+        mapping = output.mapping
+        inserts = output.upserts["upserts"].inserts
+        updates = output.upserts["upserts"].updates
+        results = output.results
+        pprint(results)
+        pprint(mapping)
+        pprint(inserts)
+        pprint(updates)
         # validation
         assert set(mapping.keys()) == set(VEN_MAPPING.keys())
         assert mapping.get("333") is not None
@@ -168,15 +171,18 @@ class TestUpdateLists:
         for col in PO_COLS:
             assert col in sharepoint.columns
         # execution
-        mapping, changes = mock_contract.update_po_list(
+        output = mock_contract.update_po_list(
             old=sharepoint,
             new=citibuy,
             vendor_lookup=VEN_MAPPING,
             contract_lookup=CON_MAPPING,
         )
-        inserts = changes["inserts"]
-        updates = changes["updates"]
-        closings = changes["closings"]
+        mapping = output.mapping
+        updates = output.upserts["updates"]
+        inserts = output.upserts["inserts"]
+        closings = output.upserts["closings"]
+        results = output.results
+        pprint(results)
         pprint(mapping)
         pprint(inserts.inserts)
         pprint(updates.updates)
@@ -192,7 +198,7 @@ class TestUpdateLists:
         assert list(closings.updates.keys()) == ["2", "4"]
         assert len(closings.inserts) == 0
         for kind in ["updates", "inserts", "closings"]:
-            assert isinstance(changes[kind], BatchedChanges)
+            assert isinstance(output.upserts[kind], BatchedChanges)
 
     def test_update_contract_list(self, mock_contract):
         """Tests that the update_contract_list() method executes correctly
@@ -212,16 +218,19 @@ class TestUpdateLists:
         for col in CON_COLS:
             assert col in sharepoint.columns
         # execution
-        mapping, upserts = mock_contract.update_contract_list(
+        output = mock_contract.update_contract_list(
             old=sharepoint,
             new=citibuy,
             vendor_lookup=VEN_MAPPING,
         )
-        updates = upserts["updates"]
-        inserts = upserts["inserts"]
+        mapping = output.mapping
+        updates = output.upserts["updates"]
+        inserts = output.upserts["inserts"]
+        results = output.results
         pprint(mapping)
         pprint(updates.updates)
         pprint(inserts.inserts)
+        pprint(results)
         # validation
         assert set(mapping.keys()) == set(CON_MAPPING.keys())
         assert mapping.get("P333") is not None
@@ -229,5 +238,5 @@ class TestUpdateLists:
         assert len(updates.inserts) == 0
         assert len(inserts.inserts) == 1
         assert len(inserts.updates) == 0
-        assert isinstance(upserts["updates"], BatchedChanges)
-        assert isinstance(upserts["inserts"], BatchedChanges)
+        assert isinstance(output.upserts["updates"], BatchedChanges)
+        assert isinstance(output.upserts["inserts"], BatchedChanges)
