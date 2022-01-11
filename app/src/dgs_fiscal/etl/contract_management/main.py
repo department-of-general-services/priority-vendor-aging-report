@@ -114,7 +114,7 @@ class ContractManagement:
         self,
         old: pd.Dataframe,
         new: pd.DataFrame,
-    ) -> dict:
+    ) -> UpdateResult:
         """Updates the list of vendors in sharepoint and returns a mapping of
         vendor IDs to SharePoint list item IDs
 
@@ -127,8 +127,10 @@ class ContractManagement:
 
         Returns
         -------
-        dict
-            A lookup dictionary that maps Vendor ID to list item id
+        UpdateResult
+            An instance of the UpdateResult class with the mapping of Vendor ID
+            to list item id for the Vendor list and the batch requests to update
+            the Vendor list and their results
         """
         ven_list = self.sharepoint.get_list(self.vendor_list)
 
@@ -147,15 +149,19 @@ class ContractManagement:
         results = ven_list.batch_upsert(changes)
 
         # return mapping of Vendor ID to list item id: {"54321": "1"}
-        mapping = self._map_lookup_ids(old, results, "Vendor ID")
-        return mapping, {"upserts": changes}
+        output = UpdateResult(
+            mapping=self._map_lookup_ids(old, results, "Vendor ID"),
+            upserts={"upserts": changes},
+            results={"upserts": results},
+        )
+        return output
 
     def update_contract_list(
         self,
         old: pd.Dataframe,
         new: pd.DataFrame,
         vendor_lookup: dict,
-    ) -> dict:
+    ) -> UpdateResult:
         """Updates the list of contracts in SharePoint and returns a mapping
         of contract PO numbers to SharePoint list item IDs
 
@@ -171,8 +177,10 @@ class ContractManagement:
 
         Returns
         -------
-        dict
-            A lookup dictionary that maps PO Number to list item id
+        UpdateResult
+            An instance of the UpdateResult class with the mapping of PO Number
+            to list item id for the contract list and the batch requests to
+            update the contract list and their results
         """
         # instantiate the list class
         con_list = self.sharepoint.get_list(self.contract_list)
@@ -201,17 +209,20 @@ class ContractManagement:
         )
         changes.inserts = []  # prevents accidental inserts
         print(f"Updating {len(changes.updates)} existing Blanket POs")
-        con_list.batch_upsert(changes)
+        changed_items = con_list.batch_upsert(changes)
 
         # add contracts that were created since the last run
         inserts = BatchedChanges(inserts=new[added].to_dict("records"))
         print(f"Inserting {len(inserts.inserts)} new Blanket POs")
-        created = con_list.batch_upsert(inserts)
+        created_items = con_list.batch_upsert(inserts)
 
         # return mapping of PO Number to list item id: {"P12345": "1"}
-        mapping = self._map_lookup_ids(old, created, "Title")
-        upserts = {"updates": changes, "inserts": inserts}
-        return mapping, upserts
+        output = UpdateResult(
+            mapping=self._map_lookup_ids(old, created_items, "Title"),
+            upserts={"updates": changes, "inserts": inserts},
+            results={"updates": changed_items, "inserts": created_items},
+        )
+        return output
 
     def update_po_list(
         self,
@@ -219,9 +230,29 @@ class ContractManagement:
         new: pd.DataFrame,
         vendor_lookup: dict,
         contract_lookup: dict,
-    ) -> dict:
+    ) -> UpdateResult:
         """Updates the list of Purchase Orders in SharePoint and returns
         a mapping of PO and Release numbers to list item IDs
+
+        Parameters
+        ----------
+        old: pd.DataFrame
+            A dataframe of the existing contract data in SharePoint
+        new: pd.DataFrame
+            A dataframe of the new contract data from CitiBuy
+        vendor_lookup: dict
+            A mapping of Vendor ID to list item id in the Vendors list, this is
+            used to set the value of the Vendor lookup column
+        contract_lookup: dict
+            A mapping of PO Number to list item id in the contract list, this
+            is used to set the value of the Contract lookup column
+
+        Returns
+        -------
+        UpdateResult
+            An instance of the UpdateResult class with the mapping of PO and
+            Release Number to list item id for the PO list and the batch
+            requests to update the PO list and their results
         """
         # instantiate the list class
         po_list = self.sharepoint.get_list(self.po_list)
@@ -244,19 +275,19 @@ class ContractManagement:
         closed = ~old["Title"].isin(new["Title"])
 
         # create update dict for closed POs: {"1": {"Status": "3PCO - Closed"}}
-        close_ids = old[closed]["id"]
-        close_status = [{"Status": "3PCO - Closed"}] * len(close_ids)
-        close_updates = dict(zip(close_ids, close_status))
+        closed_ids = old[closed]["id"]
+        closed_status = [{"Status": "3PCO - Closed"}] * len(closed_ids)
+        closed_updates = dict(zip(closed_ids, closed_status))
 
         # update POs that were closed since last run
-        closings = BatchedChanges(updates=close_updates)
+        closings = BatchedChanges(updates=closed_updates)
         print(f"Closing {len(closings.updates)} existing POs")
-        po_list.batch_upsert(closings)
+        closed_items = po_list.batch_upsert(closings)
 
         # add POs that were created since the last run
         inserts = BatchedChanges(inserts=new[added].to_dict("records"))
         print(f"Inserting {len(inserts.inserts)} new POs")
-        created = po_list.batch_upsert(inserts)
+        created_items = po_list.batch_upsert(inserts)
 
         # update POs that already existed in SharePoint
         exists = new[~added].drop(
@@ -270,16 +301,23 @@ class ContractManagement:
         )
         changes.inserts = []  # prevents accidental inserts
         print(f"Updating {len(changes.updates)} existing POs")
-        po_list.batch_upsert(changes)
+        changed_items = po_list.batch_upsert(changes)
 
         # return mapping of PO Number to list item id: {"P12345:12": "1"}
-        mapping = self._map_lookup_ids(old, created, "Title")
-        upserts = {
-            "closings": closings,
-            "updates": changes,
-            "inserts": inserts,
-        }
-        return mapping, upserts
+        output = UpdateResult(
+            mapping=self._map_lookup_ids(old, created_items, "Title"),
+            upserts={
+                "closings": closings,
+                "updates": changes,
+                "inserts": inserts,
+            },
+            results={
+                "closings": closed_items,
+                "updates": changed_items,
+                "inserts": created_items,
+            },
+        )
+        return output
 
     def _get_unique(
         self,
@@ -387,7 +425,20 @@ class ContractData:
 
 @dataclass
 class UpdateResult:
-    """Returns the results of updating a SharePoint list with Citibuy data"""
+    """Returns the results of updating a SharePoint list with Citibuy data
+
+    Attributes
+    ----------
+    mapping: dict
+        A dictionary that maps the value of a column in a SharePoint list
+        (e.g. Vendor ID) to the ID of the list item with that value
+    upserts: Dict[str, BatchedChanges]
+        A dictionary that stores the BatchedChanges instance for each type of
+        batch insert or update made to a SharePoint list
+    results: Dict[str, BatchResults]
+        A dictionary that stores the results of the batch requests made to
+        update the SharePoint list, keyed by type of update or insert
+    """
 
     mapping: dict
     upserts: Dict[str, BatchedChanges]
