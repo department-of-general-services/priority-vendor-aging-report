@@ -1,5 +1,5 @@
 from __future__ import annotations  # prevents NameError for typehints
-from typing import List
+from typing import List, Dict
 from dataclasses import dataclass
 
 import pandas as pd
@@ -383,3 +383,12 @@ class ContractData:
     po: pd.DataFrame
     vendor: pd.DataFrame
     contract: pd.DataFrame
+
+
+@dataclass
+class UpdateResult:
+    """Returns the results of updating a SharePoint list with Citibuy data"""
+
+    mapping: dict
+    upserts: Dict[str, BatchedChanges]
+    results: Dict[str, BatchResults]
