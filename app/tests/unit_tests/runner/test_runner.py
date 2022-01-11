@@ -1,3 +1,5 @@
+import subprocess
+
 import pytest
 from typer.testing import CliRunner
 
@@ -22,6 +24,20 @@ def fixture_contract_mgmt_etl(monkeypatch):
         "ContractManagement",
         mock_etl.MockContractManagement,
     )
+
+
+def test_entrypoint():
+    """Tests that the entrypoints specified in setup.py work correctly"""
+    # execution
+    output = subprocess.run(
+        ["dgs_fiscal", "hello", "Billy"],
+        check=True,
+        capture_output=True,
+    )
+    stdout = output.stdout.decode("utf-8")
+    # validation
+    assert output.returncode == 0
+    assert "Hello, Billy" in stdout
 
 
 def test_hello(runner):
