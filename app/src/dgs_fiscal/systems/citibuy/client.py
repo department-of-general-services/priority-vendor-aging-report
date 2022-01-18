@@ -21,6 +21,25 @@ class CitiBuy:
     engine: sqlalchemy.Engine
     """
 
+    INVOICE_STATUS = {
+        "4II": "4II - In Progress",
+        "4IR": "4IR - Ready for Approval",
+        "4IA": "4IA - Approved for Payment",
+        "4IP": "4IP - Paid",
+        "4IC": "4IC - Cancelled",
+        "4IRT": "4IRT - Returned",
+    }
+    PO_STATUS = {
+        "3PRS": "3PRS - Ready to Send",
+        "3PS": "3PS - Sent",
+        "3PRT": "3PRT - Returned",
+        "3PRA": "3PRA - Ready for Approval",
+        "3PPR": "3PPR - Partial Receipt",
+        "3PI": "3PI - In Progress",
+        "3PCR": "3PCR - Completed Receipt",
+        "3PCO": "3PCO - Closed",
+    }
+
     def __init__(
         self,
         config: Dynaconf = settings,
