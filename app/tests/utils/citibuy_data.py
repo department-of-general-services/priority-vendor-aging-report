@@ -60,6 +60,7 @@ ADDRESSES = {
 }
 
 PO_RECORDS = {
+    # Blanket PO between Acme and DGS, status: Sent
     "po1": {
         "po_nbr": "P111",
         "release_nbr": 0,
@@ -72,6 +73,7 @@ PO_RECORDS = {
         "desc": "description",
         "location": "DGS",
     },
+    # PO Release between Acme and DGS, status: Partial Receipt
     "po1_1": {
         "po_nbr": "P111",
         "release_nbr": 1,
@@ -84,6 +86,8 @@ PO_RECORDS = {
         "desc": "description",
         "location": "DGS",
     },
+    # PO Release between Acme and DPW, status: Partial Receipt
+    # Excluded because it's a DPW release
     "po1_2": {
         "po_nbr": "P111",
         "release_nbr": 2,
@@ -96,6 +100,8 @@ PO_RECORDS = {
         "desc": "description",
         "location": "DGS",
     },
+    # Open Market PO between Disney and DGS, status: Closed
+    # Excluded because it's closed
     "po2": {
         "po_nbr": "P222",
         "release_nbr": 0,
@@ -108,6 +114,9 @@ PO_RECORDS = {
         "desc": "description",
         "location": "DGS",
     },
+    # Blanket PO between Disney and DPW, status: Sent
+    # This is the PO for an Agency umbrella contract
+    # which allows DGS to create releases off of it
     "po4": {
         "po_nbr": "P444",
         "release_nbr": 0,
@@ -120,6 +129,7 @@ PO_RECORDS = {
         "desc": "description",
         "location": "DGS",
     },
+    # PO Release between Disney and DGS, status: Partial Receipt
     "po4_1": {
         "po_nbr": "P444",
         "release_nbr": 1,
@@ -132,6 +142,7 @@ PO_RECORDS = {
         "desc": "description",
         "location": "DGS",
     },
+    # Open Market PO between DGS and Disney, status: Sent
     "po5": {
         "po_nbr": "P555",
         "release_nbr": 0,
@@ -144,6 +155,8 @@ PO_RECORDS = {
         "desc": "description",
         "location": "DGS",
     },
+    # Open Market PO between Disney and DPW, status: Sent
+    # This PO is excluded because it isn't available to DGS
     "po6": {
         "po_nbr": "P666",
         "release_nbr": 0,
@@ -156,6 +169,8 @@ PO_RECORDS = {
         "desc": "description",
         "location": "DGS",
     },
+    # Blanket PO between Disney and DGS, status: Closed
+    # This PO is excluded because it's closed
     "po7": {
         "po_nbr": "P777",
         "release_nbr": 0,
@@ -171,6 +186,7 @@ PO_RECORDS = {
 }
 
 INVOICES = {
+    # Acme invoice for DGS, status: Paid
     "inv1": {
         "id": "invoice1",
         "po_nbr": "P111",
@@ -179,8 +195,9 @@ INVOICES = {
         "invoice_number": "Invoice#1",
         "status": "4IP",
         "amount": 10.25,
-        "invoice_date": None,
+        "invoice_date": datetime(2020, 8, 30),
     },
+    # Acme invoice for DGS, status: Paid
     "inv2": {
         "id": "invoice2",
         "po_nbr": "P111",
@@ -189,8 +206,9 @@ INVOICES = {
         "invoice_number": "Invoice#2",
         "status": "4IP",
         "amount": 25.00,
-        "invoice_date": None,
+        "invoice_date": datetime(2020, 7, 1),
     },
+    # Acme invoice for DGS, status: In
     "inv3": {
         "id": "invoice3",
         "po_nbr": "P111",
@@ -199,48 +217,54 @@ INVOICES = {
         "invoice_number": "Invoice#2",
         "status": "4IA",
         "amount": 25.00,
-        "invoice_date": None,
+        "invoice_date": datetime(2020, 7, 1),
     },
+    # Acme invoice for DPW, status: In Progress
+    # Excluded because it's for DPW
     "inv4": {
         "id": "invoice4",
         "po_nbr": "P111",
-        "release_nbr": 1,
+        "release_nbr": 2,
         "vendor_id": "111",
         "invoice_number": "Invoice#3",
         "status": "4II",
         "amount": 10.50,
-        "invoice_date": None,
+        "invoice_date": datetime(2020, 8, 15),
     },
+    # Disney invoice for DGS, status: Approved for Payment
     "disney_inv5": {
         "id": "invoice5",
         "po_nbr": "P222",
         "release_nbr": 0,
         "vendor_id": "222",
         "invoice_number": "#1",
-        "status": "4IP",
+        "status": "4IA",
         "amount": 10.50,
-        "invoice_date": None,
+        "invoice_date": datetime(2020, 9, 30),
     },
+    # Disney invoice for DGS, status: Cancelled
     "disney_inv6": {
         "id": "invoice6",
         "po_nbr": "P222",
         "release_nbr": 0,
         "vendor_id": "222",
         "invoice_number": "#2",
-        "status": "4IP",
+        "status": "4IC",
         "amount": 5.00,
-        "invoice_date": None,
+        "invoice_date": datetime(2020, 7, 1),
     },
+    # Disney invoice for DGS, status: In Progress
     "disney_inv7": {
         "id": "invoice7",
         "po_nbr": "P333",
         "release_nbr": 0,
         "vendor_id": "222",
         "invoice_number": "#3",
-        "status": "4IP",
+        "status": "4II",
         "amount": 5.00,
-        "invoice_date": None,
+        "invoice_date": datetime(2020, 7, 15),
     },
+    # Disney invoice for DGS, status: In Progress
     "disney_inv8": {
         "id": "invoice8",
         "po_nbr": "P444",
@@ -249,7 +273,7 @@ INVOICES = {
         "invoice_number": "#4",
         "status": "4IP",
         "amount": 10.00,
-        "invoice_date": None,
+        "invoice_date": datetime(2020, 8, 1),
     },
 }
 
@@ -300,52 +324,3 @@ CONTRACTS = {
         "dollar_spent": 20.00,
     },
 }
-
-PO_RESULTS = [
-    {
-        **CONTRACTS["blanket1_DGS"],
-        **PO_RECORDS["po1"],
-        **VENDORS["acme"],
-        **ADDRESSES["acme_mail"],
-    },
-    {
-        **CONTRACTS["blanket1_DGS"],
-        **PO_RECORDS["po1_1"],
-        **VENDORS["acme"],
-        **ADDRESSES["acme_mail"],
-    },
-    {
-        **CONTRACTS["blanket4"],
-        **PO_RECORDS["po4"],
-        **VENDORS["disney"],
-        **ADDRESSES["disney_mail"],
-    },
-    {
-        **CONTRACTS["blanket4_agy"],
-        **PO_RECORDS["po4"],
-        **VENDORS["disney"],
-        **ADDRESSES["disney_mail"],
-    },
-    {
-        **CONTRACTS["blanket4"],
-        **PO_RECORDS["po4_1"],
-        **VENDORS["disney"],
-        **ADDRESSES["disney_mail"],
-    },
-    {
-        **CONTRACTS["blanket4_agy"],
-        **PO_RECORDS["po4_1"],
-        **VENDORS["disney"],
-        **ADDRESSES["disney_mail"],
-    },
-    {
-        **PO_RECORDS["po5"],
-        **VENDORS["acme"],
-        **ADDRESSES["acme_mail"],
-        "contract_agency": None,
-        "start_date": None,
-        "end_date": None,
-        "dollar_limit": None,
-        "dollar_spent": None,
-    },
-]

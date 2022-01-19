@@ -3,7 +3,7 @@ from pprint import pprint
 import pytest
 import sqlalchemy
 
-from tests.utils import citibuy_data as data
+from tests.unit_tests.citibuy import data
 from dgs_fiscal.systems import CitiBuy
 
 
