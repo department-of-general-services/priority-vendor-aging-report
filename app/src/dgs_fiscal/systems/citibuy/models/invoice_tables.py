@@ -14,7 +14,7 @@ class Invoice(db.Base):
     invoice_nbr = db.Column("INVOICE_NBR", db.String)
     invoice_date = db.Column("INVOICE_DATE", db.DateTime)
     status = db.Column("INVOICE_STATUS", db.String)
-    amount = db.Column("INVOICE_AMT", db.Float(asdecimal=True))
+    amount = db.Column("INVOICE_AMT", db.Numeric(precision=2))
     vendor_id = db.Column(
         "VENDOR_NBR",
         db.String,
@@ -22,8 +22,20 @@ class Invoice(db.Base):
     )
 
     # relationship
-    purchase_order = db.relationship("Vendor", backref="invoices")
+    purchase_order = db.relationship("PurchaseOrder", backref="invoices")
     status_history = db.relationship("InvoiceStatusHistory", backref="invoice")
+
+    # column list for querying
+    columns = (
+        "id",
+        "po_nbr",
+        "release_nbr",
+        "invoice_nbr",
+        "invoice_date",
+        "status",
+        "amount",
+        "vendor_id",
+    )
 
 
 class InvoiceStatusHistory(db.Base):
