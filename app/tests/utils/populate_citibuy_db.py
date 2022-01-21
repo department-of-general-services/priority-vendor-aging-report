@@ -37,10 +37,15 @@ def populate_db(session: Session) -> None:
     vendor_addresses = [
         models.VendorAddress(**va) for va in data.VEN_ADDRESS.values()
     ]
+    invoice_history = [
+        models.InvoiceStatusHistory(**status)
+        for status in data.INVOICE_HISTORY.values()
+    ]
     add_to_session(session, vendors)
     add_to_session(session, pos)
     add_to_session(session, invoices)
     add_to_session(session, contracts)
     add_to_session(session, addresses)
     add_to_session(session, vendor_addresses)
+    add_to_session(session, invoice_history)
     session.commit()

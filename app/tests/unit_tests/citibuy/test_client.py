@@ -3,7 +3,7 @@ from pprint import pprint
 import pytest
 import sqlalchemy
 
-from tests.utils import citibuy_data as data
+from tests.unit_tests.citibuy import data
 from dgs_fiscal.systems import CitiBuy
 
 
@@ -65,4 +65,33 @@ class TestGetPurchaseOrders:
         print("EXPECTED")
         pprint(expected)
         # validation
+        assert output == expected
+
+
+class TestGetInvoices:
+    """Tests the CitiBuy.get_invoices() method"""
+
+    def test_query_default(self, mock_citibuy):
+        """Tests that PurchaseOrders.get_records() returns all records when no
+        values are passed to the filter or limit paramaters
+
+        Validates the following conditions:
+        - All matching invoices are returned with the correct fields
+        - The results are returned as a list of dictionary items
+        - The results exclude invoices that were cancelled or paid more than
+          45 days ago
+        - The results exclude invoices on POs from other agencies
+        """
+        # setup
+        expected = data.INVOICE_RESULTS
+        # execution
+        output = mock_citibuy.get_invoices().records
+        print("OUTPUT")
+        pprint(output)
+        print("EXPECTED")
+        pprint(expected)
+        # validation
+        assert isinstance(output, list)
+        assert isinstance(output[0], dict)
+        assert len(output) == len(expected)
         assert output == expected

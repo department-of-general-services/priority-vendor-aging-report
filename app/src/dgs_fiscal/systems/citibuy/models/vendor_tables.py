@@ -15,6 +15,7 @@ class Vendor(db.Base):
 
     # relationships
     purchase_orders = db.relationship("PurchaseOrder", backref="vendor")
+    invoices = db.relationship("Invoice", backref="vendor")
 
     # column list for querying
     columns = ("name", "emg_contact", "emg_email", "emg_phone")
