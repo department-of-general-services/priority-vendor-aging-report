@@ -48,3 +48,11 @@ PO_RESULTS = [
         "dollar_spent": None,
     },
 ]
+
+INVOICE_RESULTS = [
+    {**mock_data.INVOICES["inv2"], "name": "Acme"},
+    {**mock_data.INVOICES["inv3"], "name": "Acme"},
+    {**mock_data.INVOICES["inv5"], "name": "Disney"},
+    {**mock_data.INVOICES["inv6"], "name": "Disney"},
+    {**mock_data.INVOICES["inv8"], "name": "Disney"},
+]

@@ -1,9 +1,9 @@
 from __future__ import annotations  # prevents NameError for typehints
-from typing import List, Dict
+from typing import List
 from datetime import date, timedelta
 
 import pyodbc
-import sqlalchemy
+import sqlalchemy as sa
 from sqlalchemy.orm import Session, aliased
 from sqlalchemy.engine import URL, Row
 from dynaconf import Dynaconf
@@ -58,7 +58,7 @@ class CitiBuy:
             conn_url = URL.create(
                 "mssql+pyodbc", query={"odbc_connect": conn_str}
             )
-        self.engine = sqlalchemy.create_engine(conn_url)
+        self.engine = sa.create_engine(conn_url)
 
     def execute_stmt(self, query_str: str) -> DatabaseRows:
         """Executes a SQL query against the CitiBuy database
@@ -78,9 +78,9 @@ class CitiBuy:
         """
         try:
             with self.engine.connect() as conn:
-                query = sqlalchemy.text(query_str)
+                query = sa.text(query_str)
                 rows = conn.execute(query).fetchall()
-        except sqlalchemy.exc.ProgrammingError as error:
+        except sa.exc.ProgrammingError as error:
             raise error
         return DatabaseRows(rows)
 
@@ -108,7 +108,7 @@ class CitiBuy:
         va = aliased(models.VendorAddress, name="va")
 
         # extract the columns to include in the query
-        query = sqlalchemy.select(
+        query = sa.select(
             *[getattr(po, col) for col in po.columns],  # PO columns
             *[getattr(ven, col) for col in ven.columns],  # Vendor cols
             *[getattr(con, col) for col in con.columns],  # Contract cols
@@ -147,28 +147,54 @@ class CitiBuy:
             rows = session.execute(query).fetchall()
         return DatabaseRows(rows)
 
-    def get_invoices(
-        self,
-        limit: int = 100,
-        filter_dict: Dict[str, tuple] = None,
-    ) -> DatabaseRows:
+    def get_invoices(self) -> DatabaseRows:
         """Gets a list of Invoices from CitiBuy and returns them as a list
         of dictionaries
-
-        Parameters
-        ----------
-        limit: int
-            Number of records to return from the query results
-        filter_dict: Dict[str, tuple]
-            Conditions applied to fields on the PO used to filter the results.
-            Must be passed in this format: {"col_name": ("equals", "dog")}
 
         Returns
         -------
         DatabaseRows
             An instance of DatabaseRows for the purchase order records
         """
-        pass
+        # create aliases for the tables
+        po = aliased(models.PurchaseOrder, name="po")
+        ven = aliased(models.Vendor, name="vendor")
+        inv = aliased(models.Invoice, name="invoice")
+        status = aliased(models.InvoiceStatusHistory, name="status")
+
+        # create the foreign keys
+        fkey_status = inv.id == status.invoice_id
+        fkey_vendor = inv.vendor_id == ven.vendor_id
+        fkey_po = (po.po_nbr == inv.po_nbr) & (
+            po.release_nbr == inv.release_nbr
+        )
+
+        # create a sub-query for recently closed and cancelled invoices
+        updated_recently = status.status_date > (date.today() - timedelta(45))
+        closed = sa.select(inv.id)
+        closed = closed.join(status, fkey_status)
+        closed = closed.where(inv.status == status.to_status)
+        closed = closed.where(updated_recently)
+        closed = closed.cte("recently_closed")  # creates a WITH clause
+        closed = sa.select(closed.c.id)  # isloates invoice ids from clause
+
+        # create the return query
+        query = sa.select(
+            # invoice columns and vendor name
+            ven.name,
+            *[getattr(inv, col) for col in inv.columns],
+        )
+        query = query.join(ven, fkey_vendor)
+        query = query.join(po, fkey_po)
+        query = query.where(po.agency == "DGS")  # invoice created from DGS PO
+        query = query.where(
+            # invoice still open or recently closed or cancelled
+            (inv.status.not_in(("4IP", "4IC")))
+            | (inv.id.in_(closed))
+        )
+        with Session(self.engine) as session:
+            rows = session.execute(query).fetchall()
+        return DatabaseRows(rows)
 
 
 class DatabaseRows:

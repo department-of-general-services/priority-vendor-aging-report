@@ -236,6 +236,7 @@ CONTRACTS = {
 
 INVOICES = {
     # Acme invoice for DGS, status: Paid
+    # Excluded because it was paid more than 45 days ago
     "inv1": {
         "id": "invoice1",
         "po_nbr": PO_RECORDS["po1_1"]["po_nbr"],
@@ -247,6 +248,7 @@ INVOICES = {
         "invoice_date": datetime(2020, 8, 30),
     },
     # Acme invoice for DGS, status: Paid
+    # Included because it was paid less than 45 days ago
     "inv2": {
         "id": "invoice2",
         "po_nbr": PO_RECORDS["po1_1"]["po_nbr"],
@@ -258,6 +260,7 @@ INVOICES = {
         "invoice_date": datetime(2020, 7, 1),
     },
     # Acme invoice for DGS, status: Approved for Payment
+    # Included because it hasn't yet been paid
     "inv3": {
         "id": "invoice3",
         "po_nbr": PO_RECORDS["po1_1"]["po_nbr"],
@@ -281,7 +284,8 @@ INVOICES = {
         "invoice_date": datetime(2020, 8, 15),
     },
     # Disney invoice for DGS, status: Approved for Payment
-    "disney_inv5": {
+    # Included because it hasn't yet been paid
+    "inv5": {
         "id": "invoice5",
         "po_nbr": PO_RECORDS["po2"]["po_nbr"],
         "release_nbr": PO_RECORDS["po2"]["release_nbr"],
@@ -292,7 +296,8 @@ INVOICES = {
         "invoice_date": datetime(2020, 9, 30),
     },
     # Disney invoice for DGS, status: Cancelled
-    "disney_inv6": {
+    # Included because it was canceled less than 45 days ago
+    "inv6": {
         "id": "invoice6",
         "po_nbr": PO_RECORDS["po2"]["po_nbr"],
         "release_nbr": PO_RECORDS["po2"]["release_nbr"],
@@ -303,7 +308,8 @@ INVOICES = {
         "invoice_date": datetime(2020, 7, 1),
     },
     # Disney invoice for DGS, status: Cancelled
-    "disney_inv7": {
+    # Excluded because it was cancelled more than 45 days ago
+    "inv7": {
         "id": "invoice7",
         "po_nbr": "P333",
         "release_nbr": 0,
@@ -314,7 +320,8 @@ INVOICES = {
         "invoice_date": datetime(2020, 7, 15),
     },
     # Disney invoice for DGS, status: In Progress
-    "disney_inv8": {
+    # Included because it hasn't yet been paid
+    "inv8": {
         "id": "invoice8",
         "po_nbr": PO_RECORDS["po4_1"]["po_nbr"],
         "release_nbr": PO_RECORDS["po4_1"]["release_nbr"],
@@ -352,7 +359,7 @@ INVOICE_HISTORY = {
         "vendor_id": INVOICES["inv1"]["vendor_id"],
         "from_status": "4IA",
         "to_status": "4IP",
-        "status_date": datetime(2025, 10, 1),
+        "status_date": datetime(2020, 10, 1),  # more than 45 days ago
     },
     "inv2_4IP": {
         "id": "update_2",
@@ -361,7 +368,7 @@ INVOICE_HISTORY = {
         "vendor_id": INVOICES["inv2"]["vendor_id"],
         "from_status": "4IA",
         "to_status": "4IP",
-        "status_date": datetime(2025, 9, 1),
+        "status_date": datetime(2025, 9, 1),  # less than 45 days ago
     },
     "inv3_4IA": {
         "id": "update_3",
@@ -374,20 +381,20 @@ INVOICE_HISTORY = {
     },
     "inv6_4IC": {
         "id": "update_6",
-        "invoice_id": INVOICES["disney_inv6"]["id"],
-        "invoice_nbr": INVOICES["disney_inv6"]["invoice_nbr"],
-        "vendor_id": INVOICES["disney_inv6"]["vendor_id"],
+        "invoice_id": INVOICES["inv6"]["id"],
+        "invoice_nbr": INVOICES["inv6"]["invoice_nbr"],
+        "vendor_id": INVOICES["inv6"]["vendor_id"],
         "from_status": "4IC",
         "to_status": "4IC",
-        "status_date": datetime(2025, 9, 1),
+        "status_date": datetime(2025, 9, 1),  # less than 45 days ago
     },
     "inv7_4IC": {
         "id": "update_7",
-        "invoice_id": INVOICES["disney_inv7"]["id"],
-        "invoice_nbr": INVOICES["disney_inv7"]["invoice_nbr"],
-        "vendor_id": INVOICES["disney_inv7"]["vendor_id"],
+        "invoice_id": INVOICES["inv7"]["id"],
+        "invoice_nbr": INVOICES["inv7"]["invoice_nbr"],
+        "vendor_id": INVOICES["inv7"]["vendor_id"],
         "from_status": "4IC",
         "to_status": "4IC",
-        "status_date": datetime(2020, 9, 1),
+        "status_date": datetime(2020, 9, 1),  # more than 45 days ago
     },
 }
