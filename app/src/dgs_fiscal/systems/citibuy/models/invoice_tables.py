@@ -14,7 +14,7 @@ class Invoice(db.Base):
     invoice_nbr = db.Column("INVOICE_NBR", db.String)
     invoice_date = db.Column("INVOICE_DATE", db.DateTime)
     status = db.Column("INVOICE_STATUS", db.String)
-    amount = db.Column("INVOICE_AMT", db.Numeric(precision=2))
+    amount = db.Column("INVOICE_AMT", db.Float(precision=2))
     vendor_id = db.Column(
         "VENDOR_NBR",
         db.String,
