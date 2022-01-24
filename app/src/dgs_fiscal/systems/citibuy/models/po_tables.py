@@ -12,7 +12,7 @@ class PurchaseOrder(db.Base):
     agency = db.Column("DEPT_NBR_PREFIX_REF", db.String)
     status = db.Column("CURRENT_HDR_STATUS", db.String)
     date = db.Column("PO_DATE", db.DateTime)
-    cost = db.Column("ACTUAL_COST", db.Numeric(precision=2))
+    cost = db.Column("ACTUAL_COST", db.Float(precision=2))
     desc = db.Column("SHORT_DESC", db.String)
     buyer = db.Column("PURCHASER", db.String)
     location = db.Column("LOC_ID", db.String)
@@ -49,8 +49,8 @@ class BlanketContract(db.Base):
     contract_agency = db.Column("DEPT_NBR_PRFX", db.String, primary_key=True)
     start_date = db.Column("BLANKET_BEG_DATE", db.DateTime)
     end_date = db.Column("BLANKET_END_DATE", db.DateTime)
-    dollar_limit = db.Column("BLANKET_DOLLAR_LIMIT", db.Numeric(precision=2))
-    dollar_spent = db.Column("BLANKET_DOLLAR_TODATE", db.Numeric(precision=2))
+    dollar_limit = db.Column("BLANKET_DOLLAR_LIMIT", db.Float(precision=2))
+    dollar_spent = db.Column("BLANKET_DOLLAR_TODATE", db.Float(precision=2))
 
     # column list for querying
     columns = (

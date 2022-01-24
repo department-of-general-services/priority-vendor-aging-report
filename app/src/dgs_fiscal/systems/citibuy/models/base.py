@@ -4,7 +4,7 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
-    Numeric,
+    Float,
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
