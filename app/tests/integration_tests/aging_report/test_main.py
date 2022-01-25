@@ -1,7 +1,10 @@
 import pytest
+import pandas as pd
 
 from dgs_fiscal.etl import AgingReport
 from dgs_fiscal.systems import SharePoint
+from dgs_fiscal.etl.aging_report import constants
+from tests.unit_tests.citibuy import data
 
 
 @pytest.fixture(scope="session", name="mock_aging")
@@ -33,7 +36,14 @@ class TestAgingReport:
         - The correct set of invoices are returned from CitiBuy
         - Each record has all of the necessary fields
         """
+        # setup
+        cols = constants.CITIBUY["invoice_cols"]
+        expected = pd.DataFrame(data.INVOICE_RESULTS)[cols.keys()]
+        expected.columns = cols.values()
         # execution
-        mock_aging.get_citibuy_data()
+        output = mock_aging.get_citibuy_data()
+        print(output)
         # validation
-        assert 1
+        assert output.columns.all() == expected.columns.all()
+        for val in output["Status"]:
+            assert val in mock_aging.citibuy.INVOICE_STATUS.values()

@@ -5,6 +5,7 @@ import pandas as pd
 from O365.drive import File
 
 from dgs_fiscal.systems import CitiBuy, SharePoint
+from dgs_fiscal.etl.aging_report import constants
 
 
 class AgingReport:
@@ -35,7 +36,18 @@ class AgingReport:
         pd.DataFrame
             A dataframe of the invoices exported from CitiBuy
         """
-        pass
+        # query the data from city
+        cols = constants.CITIBUY["invoice_cols"]
+        df = self.citibuy.get_invoices().dataframe
+
+        # reorder and rename the columns
+        df = df[cols.keys()]
+        df.columns = cols.values()
+
+        # recode status so it's more descriptive
+        df = df.replace(self.citibuy.INVOICE_STATUS)
+
+        return df
 
     def upload_invoice_data(self, folder_id: Optional[str] = None) -> File:
         """Uploads CitiBuy invoice data to SharePoint as an Excel file
