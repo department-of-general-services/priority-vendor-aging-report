@@ -65,9 +65,9 @@ class TestContractManagement:
         df_po = output.po
         df_ven = output.vendor
         df_con = output.contract
-        print(df_po.dtypes)
-        print(df_ven.dtypes)
-        print(df_con.dtypes)
+        print(df_po)
+        print(df_ven)
+        print(df_con)
         blanket_title = df_po.loc[0, "Title"]
         release_title = df_po.loc[1, "Title"]
         # validation
@@ -82,6 +82,8 @@ class TestContractManagement:
         assert list(df_po["PO Type"]) == po_types
         for df in [df_po, df_ven, df_con]:
             assert len(df) == len(df["Title"].unique())
+        for col in ["End Date", "Start Date"]:
+            assert "T00:00:00Z" in df_con.loc[0, col]
 
     def test_get_sharepoint_data(self, mock_contract):
         """Tests the get_sharepoint_data() method executes correctly
@@ -94,6 +96,7 @@ class TestContractManagement:
         # execution
         output = mock_contract.get_sharepoint_data()
         print(output.po)
+        print(output.contract)
         print(output.vendor)
         # validation
         assert isinstance(output, ContractData)
@@ -105,6 +108,8 @@ class TestContractManagement:
             assert col in output.po.columns
         for col in CON_COLS:
             assert col in output.contract.columns
+        for col in ["End Date", "Start Date"]:
+            assert "T00:00:00Z" in output.contract.loc[0, col]
 
 
 class TestUpdateLists:

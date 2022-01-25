@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import numpy as np
 
 CITIBUY = {
@@ -24,10 +22,10 @@ CITIBUY = {
         ],
         "Actual Cost": [0, 150, 100, 25, 0],
         "PO Date": [
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
+            "2020-07-01T00:00:00Z",
+            "2020-07-01T00:00:00Z",
+            "2020-07-01T00:00:00Z",
+            "2020-07-01T00:00:00Z",
             None,
         ],
     },
@@ -47,16 +45,16 @@ CITIBUY = {
         "Dollar Limit": [150, 100, 200, 200],
         "Amount Spent": [125, 100, 100, 0],
         "Start Date": [
-            datetime(2020, 7, 1),
+            "2020-07-01T00:00:00Z",
             None,
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
+            "2020-07-01T00:00:00Z",
+            "2020-07-01T00:00:00Z",
         ],
         "End Date": [
-            datetime(2050, 7, 1),
-            datetime(2050, 7, 1),
-            datetime(2050, 7, 1),
-            datetime(2050, 7, 1),
+            "2050-07-01T00:00:00Z",
+            "2050-07-01T00:00:00Z",
+            "2050-07-01T00:00:00Z",
+            "2050-07-01T00:00:00Z",
         ],
         "Vendor": ["111", "222", "222", "333"],
     },
@@ -78,10 +76,10 @@ SHAREPOINT = {
         ],
         "Actual Cost": [0, 150, 150, 40],
         "PO Date": [
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
-            datetime(2020, 7, 1),
+            "2020-07-01T00:00:00Z",
+            "2020-07-01T00:00:00Z",
+            "2020-07-01T00:00:00Z",
+            "2020-07-01T00:00:00Z",
         ],
     },
     "vendor": {
@@ -104,8 +102,8 @@ SHAREPOINT = {
         "Agency": ["DGS", "DGS"],
         "Dollar Limit": [150, 100],
         "Amount Spent": [100, 100],
-        "Start Date": [datetime(2020, 7, 1), None],
-        "End Date": [datetime(2050, 7, 1), datetime(2050, 7, 1)],
+        "Start Date": ["2020-07-01T00:00:00Z", None],
+        "End Date": ["2050-07-01T00:00:00Z", "2050-07-01T00:00:00Z"],
         "Vendor": ["Acme", "Disney"],
     },
 }
