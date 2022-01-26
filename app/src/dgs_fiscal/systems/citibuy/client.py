@@ -148,13 +148,13 @@ class CitiBuy:
         return DatabaseRows(rows)
 
     def get_invoices(self) -> DatabaseRows:
-        """Gets a list of Invoices from CitiBuy and returns them as a list
+        """Gets a list of invoices from CitiBuy and returns them as a list
         of dictionaries
 
         Returns
         -------
         DatabaseRows
-            An instance of DatabaseRows for the purchase order records
+            An instance of DatabaseRows for the invoice records
         """
         # create aliases for the tables
         po = aliased(models.PurchaseOrder, name="po")
