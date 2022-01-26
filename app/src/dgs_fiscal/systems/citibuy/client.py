@@ -106,6 +106,7 @@ class CitiBuy:
         con = aliased(models.BlanketContract, name="c")
         addr = aliased(models.Address, name="a")
         va = aliased(models.VendorAddress, name="va")
+        loc = aliased(models.Location, name="loc")
 
         # extract the columns to include in the query
         query = sa.select(
@@ -113,6 +114,7 @@ class CitiBuy:
             *[getattr(ven, col) for col in ven.columns],  # Vendor cols
             *[getattr(con, col) for col in con.columns],  # Contract cols
             *[getattr(addr, col) for col in addr.columns],  # Address cols
+            loc.desc.label("unit"),  # business unit associated with the PO
         ).limit(limit)
 
         # join the contract, vendor, and address tables
@@ -120,6 +122,7 @@ class CitiBuy:
         fkey_contract = (dgs_contract) & (po.po_nbr == con.po_nbr)
         fkey_vendor = po.vendor_id == ven.vendor_id
         fkey_address = addr.address_id == va.address_id
+        fkey_location = loc.loc_id == po.loc_id
         fkey_va = (
             (va.vendor_id == ven.vendor_id)
             & (va.address_type == "M")
@@ -129,6 +132,7 @@ class CitiBuy:
         query = query.join(con, fkey_contract, isouter=True)
         query = query.join(va, fkey_va, isouter=True)
         query = query.join(addr, fkey_address, isouter=True)
+        query = query.join(loc, fkey_location, isouter=True)
 
         # filter for recent blanket contracts and open market POs
         open_market = con.contract_agency.is_(None)
@@ -163,9 +167,7 @@ class CitiBuy:
 
         # create foreign key join conditions
         fkey_vendor = inv.vendor_id == ven.vendor_id
-        fkey_po = (po.po_nbr == inv.po_nbr) & (
-            po.release_nbr == inv.release_nbr
-        )
+        fkey_po = (po.po_nbr == inv.po_nbr) & (po.release_nbr == inv.release_nbr)  # fmt: skip
 
         # build the query statement
         query = sa.select(
