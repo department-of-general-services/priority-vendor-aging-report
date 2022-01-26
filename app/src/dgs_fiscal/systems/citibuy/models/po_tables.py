@@ -1,6 +1,21 @@
 import dgs_fiscal.systems.citibuy.models.base as db
 
 
+class Location(db.Base):
+    """Provides the longer description for the PO location, which is the
+    agency section or division associated with that Purchase Order
+    """
+
+    __tablename__ = "LOCATION"
+
+    # columns
+    loc_id = db.Column("LOCATION_NBR", db.String, primary_key=True)
+    desc = db.Column("DESC_TEXT", db.String)
+
+    # relationship
+    purchase_orders = db.relationship("PurchaseOrder", backref="location")
+
+
 class PurchaseOrder(db.Base):
     """Table that contains summary level information about a Purchase Order"""
 
@@ -15,7 +30,11 @@ class PurchaseOrder(db.Base):
     cost = db.Column("ACTUAL_COST", db.Float(precision=2))
     desc = db.Column("SHORT_DESC", db.String)
     buyer = db.Column("PURCHASER", db.String)
-    location = db.Column("LOC_ID", db.String)
+    loc_id = db.Column(
+        "LOC_ID",
+        db.String,
+        db.ForeignKey("LOCATION.LOCATION_NBR"),
+    )
     vendor_id = db.Column(
         "VEND_ID",
         db.String,
@@ -32,7 +51,7 @@ class PurchaseOrder(db.Base):
         "cost",
         "vendor_id",
         "desc",
-        "location",
+        "loc_id",
         "buyer",
     )
 
