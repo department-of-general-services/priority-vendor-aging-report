@@ -15,6 +15,7 @@ class Invoice(db.Base):
     invoice_date = db.Column("INVOICE_DATE", db.DateTime)
     status = db.Column("INVOICE_STATUS", db.String)
     amount = db.Column("INVOICE_AMT", db.Float(precision=2))
+    modified = db.Column("UPDATED_DATE", db.DateTime)
     vendor_id = db.Column(
         "VENDOR_NBR",
         db.String,
@@ -35,6 +36,7 @@ class Invoice(db.Base):
         "status",
         "amount",
         "vendor_id",
+        "modified",
     )
 
 

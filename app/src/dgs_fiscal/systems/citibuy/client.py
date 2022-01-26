@@ -160,23 +160,24 @@ class CitiBuy:
         po = aliased(models.PurchaseOrder, name="po")
         ven = aliased(models.Vendor, name="vendor")
         inv = aliased(models.Invoice, name="invoice")
-        status = aliased(models.InvoiceStatusHistory, name="status")
+        # status = aliased(models.InvoiceStatusHistory, name="status")
 
         # create the foreign keys
-        fkey_status = inv.id == status.invoice_id
+        # fkey_status = inv.id == status.invoice_id
         fkey_vendor = inv.vendor_id == ven.vendor_id
         fkey_po = (po.po_nbr == inv.po_nbr) & (
             po.release_nbr == inv.release_nbr
         )
 
+        # TODO: remove this section
         # create a sub-query for recently closed and cancelled invoices
-        updated_recently = status.status_date > (date.today() - timedelta(45))
-        closed = sa.select(inv.id)
-        closed = closed.join(status, fkey_status)
-        closed = closed.where(inv.status == status.to_status)
-        closed = closed.where(updated_recently)
-        closed = closed.cte("recently_closed")  # creates a WITH clause
-        closed = sa.select(closed.c.id)  # isloates invoice ids from clause
+        # updated_recently = status.status_date > (date.today() - timedelta(45))
+        # closed = sa.select(inv.id)
+        # closed = closed.join(status, fkey_status)
+        # closed = closed.where(inv.status == status.to_status)
+        # closed = closed.where(updated_recently)
+        # closed = closed.cte("recently_closed")  # creates a WITH clause
+        # closed = sa.select(closed.c.id)  # isloates invoice ids from clause
 
         # create the return query
         query = sa.select(
@@ -190,7 +191,7 @@ class CitiBuy:
         query = query.where(
             # invoice still open or recently closed or cancelled
             (inv.status.not_in(("4IP", "4IC")))
-            | (inv.id.in_(closed))
+            | (inv.modified > (date.today() - timedelta(45)))
         )
         with Session(self.engine) as session:
             rows = session.execute(query).fetchall()
