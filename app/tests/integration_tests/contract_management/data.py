@@ -28,6 +28,15 @@ CITIBUY = {
             "2020-07-01T00:00:00Z",
             None,
         ],
+        "Buyer": ["JOHN", "JANE", "JANE", "ALICE", "BOB"],
+        "Description": ["text1", "text1.2", "text1.3", "text3", "text4"],
+        "Location": [
+            "DGS - Building Maintenance",
+            "DGS - Fleet Management",
+            "DGS - Energy",
+            "DGS - Contract Maintenance",
+            "DGS - Fleet Management",
+        ],
     },
     "vendor": {
         "Title": ["Acme", "Disney", "Apple"],
@@ -80,6 +89,14 @@ SHAREPOINT = {
             "2020-07-01T00:00:00Z",
             "2020-07-01T00:00:00Z",
             "2020-07-01T00:00:00Z",
+        ],
+        "Buyer": ["JOHN", "JANE", "JANE", "ALICE"],
+        "Description": ["text1", "text1.1", "text1.2", "text2"],
+        "Location": [
+            "DGS - Building Maintenance",
+            "DGS - Energy",
+            "DGS - Fleet Management",
+            "DGS - Contract Maintenance",
         ],
     },
     "vendor": {

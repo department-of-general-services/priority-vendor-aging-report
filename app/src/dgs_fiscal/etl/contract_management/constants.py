@@ -8,9 +8,9 @@ CITIBUY = {
         "status": "Status",
         "cost": "Actual Cost",
         "date": "PO Date",
-        # "desc": "Description",
-        # "location": "Location",
-        # "buyer": "Buyer",
+        "buyer": "Buyer",
+        "desc": "Description",
+        "unit": "Location",
     },
     "vendor_cols": {
         "name": "Title",
