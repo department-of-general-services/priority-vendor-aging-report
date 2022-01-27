@@ -246,6 +246,7 @@ INVOICES = {
         "status": "4IP",
         "amount": 10.25,
         "invoice_date": datetime(2020, 8, 30),
+        "modified": datetime(2020, 8, 30),
     },
     # Acme invoice for DGS, status: Paid
     # Included because it was paid less than 45 days ago
@@ -258,6 +259,7 @@ INVOICES = {
         "status": "4IP",
         "amount": 25.00,
         "invoice_date": datetime(2020, 7, 1),
+        "modified": datetime(2050, 8, 30),
     },
     # Acme invoice for DGS, status: Approved for Payment
     # Included because it hasn't yet been paid
@@ -270,6 +272,7 @@ INVOICES = {
         "status": "4IA",
         "amount": 25.00,
         "invoice_date": datetime(2020, 7, 1),
+        "modified": datetime(2020, 8, 30),
     },
     # Acme invoice for DPW, status: In Progress
     # Excluded because it's for DPW
@@ -282,6 +285,7 @@ INVOICES = {
         "status": "4II",
         "amount": 10.50,
         "invoice_date": datetime(2020, 8, 15),
+        "modified": datetime(2020, 8, 30),
     },
     # Disney invoice for DGS, status: Approved for Payment
     # Included because it hasn't yet been paid
@@ -294,6 +298,7 @@ INVOICES = {
         "status": "4IA",
         "amount": 10.50,
         "invoice_date": datetime(2020, 9, 30),
+        "modified": datetime(2020, 8, 30),
     },
     # Disney invoice for DGS, status: Cancelled
     # Included because it was canceled less than 45 days ago
@@ -306,6 +311,7 @@ INVOICES = {
         "status": "4IC",
         "amount": 5.00,
         "invoice_date": datetime(2020, 7, 1),
+        "modified": datetime(2050, 8, 30),
     },
     # Disney invoice for DGS, status: Cancelled
     # Excluded because it was cancelled more than 45 days ago
@@ -318,6 +324,7 @@ INVOICES = {
         "status": "4IC",
         "amount": 5.00,
         "invoice_date": datetime(2020, 7, 15),
+        "modified": datetime(2020, 8, 30),
     },
     # Disney invoice for DGS, status: In Progress
     # Included because it hasn't yet been paid
@@ -330,6 +337,7 @@ INVOICES = {
         "status": "4II",
         "amount": 10.00,
         "invoice_date": datetime(2020, 8, 1),
+        "modified": datetime(2020, 8, 30),
     },
 }
 

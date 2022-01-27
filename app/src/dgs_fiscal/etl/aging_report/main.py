@@ -22,7 +22,7 @@ class AgingReport:
         SharePoint resources
     """
 
-    def __init__(self, citibuy_url: str) -> None:
+    def __init__(self, citibuy_url: str = None) -> None:
         """Inits the AgingReport class"""
         self.citibuy = CitiBuy(conn_url=citibuy_url)
         self.sharepoint = SharePoint()

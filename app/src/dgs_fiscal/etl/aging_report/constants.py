@@ -9,5 +9,6 @@ CITIBUY = {
         "invoice_date": "Invoice Date",
         "amount": "Amount",
         "status": "Status",
+        "modified": "Last Modified",
     }
 }
