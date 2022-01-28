@@ -47,6 +47,11 @@ CITIBUY = {
         "Emergency Contact": ["", "", ""],
         "Emergency Phone": ["", "", ""],
         "Emergency Email": ["", "", ""],
+        "Agency Locations": [
+            "DGS - BUILDING MAINTENANCE, DGS - FLEET MANGEMENT",
+            "DGS - ENERGY, DPW - WASTE MANAGEMENT",
+            "DGS - CONTRACT",
+        ],
     },
     "contract": {
         "Title": ["P111", "P222", "P222", "P333"],
@@ -66,6 +71,12 @@ CITIBUY = {
             "2050-07-01T00:00:00Z",
         ],
         "Vendor": ["111", "222", "222", "333"],
+        "Locations": [
+            "DGS - BUILDING MAINTENANCE, DGS - FLEET MANAGEMENT",
+            "DPW - WASTE MANAGEMENT, DGS - ENERGY",
+            "DPW - WASTE MANAGEMENT, DGS - CONTRACT",
+            "DPW - ENERGY, DGS - FISCAL",
+        ],
     },
 }
 
@@ -112,6 +123,10 @@ SHAREPOINT = {
         "Emergency Contact": [np.nan, np.nan],
         "Emergency Phone": [np.nan, np.nan],
         "Emergency Email": [np.nan, np.nan],
+        "Agency Locations": [
+            "DGS - BUILDING MAINTENANCE, DGS - FLEET MANGEMENT",
+            "DGS - ENERGY, DPW - WASTE MANAGEMENT",
+        ],
     },
     "contract": {
         "id": ["1", "2"],
@@ -122,5 +137,9 @@ SHAREPOINT = {
         "Start Date": ["2020-07-01T00:00:00Z", None],
         "End Date": ["2050-07-01T00:00:00Z", "2050-07-01T00:00:00Z"],
         "Vendor": ["Acme", "Disney"],
+        "Locations": [
+            "DGS - BUILDING MAINTENANCE, DGS - FLEET MANAGEMENT",
+            "DPW - WASTE MANAGEMENT, DGS - ENERGY",
+        ],
     },
 }

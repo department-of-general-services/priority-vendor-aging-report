@@ -70,7 +70,7 @@ LOCATIONS = {
     },
     "energy": {
         "loc_id": "DGSEE",
-        "desc": "DGS - ENGINEERING ENERGY SECTION & PERMITS",
+        "desc": "DGS - ENERGY",
     },
     "fleet": {
         "loc_id": "DGSFM",
@@ -209,6 +209,7 @@ PO_RECORDS = {
 }
 
 CONTRACTS = {
+    # Included in list of contracts
     "blanket1_DGS": {
         "po_nbr": PO_RECORDS["po1"]["po_nbr"],
         "release_nbr": PO_RECORDS["po1"]["release_nbr"],
@@ -218,6 +219,7 @@ CONTRACTS = {
         "dollar_limit": 750.00,
         "dollar_spent": 50.00,
     },
+    # Excluded because it's related to DPW
     "blanket1_DPW": {
         "po_nbr": PO_RECORDS["po1"]["po_nbr"],
         "release_nbr": PO_RECORDS["po1"]["release_nbr"],
@@ -227,6 +229,7 @@ CONTRACTS = {
         "dollar_limit": 250.00,
         "dollar_spent": 50.00,
     },
+    # Included because it's an Agency Umbrella contract
     "blanket4": {
         "po_nbr": PO_RECORDS["po4"]["po_nbr"],
         "release_nbr": PO_RECORDS["po4"]["release_nbr"],
@@ -236,6 +239,7 @@ CONTRACTS = {
         "dollar_limit": 500.00,
         "dollar_spent": 10.00,
     },
+    # Included in the list of contracts
     "blanket4_agy": {
         "po_nbr": PO_RECORDS["po4"]["po_nbr"],
         "release_nbr": PO_RECORDS["po4"]["release_nbr"],
@@ -245,6 +249,7 @@ CONTRACTS = {
         "dollar_limit": 10000.00,
         "dollar_spent": 250.00,
     },
+    # Excluded because it expired more than 90 days ago
     "blanket7": {
         "po_nbr": PO_RECORDS["po7"]["po_nbr"],
         "release_nbr": PO_RECORDS["po7"]["release_nbr"],

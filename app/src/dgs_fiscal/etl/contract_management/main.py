@@ -88,6 +88,14 @@ class ContractManagement:
         df.loc[blanket_po, "po_type"] = "Master Blanket"
         df.loc[open_market, "po_type"] = "Open Market"
 
+        # aggregates the location field for contracts and vendors
+        df["con_loc"] = df["po_nbr"].map(
+            df.groupby("po_nbr")["unit"].agg(set).str.join(", ")
+        )
+        df["ven_loc"] = df["vendor_id"].map(
+            df.groupby("vendor_id")["unit"].agg(set).str.join(", ")
+        )
+
         # isloate and format separate dataframes
         df_po = self._get_unique(df, po_cols, "po_title")
         df_ven = self._get_unique(df, ven_cols, "vendor_id")

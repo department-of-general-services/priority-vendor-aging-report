@@ -21,6 +21,7 @@ CITIBUY = {
         "emg_contact": "Emergency Contact",
         "emg_email": "Emergency Email",
         "emg_phone": "Emergency Phone",
+        "ven_loc": "Agency Locations",
     },
     "contract_cols": {
         "po_nbr": "Title",
@@ -30,5 +31,6 @@ CITIBUY = {
         "start_date": "Start Date",
         "end_date": "End Date",
         "vendor_id": "Vendor",
+        "con_loc": "Locations",
     },
 }
