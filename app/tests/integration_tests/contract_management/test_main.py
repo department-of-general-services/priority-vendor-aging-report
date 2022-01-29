@@ -76,10 +76,12 @@ class TestContractManagement:
         assert list(df_ven.columns) == VEN_COLS
         assert list(df_con.columns) == CON_COLS
         assert len(df_ven) == 2
-        assert "P555" not in list(df_con["Title"])  #
+        assert "P555" not in list(df_con["Title"])
         assert blanket_title == "P111"
         assert release_title == "P111:1"
         assert list(df_po["PO Type"]) == po_types
+        assert list(df_con["Locations"]) is not None
+        assert list(df_ven["Agency Locations"]) is not None
         for df in [df_po, df_ven, df_con]:
             assert len(df) == len(df["Title"].unique())
         for col in ["End Date", "Start Date"]:
@@ -112,6 +114,7 @@ class TestContractManagement:
             assert "T00:00:00Z" in output.contract.loc[0, col]
 
 
+@pytest.mark.skip
 class TestUpdateLists:
     """Tests the class methods that update the items in sharepoint lists
     for Vendors, Contracts, and Purchase Orders

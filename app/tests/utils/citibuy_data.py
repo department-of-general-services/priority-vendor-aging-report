@@ -59,6 +59,29 @@ ADDRESSES = {
     },
 }
 
+LOCATIONS = {
+    "building": {
+        "loc_id": "DGSBM",
+        "desc": "DGS - BUILDING MAINTENANCE",
+    },
+    "contract": {
+        "loc_id": "DGSCM",
+        "desc": "DGS - FACILITIES CONTRACT MAINTENANCE",
+    },
+    "energy": {
+        "loc_id": "DGSEE",
+        "desc": "DGS - ENERGY",
+    },
+    "fleet": {
+        "loc_id": "DGSFM",
+        "desc": "DGS - FLEET MANAGEMENT",
+    },
+    "dpw": {
+        "loc_id": "DPWWM",
+        "desc": "DPW - WASTE MANAGEMENT",
+    },
+}
+
 PO_RECORDS = {
     # Blanket PO between Acme and DGS, status: Sent
     "po1": {
@@ -71,7 +94,7 @@ PO_RECORDS = {
         "date": None,
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["building"]["loc_id"],
     },
     # PO Release between Acme and DGS, status: Partial Receipt
     "po1_1": {
@@ -84,7 +107,7 @@ PO_RECORDS = {
         "date": None,
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["fleet"]["loc_id"],
     },
     # PO Release between Acme and DPW, status: Partial Receipt
     # Excluded because it's a DPW release
@@ -98,7 +121,7 @@ PO_RECORDS = {
         "date": None,
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["dpw"]["loc_id"],
     },
     # Open Market PO between Disney and DGS, status: Closed
     # Excluded because it's closed
@@ -112,7 +135,7 @@ PO_RECORDS = {
         "date": None,
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["energy"]["loc_id"],
     },
     # Blanket PO between Disney and DPW, status: Sent
     # This is the PO for an Agency umbrella contract
@@ -127,7 +150,7 @@ PO_RECORDS = {
         "date": datetime(2020, 7, 1),
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["dpw"]["loc_id"],
     },
     # PO Release between Disney and DGS, status: Partial Receipt
     "po4_1": {
@@ -140,7 +163,7 @@ PO_RECORDS = {
         "date": None,
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["energy"]["loc_id"],
     },
     # Open Market PO between DGS and Acme, status: Sent
     "po5": {
@@ -153,7 +176,7 @@ PO_RECORDS = {
         "date": datetime(2020, 7, 1),
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["fleet"]["loc_id"],
     },
     # Open Market PO between Acme and DPW, status: Sent
     # This PO is excluded because it isn't available to DGS
@@ -167,7 +190,7 @@ PO_RECORDS = {
         "date": datetime(2020, 7, 1),
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["building"]["loc_id"],
     },
     # Blanket PO between Disney and DGS, status: Closed
     # This PO is excluded because it's closed
@@ -181,11 +204,12 @@ PO_RECORDS = {
         "date": None,
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "location": "DGS",
+        "loc_id": LOCATIONS["fleet"]["loc_id"],
     },
 }
 
 CONTRACTS = {
+    # Included in list of contracts
     "blanket1_DGS": {
         "po_nbr": PO_RECORDS["po1"]["po_nbr"],
         "release_nbr": PO_RECORDS["po1"]["release_nbr"],
@@ -195,6 +219,7 @@ CONTRACTS = {
         "dollar_limit": 750.00,
         "dollar_spent": 50.00,
     },
+    # Excluded because it's related to DPW
     "blanket1_DPW": {
         "po_nbr": PO_RECORDS["po1"]["po_nbr"],
         "release_nbr": PO_RECORDS["po1"]["release_nbr"],
@@ -204,6 +229,7 @@ CONTRACTS = {
         "dollar_limit": 250.00,
         "dollar_spent": 50.00,
     },
+    # Included because it's an Agency Umbrella contract
     "blanket4": {
         "po_nbr": PO_RECORDS["po4"]["po_nbr"],
         "release_nbr": PO_RECORDS["po4"]["release_nbr"],
@@ -213,6 +239,7 @@ CONTRACTS = {
         "dollar_limit": 500.00,
         "dollar_spent": 10.00,
     },
+    # Included in the list of contracts
     "blanket4_agy": {
         "po_nbr": PO_RECORDS["po4"]["po_nbr"],
         "release_nbr": PO_RECORDS["po4"]["release_nbr"],
@@ -222,6 +249,7 @@ CONTRACTS = {
         "dollar_limit": 10000.00,
         "dollar_spent": 250.00,
     },
+    # Excluded because it expired more than 90 days ago
     "blanket7": {
         "po_nbr": PO_RECORDS["po7"]["po_nbr"],
         "release_nbr": PO_RECORDS["po7"]["release_nbr"],
@@ -341,7 +369,7 @@ INVOICES = {
     },
 }
 
-INVOICE_HISTORY = {
+INV_HISTORY = {
     "inv1_4IR": {
         "id": "update_1.1",
         "invoice_id": INVOICES["inv1"]["id"],

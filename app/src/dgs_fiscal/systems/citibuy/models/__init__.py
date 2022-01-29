@@ -6,6 +6,7 @@ from dgs_fiscal.systems.citibuy.models.invoice_tables import (
     InvoiceStatusHistory,
 )
 from dgs_fiscal.systems.citibuy.models.po_tables import (
+    Location,
     PurchaseOrder,
     BlanketContract,
 )

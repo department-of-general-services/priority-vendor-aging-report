@@ -21,6 +21,19 @@ def add_to_session(session: Session, entries: Iterable) -> None:
         session.add(entry)
 
 
+def create_records(model: models.Base, records: dict):
+    """Uses a SQLAlchemy model to create a record for each entry in the data
+
+    Parameters
+    ----------
+    model: models.Base
+        A model that inherits from SQLAlchemy's declarative base
+    records: dict
+        A dictionary of entries to insert into the test database
+    """
+    return [model(**entry) for entry in records.values()]
+
+
 def populate_db(session: Session) -> None:
     """Populates the mock database with test data
 
@@ -29,23 +42,21 @@ def populate_db(session: Session) -> None:
     session: Session
         A SQLAlchemy session object passed to this function by the fixture
     """
-    vendors = [models.Vendor(**vendor) for vendor in data.VENDORS.values()]
-    pos = [models.PurchaseOrder(**po) for po in data.PO_RECORDS.values()]
-    invoices = [models.Invoice(**inv) for inv in data.INVOICES.values()]
-    contracts = [models.BlanketContract(**c) for c in data.CONTRACTS.values()]
-    addresses = [models.Address(**a) for a in data.ADDRESSES.values()]
-    vendor_addresses = [
-        models.VendorAddress(**va) for va in data.VEN_ADDRESS.values()
-    ]
-    invoice_history = [
-        models.InvoiceStatusHistory(**status)
-        for status in data.INVOICE_HISTORY.values()
-    ]
+    vendors = create_records(models.Vendor, data.VENDORS)
+    po_records = create_records(models.PurchaseOrder, data.PO_RECORDS)
+    invoices = create_records(models.Invoice, data.INVOICES)
+    contracts = create_records(models.BlanketContract, data.CONTRACTS)
+    addresses = create_records(models.Address, data.ADDRESSES)
+    locations = create_records(models.Location, data.LOCATIONS)
+    ven_addresses = create_records(models.VendorAddress, data.VEN_ADDRESS)
+    inv_history = create_records(models.InvoiceStatusHistory, data.INV_HISTORY)
+
     add_to_session(session, vendors)
-    add_to_session(session, pos)
+    add_to_session(session, po_records)
     add_to_session(session, invoices)
     add_to_session(session, contracts)
     add_to_session(session, addresses)
-    add_to_session(session, vendor_addresses)
-    add_to_session(session, invoice_history)
+    add_to_session(session, locations)
+    add_to_session(session, ven_addresses)
+    add_to_session(session, inv_history)
     session.commit()
