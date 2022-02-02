@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 import pandas as pd
 
@@ -47,3 +49,23 @@ class TestAgingReport:
         assert output.columns.all() == expected.columns.all()
         for val in output["Status"]:
             assert val in mock_aging.citibuy.INVOICE_STATUS.values()
+
+    def test_upload_invoice_data(self, mock_aging, test_archive_dir):
+        """Tests that upload_invoice_data() method executes correctly
+
+        Validates the following conditions:
+        - The file has been uploaded to SharePoint
+        - The filename that is uploaded contains today's date
+        """
+        # setup
+        date_str = datetime.today().strftime("%Y-%m-%d")
+        file_name = f"{date_str}_InvoiceExport.xlsx"
+        df = pd.DataFrame({"Col A": ["a", "b"], "Col B": ["d", "f"]})
+        # execution
+        file = mock_aging.upload_invoice_data(
+            df=df,
+            folder_name="test",
+            local_archive=test_archive_dir,
+        )
+        # validation
+        assert file.name == file_name

@@ -1,5 +1,7 @@
 from __future__ import annotations  # prevents NameError for typehints
 from typing import Optional
+from pathlib import Path
+from datetime import datetime
 
 import pandas as pd
 from O365.drive import File
@@ -9,7 +11,9 @@ from dgs_fiscal.etl.aging_report import constants
 
 
 class AgingReport:
-    """Runs the Aging Report workflow, which gets the status of invoices from
+    """Manages execution of the Aging Report workflow
+
+    The aging Aging Report workflow aggregates the status of invoices from
     CitiBuy, CoreIntegrator, and Integrify and updates them in SharePoint
 
     Attributes
@@ -28,8 +32,7 @@ class AgingReport:
         self.sharepoint = SharePoint()
 
     def get_citibuy_data(self) -> pd.DataFrame:
-        """Gets a list of open and recently paid invoices from CitiBuy so they
-        can be uploaded to SharePoint and used to build the AgingReport
+        """Exports open and recently paid invoices from CitiBuy
 
         Returns
         -------
@@ -49,18 +52,39 @@ class AgingReport:
 
         return df
 
-    def upload_invoice_data(self, folder_id: Optional[str] = None) -> File:
+    def upload_invoice_data(
+        self,
+        df: pd.DataFrame,
+        folder_name: Optional[str] = None,
+        local_archive: Optional[Path] = None,
+    ) -> File:
         """Uploads CitiBuy invoice data to SharePoint as an Excel file
 
         Parameters
         ----------
-        folder_id: str, optional
-            The id of the folder to which the invoice data will be uploaded
+        df: pd.DataFrame
+            A dataframe of the invoice data to upload to SharePoint
+        folder_name: str, optional
+            The name of the folder to which the invoice data will be uploaded
+        local_archive: Path, optional
+            Path to local directory where export will be saved before being
+            uploaded to SharePoint. Default is archives/ directory at root.
 
         Returns
         -------
         File
             Returns an instance of the O365 File class for the Excel file that
-            was created in the SharePoint folder passed to this
+            was uploaded to SharePoint
         """
-        pass
+        # set the file name to the current date
+        date_str = datetime.today().strftime("%Y-%m-%d")
+        file_name = f"{date_str}_InvoiceExport.xlsx"
+
+        # export the invoice data to local archive
+        archive = self.sharepoint.get_archive_folder(local_archive)
+        tmp_file = archive.export_dataframe(df, file_name)
+
+        # upload the exported file to SharePoint
+        folder = folder_name or "aging_report"
+        print(folder)
+        return archive.upload_file(tmp_file, folder, file_name)
