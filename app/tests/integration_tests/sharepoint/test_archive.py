@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+import pandas as pd
 from O365.drive import Folder, File
 
 DATA_DIR = Path.cwd() / "tests" / "integration_tests" / "sharepoint" / "data"
@@ -96,3 +97,14 @@ class TestArchiveFolder:
         assert isinstance(output, Path)
         assert output.name == file_name
         assert any(tmp_dir.iterdir())
+
+    def test_export_dataframe(self, test_archive):
+        """Tests that the export_dataframe() method successfully exports the
+        dataframe to an Excel file and formats it with a table
+        """
+        # setup
+        df = pd.DataFrame({"Col A": ["a", "b"], "Col B": ["d", "f"]})
+        # execution
+        file = test_archive.export_dataframe(df, "test.xlsx")
+        # validation
+        assert file.exists()

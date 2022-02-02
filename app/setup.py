@@ -20,6 +20,7 @@ setup(
         "openpyxl",
         "more-itertools",
         "typer",
+        "XlsxWriter",
     ],
     include_package_data=True,
     package_dir={"": "src"},  # this is required to access code in src/
