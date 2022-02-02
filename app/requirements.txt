@@ -19,3 +19,4 @@ pyodbc==4.0.32
 more-itertools==8.11.0
 typer==0.4.0
 XlsxWriter==3.0.2
+numpy==1.22.1
