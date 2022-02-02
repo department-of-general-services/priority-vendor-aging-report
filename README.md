@@ -75,7 +75,7 @@ The list below represents a summary of important files and directories within th
 
 ### Prerequisites
 
-- Python installed on your local machine, preferably a version between 3.7 and 3.9
+- Python installed on your local machine, preferably a version between 3.8 and 3.9
 
 In order to check which version of python you have installed, run the following in your command line, and the output should look something like this:
 
