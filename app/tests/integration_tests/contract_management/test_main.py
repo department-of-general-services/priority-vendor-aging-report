@@ -114,7 +114,6 @@ class TestContractManagement:
             assert "T00:00:00Z" in output.contract.loc[0, col]
 
 
-@pytest.mark.skip
 class TestUpdateLists:
     """Tests the class methods that update the items in sharepoint lists
     for Vendors, Contracts, and Purchase Orders
