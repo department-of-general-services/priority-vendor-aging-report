@@ -6,7 +6,6 @@ import pandas as pd
 from dgs_fiscal.etl import AgingReport
 from dgs_fiscal.systems import SharePoint
 from dgs_fiscal.etl.aging_report import constants
-from tests.unit_tests.citibuy import data
 
 
 @pytest.fixture(scope="session", name="mock_aging")
@@ -39,16 +38,16 @@ class TestAgingReport:
         - Each record has all of the necessary fields
         """
         # setup
-        cols = constants.CITIBUY["invoice_cols"]
-        expected = pd.DataFrame(data.INVOICE_RESULTS)[cols.keys()]
-        expected.columns = cols.values()
+        cols = list(constants.CITIBUY["invoice_cols"].values())
         # execution
         output = mock_aging.get_citibuy_data()
         print(output)
         # validation
-        assert output.columns.all() == expected.columns.all()
-        for val in output["Status"]:
+        assert list(output.columns) == cols
+        for val in output["Invoice Status"]:
             assert val in mock_aging.citibuy.INVOICE_STATUS.values()
+        for val in output["PO Status"]:
+            assert val in mock_aging.citibuy.PO_STATUS.values()
 
     def test_upload_invoice_data(self, mock_aging, test_archive_dir):
         """Tests that upload_invoice_data() method executes correctly

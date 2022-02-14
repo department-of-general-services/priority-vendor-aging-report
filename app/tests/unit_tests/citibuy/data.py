@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from tests.utils import citibuy_data as mock_data
 
 PO_RESULTS = [
@@ -57,9 +59,59 @@ PO_RESULTS = [
 ]
 
 INVOICE_RESULTS = [
-    {**mock_data.INVOICES["inv2"], "name": "Acme"},
-    {**mock_data.INVOICES["inv3"], "name": "Acme"},
-    {**mock_data.INVOICES["inv5"], "name": "Disney"},
-    {**mock_data.INVOICES["inv6"], "name": "Disney"},
-    {**mock_data.INVOICES["inv8"], "name": "Disney"},
+    {
+        # P111:1
+        **mock_data.INVOICES["inv2"],
+        "vendor_name": "Acme",
+        "po_status": "3PPR",
+        "po_date": None,
+        "po_cost": 75.00,
+        "contract_end_date": datetime(2050, 7, 1),
+        "contract_dollar_limit": 750.00,
+        "contract_amount_spent": 50.00,
+    },
+    {
+        # P111:1
+        **mock_data.INVOICES["inv3"],
+        "vendor_name": "Acme",
+        "po_status": "3PPR",
+        "po_date": None,
+        "po_cost": 75.00,
+        "contract_end_date": datetime(2050, 7, 1),
+        "contract_dollar_limit": 750.00,
+        "contract_amount_spent": 50.00,
+    },
+    {
+        # P222
+        **mock_data.INVOICES["inv5"],
+        "vendor_name": "Disney",
+        "po_status": "3PCO",
+        "po_date": None,
+        "po_cost": 15.50,
+        "contract_end_date": None,
+        "contract_dollar_limit": None,
+        "contract_amount_spent": None,
+    },
+    {
+        # P222
+        **mock_data.INVOICES["inv6"],
+        "vendor_name": "Disney",
+        "po_status": "3PCO",
+        "po_date": None,
+        "po_cost": 15.50,
+        "contract_end_date": None,
+        "contract_dollar_limit": None,
+        "contract_amount_spent": None,
+    },
+    {
+        # P444:1
+        **mock_data.INVOICES["inv8"],
+        "vendor_name": "Disney",
+        "po_status": "3PPR",
+        "po_date": None,
+        "po_cost": 10.00,
+        "contract_end_date": datetime(2050, 7, 1),
+        "contract_dollar_limit": 10000.00,
+        "contract_amount_spent": 250.00,
+    },
 ]

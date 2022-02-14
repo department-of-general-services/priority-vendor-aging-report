@@ -88,7 +88,7 @@ class CitiBuy:
         self,
         limit: int = 10000,
     ) -> DatabaseRows:
-        """Gets a list of POs from CitiBuy and returns them as a list of dicts
+        """Gets a list of POs from CitiBuy
 
         Parameters
         ----------
@@ -152,8 +152,7 @@ class CitiBuy:
         return DatabaseRows(rows)
 
     def get_invoices(self) -> DatabaseRows:
-        """Gets a list of invoices from CitiBuy and returns them as a list
-        of dictionaries
+        """Gets a list of invoices from CitiBuy
 
         Returns
         -------
@@ -164,19 +163,36 @@ class CitiBuy:
         po = aliased(models.PurchaseOrder, name="po")
         ven = aliased(models.Vendor, name="vendor")
         inv = aliased(models.Invoice, name="invoice")
+        con = aliased(models.BlanketContract, name="contract")
 
         # create foreign key join conditions
+        dgs_contract = con.contract_agency == "DGS"
         fkey_vendor = inv.vendor_id == ven.vendor_id
         fkey_po = (po.po_nbr == inv.po_nbr) & (po.release_nbr == inv.release_nbr)  # fmt: skip
+        fkey_contract = (inv.po_nbr == con.po_nbr) & (dgs_contract)
 
         # build the query statement
         query = sa.select(
-            # invoice columns and vendor name
-            ven.name,
-            *[getattr(inv, col) for col in inv.columns],
+            ven.name.label("vendor_name"),
+            inv.vendor_id,
+            inv.po_nbr,
+            inv.release_nbr,
+            inv.id,
+            inv.invoice_nbr,
+            inv.invoice_date,
+            inv.amount,
+            inv.status,
+            inv.modified,
+            po.cost.label("po_cost"),
+            po.date.label("po_date"),
+            po.status.label("po_status"),
+            con.end_date.label("contract_end_date"),
+            con.dollar_limit.label("contract_dollar_limit"),
+            con.dollar_spent.label("contract_amount_spent"),
         )
         query = query.join(ven, fkey_vendor)
         query = query.join(po, fkey_po)
+        query = query.join(con, fkey_contract, isouter=True)
         query = query.where(po.agency == "DGS")  # invoice created from DGS PO
         query = query.where(
             # invoice still open or recently closed or cancelled
