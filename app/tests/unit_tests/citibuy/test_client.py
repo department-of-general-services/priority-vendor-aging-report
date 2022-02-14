@@ -5,6 +5,7 @@ import sqlalchemy
 
 from tests.unit_tests.citibuy import data
 from dgs_fiscal.systems import CitiBuy
+import dgs_fiscal.etl.aging_report.constants as aging_constants
 
 
 @pytest.fixture(scope="session", name="mock_citibuy")
@@ -84,14 +85,20 @@ class TestGetInvoices:
         """
         # setup
         expected = data.INVOICE_RESULTS
+        columns = aging_constants.CITIBUY["invoice_cols"].keys()
         # execution
         output = mock_citibuy.get_invoices().records
         print("OUTPUT")
         pprint(output)
         print("EXPECTED")
         pprint(expected)
+        output_cols = output[0].keys()
         # validation
         assert isinstance(output, list)
         assert isinstance(output[0], dict)
         assert len(output) == len(expected)
         assert output == expected
+        for col in columns:
+            if col == "po_type":
+                continue
+            assert col in output_cols

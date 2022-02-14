@@ -43,12 +43,18 @@ class AgingReport:
         cols = constants.CITIBUY["invoice_cols"]
         df = self.citibuy.get_invoices().dataframe
 
+        # add PO type column
+        open_market = df["contract_end_date"].isna()
+        df["po_type"] = "Release"
+        df.loc[open_market, "po_type"] = "Open Market"
+
         # reorder and rename the columns
         df = df[cols.keys()]
         df.columns = cols.values()
 
-        # recode status so it's more descriptive
+        # recode invoice and PO statuses so they're more descriptive
         df = df.replace(self.citibuy.INVOICE_STATUS)
+        df = df.replace(self.citibuy.PO_STATUS)
 
         return df
 
