@@ -39,9 +39,9 @@ class AgingReport:
         pd.DataFrame
             A dataframe of the invoices exported from CitiBuy
         """
-        # query the data from city
-        cols = constants.CITIBUY["invoice_cols"]
-        df = self.citibuy.get_invoices().dataframe
+        # query the data from city,
+        # including invoices paid or cancelled up to a year ago
+        df = self.citibuy.get_invoices(days_ago=365).dataframe
 
         # add PO type column
         open_market = df["contract_end_date"].isna()
@@ -49,6 +49,7 @@ class AgingReport:
         df.loc[open_market, "po_type"] = "Open Market"
 
         # reorder and rename the columns
+        cols = constants.CITIBUY["invoice_cols"]
         df = df[cols.keys()]
         df.columns = cols.values()
 
