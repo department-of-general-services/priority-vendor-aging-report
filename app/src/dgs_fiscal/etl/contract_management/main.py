@@ -34,7 +34,7 @@ class ContractManagement:
         self,
         citibuy_url: str = None,
         vendor_list: str = "Vendors",
-        po_list: str = "Purchase Orders",
+        po_list: str = "PO Releases",
         contract_list: str = "Master Blanket POs",
     ) -> None:
         """Inits the ContractManagement class"""
