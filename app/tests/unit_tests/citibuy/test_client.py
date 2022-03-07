@@ -27,7 +27,7 @@ class TestGetPurchaseOrders:
     """Tests the CitiBuy.get_purchase_orders() method"""
 
     def test_query_default(self, mock_citibuy):
-        """Tests that PurchaseOrders.get_records() returns all records when no
+        """Tests that CitiBuy.get_purchase_orders() returns all records when no
         values are passed to the filter or limit paramaters
 
         Validates the following conditions:
@@ -52,7 +52,7 @@ class TestGetPurchaseOrders:
 
     def test_get_records_limit(self, mock_citibuy):
         """Tests that the limit parameter works as expected when passed to
-        PurchaseOrder.get_records()
+        CitiBuy.get_purchase_orders()
 
         Validates the following conditions:
         - Only the first x records are returned when a limit of x is passed
@@ -73,7 +73,7 @@ class TestGetInvoices:
     """Tests the CitiBuy.get_invoices() method"""
 
     def test_query_default(self, mock_citibuy):
-        """Tests that PurchaseOrders.get_records() returns all records when no
+        """Tests that CitiBuy.get_invoices() returns all records when no
         values are passed to the filter or limit paramaters
 
         Validates the following conditions:
@@ -102,3 +102,23 @@ class TestGetInvoices:
             if col == "po_type":
                 continue
             assert col in output_cols
+
+    def test_query_custom_date_range(self, mock_citibuy):
+        """Tests that CitiBuy.get_invoices() returns more records when the
+        days_ago parameter is passed a large value
+
+        Validates the following conditions:
+        - The results exclude invoices that were cancelled or paid up to 5000
+          days ago
+        """
+        # setup
+        filtered = data.INVOICE_RESULTS
+        old_invoice = "invoice1"  # an invoice paid more than 90 days ago
+        # execution
+        output = mock_citibuy.get_invoices(days_ago=5000).records
+        invoice_ids = [record["id"] for record in output]
+        print("OUTPUT")
+        pprint(output)
+        # validation
+        assert len(output) >= len(filtered)  # ensure more results are returned
+        assert old_invoice in invoice_ids

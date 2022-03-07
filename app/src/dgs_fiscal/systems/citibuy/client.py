@@ -151,8 +151,15 @@ class CitiBuy:
             rows = session.execute(query).fetchall()
         return DatabaseRows(rows)
 
-    def get_invoices(self) -> DatabaseRows:
+    def get_invoices(self, days_ago: int = 90) -> DatabaseRows:
         """Gets a list of invoices from CitiBuy
+
+        Parameters
+        ----------
+        days_ago: int
+            The maximum number of days in the past an invoice must have been
+            paid or cancelled in order for it to appear in the results. Older
+            paid or cancelled invoices will be excluded
 
         Returns
         -------
@@ -196,8 +203,9 @@ class CitiBuy:
         query = query.where(po.agency == "DGS")  # invoice created from DGS PO
         query = query.where(
             # invoice still open or recently closed or cancelled
+            # as determined by the days_ago parameter cutoff
             (inv.status.not_in(("4IP", "4IC")))
-            | (inv.modified > (date.today() - timedelta(45)))
+            | (inv.modified > (date.today() - timedelta(days_ago)))
         )
 
         # execute the query

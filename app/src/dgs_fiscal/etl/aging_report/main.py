@@ -31,17 +31,23 @@ class AgingReport:
         self.citibuy = CitiBuy(conn_url=citibuy_url)
         self.sharepoint = SharePoint()
 
-    def get_citibuy_data(self) -> pd.DataFrame:
+    def get_citibuy_data(self, invoice_window: int = 365) -> pd.DataFrame:
         """Exports open and recently paid invoices from CitiBuy
+
+        Parameters
+        ----------
+        invoice_window: int
+            The maximum number of days in the past an invoice must have been
+            paid or cancelled in order to be included in the exported results
 
         Returns
         -------
         pd.DataFrame
             A dataframe of the invoices exported from CitiBuy
         """
-        # query the data from city
-        cols = constants.CITIBUY["invoice_cols"]
-        df = self.citibuy.get_invoices().dataframe
+        # query the data from city,
+        # including invoices paid or cancelled up to a year ago
+        df = self.citibuy.get_invoices(days_ago=invoice_window).dataframe
 
         # add PO type column
         open_market = df["contract_end_date"].isna()
@@ -49,6 +55,7 @@ class AgingReport:
         df.loc[open_market, "po_type"] = "Open Market"
 
         # reorder and rename the columns
+        cols = constants.CITIBUY["invoice_cols"]
         df = df[cols.keys()]
         df.columns = cols.values()
 

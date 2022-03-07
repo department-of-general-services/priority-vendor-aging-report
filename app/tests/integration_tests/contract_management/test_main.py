@@ -21,7 +21,7 @@ def fixture_contract(mock_db):
     """Mocks the ContractManagement class with the local CitiBuy db"""
     contract = ContractManagement(
         citibuy_url=mock_db,
-        po_list="Purchase Orders Test",
+        po_list="PO Releases Test",
         vendor_list="Vendors Test",
         contract_list="Master Blanket POs Test",
     )
