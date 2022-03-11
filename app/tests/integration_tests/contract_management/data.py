@@ -77,6 +77,8 @@ CITIBUY = {
             "DPW - WASTE MANAGEMENT, DGS - CONTRACT",
             "DPW - ENERGY, DGS - FISCAL",
         ],
+        "Buyer": ["JANEDOE", "JANEDOE", "JANEDOE", "JANEDOE"],
+        "Description": ["text", "text", "text", "text"],
     },
 }
 
@@ -141,5 +143,7 @@ SHAREPOINT = {
             "DGS - BUILDING MAINTENANCE, DGS - FLEET MANAGEMENT",
             "DPW - WASTE MANAGEMENT, DGS - ENERGY",
         ],
+        "Buyer": ["JANEDOE", "JANEDOE"],
+        "Description": ["text", "text"],
     },
 }
