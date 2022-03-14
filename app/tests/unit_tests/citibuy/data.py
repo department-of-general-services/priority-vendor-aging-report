@@ -54,7 +54,7 @@ PO_RESULTS = [
         "end_date": None,
         "dollar_limit": None,
         "dollar_spent": None,
-        "unit": mock_data.LOCATIONS["fleet"]["desc"],
+        "unit": mock_data.LOCATIONS["contract"]["desc"],
     },
 ]
 

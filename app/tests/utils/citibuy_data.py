@@ -176,7 +176,7 @@ PO_RECORDS = {
         "date": datetime(2020, 7, 1),
         "buyer": "JOHNSMITH",
         "desc": "description",
-        "loc_id": LOCATIONS["fleet"]["loc_id"],
+        "loc_id": LOCATIONS["contract"]["loc_id"],
     },
     # Open Market PO between Acme and DPW, status: Sent
     # This PO is excluded because it isn't available to DGS

@@ -68,6 +68,8 @@ class TestContractManagement:
         print(df_po)
         print(df_ven)
         print(df_con)
+        print(df_con["Locations"])
+        print(df_ven["Agency Locations"])
         blanket_title = df_po.loc[0, "Title"]
         release_title = df_po.loc[1, "Title"]
         # validation - all of the correct columns are returned
@@ -85,7 +87,7 @@ class TestContractManagement:
         # validation - PO locations were aggregated correctly
         assert list(df_con["Locations"]) is not None
         assert list(df_ven["Agency Locations"]) is not None
-
+        assert len(df_con[df_con["Locations"].str.contains("DPW")]) == 0
         # validation - rows were successfully deduped
         for df in [df_po, df_ven, df_con]:
             assert len(df) == len(df["Title"].unique())
