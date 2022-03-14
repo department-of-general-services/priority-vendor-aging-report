@@ -32,5 +32,7 @@ CITIBUY = {
         "end_date": "End Date",
         "vendor_id": "Vendor",
         "con_loc": "Locations",
+        "buyer": "Buyer",
+        "desc": "Description",
     },
 }

@@ -73,10 +73,12 @@ CITIBUY = {
         "Vendor": ["111", "222", "222", "333"],
         "Locations": [
             "DGS - BUILDING MAINTENANCE, DGS - FLEET MANAGEMENT",
-            "DPW - WASTE MANAGEMENT, DGS - ENERGY",
-            "DPW - WASTE MANAGEMENT, DGS - CONTRACT",
-            "DPW - ENERGY, DGS - FISCAL",
+            "DGS - ENERGY",
+            "DGS - CONTRACT",
+            "DGS - ENERGY, DGS - FISCAL",
         ],
+        "Buyer": ["JANEDOE", "JANEDOE", "JANEDOE", "JANEDOE"],
+        "Description": ["text", "text", "text", "text"],
     },
 }
 
@@ -139,7 +141,9 @@ SHAREPOINT = {
         "Vendor": ["Acme", "Disney"],
         "Locations": [
             "DGS - BUILDING MAINTENANCE, DGS - FLEET MANAGEMENT",
-            "DPW - WASTE MANAGEMENT, DGS - ENERGY",
+            "DGS - ENERGY",
         ],
+        "Buyer": ["JANEDOE", "JANEDOE"],
+        "Description": ["text", "text"],
     },
 }

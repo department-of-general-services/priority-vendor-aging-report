@@ -39,6 +39,15 @@ class CitiBuy:
         "3PCR": "3PCR - Completed Receipt",
         "3PCO": "3PCO - Closed",
     }
+    DGS_LOCATIONS = [
+        "DGS - BUILDING MAINTENANCE",
+        "DGS - FACILITIES CONTRACT MAINTENANCE",
+        "DGS - FACILITIES DOWNTOWN",
+        "DGS - FACILITIES SHOP",
+        "DGS - FISCAL SECTION",
+        "DGS - FLEET MANAGEMENT",
+        "MAJOR PROJECTS",
+    ]
 
     def __init__(
         self,

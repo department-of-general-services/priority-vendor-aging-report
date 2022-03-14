@@ -89,11 +89,13 @@ class ContractManagement:
         df.loc[open_market, "po_type"] = "Open Market"
 
         # aggregates the location field for contracts and vendors
+        # excluding all non DGS locations
+        dgs_po = df["agency"] == "DGS"  # excludes non-DGS POs
         df["con_loc"] = df["po_nbr"].map(
-            df.groupby("po_nbr")["unit"].agg(set).str.join(", ")
+            df[dgs_po].groupby("po_nbr")["unit"].agg(set).str.join(", ")
         )
         df["ven_loc"] = df["vendor_id"].map(
-            df.groupby("vendor_id")["unit"].agg(set).str.join(", ")
+            df[dgs_po].groupby("vendor_id")["unit"].agg(set).str.join(", ")
         )
 
         # isloate and format separate dataframes

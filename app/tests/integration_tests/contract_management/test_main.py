@@ -47,7 +47,7 @@ class TestContractManagement:
         - The return type is ContractData
         - The columns of ContractData.po match the CITIBUY constants
         - The columns of ContractData.vendor match the CITIBUY constants
-        - The dataframe in ContractData.vendor has been deduped
+        - The columns of ContractData.contract match the CITIBUY constants
         - The PO Type has been set correctly
         - The list of contracts excludes Open Market POs
         - The list of records in each dataframe is unique
@@ -68,24 +68,29 @@ class TestContractManagement:
         print(df_po)
         print(df_ven)
         print(df_con)
+        print(df_con["Locations"])
+        print(df_ven["Agency Locations"])
         blanket_title = df_po.loc[0, "Title"]
         release_title = df_po.loc[1, "Title"]
-        # validation
+        # validation - all of the correct columns are returned
         assert isinstance(output, ContractData)
         assert list(df_po.columns) == PO_COLS
         assert list(df_ven.columns) == VEN_COLS
         assert list(df_con.columns) == CON_COLS
-        assert len(df_ven) == 2
-        assert "P555" not in list(df_con["Title"])
+        # validation - data transformations were done correctly
+        assert "P555" not in list(df_con["Title"])  # open market PO excluded
         assert blanket_title == "P111"
         assert release_title == "P111:1"
         assert list(df_po["PO Type"]) == po_types
-        assert list(df_con["Locations"]) is not None
-        assert list(df_ven["Agency Locations"]) is not None
-        for df in [df_po, df_ven, df_con]:
-            assert len(df) == len(df["Title"].unique())
         for col in ["End Date", "Start Date"]:
             assert "T00:00:00Z" in df_con.loc[0, col]
+        # validation - PO locations were aggregated correctly
+        assert list(df_con["Locations"]) is not None
+        assert list(df_ven["Agency Locations"]) is not None
+        assert len(df_con[df_con["Locations"].str.contains("DPW")]) == 0
+        # validation - rows were successfully deduped
+        for df in [df_po, df_ven, df_con]:
+            assert len(df) == len(df["Title"].unique())
 
     def test_get_sharepoint_data(self, mock_contract):
         """Tests the get_sharepoint_data() method executes correctly
