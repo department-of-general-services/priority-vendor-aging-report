@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 import pandas as pd
@@ -68,3 +69,38 @@ class TestAgingReport:
         )
         # validation
         assert file.name == file_name
+
+
+class TestGetSharePointData:
+    """Tests the AgingReport.get_sharepoint_data() method"""
+
+    def test_get_sharepoint_data(
+        self, mock_aging, test_archive, test_archive_dir
+    ):
+        """Tests that the get_sharepoint_data() method executes correctly
+
+        Validates the following conditions:
+        - get_sharepoint_data() returns a dataframe of the blank Aging Report
+          downloaded from SharePoint
+        - The resulting dataframe reads the vendor ID in as a string
+        """
+        # setup - reset mock AgingReport.xslx
+        curr_dir = Path(__file__).parent.resolve()
+        mock_file = curr_dir / "SampleAgingReport.xlsx"
+        expected = pd.read_excel(mock_file)
+        upload = test_archive.upload_file(
+            local_path=mock_file,
+            folder_name="test",
+            file_name="AgingReport.xlsx",
+        )
+        assert upload.name == "AgingReport.xlsx"
+        # execution
+        report_path = "/Prompt Payment/Workflow Archives/test/AgingReport.xlsx"
+        df = mock_aging.get_sharepoint_data(
+            report_path=report_path,
+            download_loc=test_archive_dir,
+        )
+        print(df)
+        # validation
+        assert df.shape == expected.shape
+        assert df.loc[0, "Vendor ID"] == "111"

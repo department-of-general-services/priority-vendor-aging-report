@@ -9,6 +9,8 @@ from O365.drive import File
 from dgs_fiscal.systems import CitiBuy, SharePoint
 from dgs_fiscal.etl.aging_report import constants
 
+REPORT_PATH = "/Prompt Payment/Priority Vendor (Aging) Report/AgingReport.xlsx"
+
 
 class AgingReport:
     """Manages execution of the Aging Report workflow
@@ -30,6 +32,27 @@ class AgingReport:
         """Inits the AgingReport class"""
         self.citibuy = CitiBuy(conn_url=citibuy_url)
         self.sharepoint = SharePoint()
+
+    def get_sharepoint_data(
+        self,
+        report_path: Optional[str] = REPORT_PATH,
+        download_loc: Optional[Path] = None,
+    ) -> pd.DataFrame:
+        """Retrieves blank aging report from SharePoint
+
+        Parameters
+        ----------
+        folder_path: str, optional
+            Path to the folder
+        """
+        # Set the download location
+        download_loc = download_loc or Path.cwd() / "archives"
+        file = self.sharepoint.get_item_by_path(report_path)
+        tmp_file = download_loc / file.name
+
+        # download and read in file from SharePoint
+        file.download(download_loc)
+        return pd.read_excel(tmp_file, dtype={"Vendor ID": "string"})
 
     def get_citibuy_data(self, invoice_window: int = 365) -> pd.DataFrame:
         """Exports open and recently paid invoices from CitiBuy

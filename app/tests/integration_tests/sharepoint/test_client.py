@@ -66,11 +66,11 @@ class TestClient:
         assert archive.folder.name == "Workflow Archives"
         assert archive.tmp_dir == tmp_dir
 
-    def test_get_folder_by_path(self, test_sharepoint):
-        """Tests get_folder_by_path() method"""
+    def test_get_item_by_path(self, test_sharepoint):
+        """Tests get_item_by_path() method"""
         # setup
         path = "/Prompt Payment"
         # execution
-        folder = test_sharepoint.get_folder_by_path(path)
+        folder = test_sharepoint.get_item_by_path(path)
         # validation
         assert folder.name == "Prompt Payment"
