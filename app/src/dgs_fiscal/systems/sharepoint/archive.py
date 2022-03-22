@@ -33,7 +33,7 @@ class ArchiveFolder:
         df: pd.DataFrame,
         file_name: str,
     ) -> Path:
-        """Export dataframe to Excel in local archive for uploade to SharePoint
+        """Export dataframe to Excel in local archive for upload to SharePoint
         and styles the data as a table
 
         Parameters

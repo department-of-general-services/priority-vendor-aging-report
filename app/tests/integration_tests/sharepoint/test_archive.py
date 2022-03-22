@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import date
 
 import pytest
 import pandas as pd
@@ -56,7 +57,8 @@ class TestArchiveFolder:
         """
         # setup
         file_loc = DATA_DIR / "upload.csv"
-        file_name = "test_upload.csv"
+        date_str = date.today().strftime("%Y-%m-%d")
+        file_name = f"test_upload_{date_str}.csv"
         # execution
         output = test_archive.upload_file(file_loc, TEST_FOLDER, file_name)
         # validation
@@ -71,11 +73,13 @@ class TestArchiveFolder:
         - The result returned is an instance of O365.File
         - The name of that file matches the last uploaded csv
         """
+        # setup
+        date_str = date.today().strftime("%Y-%m-%d")
         # execution
         output = test_archive.get_last_upload(TEST_FOLDER)
         # validation
         assert isinstance(output, File)
-        assert output.name == "test_last_upload.csv"
+        assert date_str in output.name
 
     def test_download_file(self, test_archive_dir, test_archive):
         """Tests that the ArchiveFolder.download_file() method successfully
