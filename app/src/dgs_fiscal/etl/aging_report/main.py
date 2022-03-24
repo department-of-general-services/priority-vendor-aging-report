@@ -56,7 +56,12 @@ class AgingReport:
         file.download(download_loc)
         df = pd.read_excel(
             tmp_file,
-            dtype={"Vendor ID": "string", "WO": "string"},
+            dtype={
+                "Vendor ID": "string",
+                "WO": "string",
+                "Invoice": "string",
+                "EST#": "string",
+            },
         )
 
         # clean and rename the columns

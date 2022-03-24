@@ -97,8 +97,8 @@ class TestGetSharePointData:
         assert upload.name == "AgingReport.xlsx"
         # setup - read in and format expected output
         expected = pd.DataFrame(data.REPORT)
-        expected["Vendor ID"] = expected["Vendor ID"].astype("string")
-        expected["WO"] = expected["WO"].astype("string")
+        for col in ["Vendor ID", "WO", "Invoice Number", "EST#"]:
+            expected[col] = expected[col].astype("string")
         # execution
         report_path = "/Prompt Payment/Workflow Archives/test/AgingReport.xlsx"
         df = mock_aging.get_sharepoint_data(
@@ -110,7 +110,7 @@ class TestGetSharePointData:
         print(expected.dtypes)
         # validation
         assert list(df.columns) == list(expected.columns)
-        assert df.equals(expected)
+        assert df.to_dict("records") == expected.to_dict("records")
 
 
 class TestPopulateReport:
@@ -125,12 +125,12 @@ class TestPopulateReport:
         """
         # setup - read in and format expected input
         report = pd.DataFrame(data.REPORT)
-        report["Vendor ID"] = report["Vendor ID"].astype("string")
-        report["WO"] = report["WO"].astype("string")
+        for col in ["Vendor ID", "WO", "Invoice Number", "EST#"]:
+            report[col] = report[col].astype("string")
         # setup - read in and format expected output
         expected = pd.DataFrame(data.OUTPUT)
-        expected["Vendor ID"] = expected["Vendor ID"].astype("string")
-        expected["WO"] = expected["WO"].astype("string")
+        for col in ["Vendor ID", "WO", "Invoice Number", "EST#"]:
+            expected[col] = expected[col].astype("string")
         # setup - get CitiBuy data
         invoice_data = mock_aging.get_citibuy_data()
         print(invoice_data.columns)

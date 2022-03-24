@@ -1,7 +1,7 @@
 from pandas import Timestamp
 
 REPORT = {
-    "EST#": ["Invoice#2", "Invoice#3", "Invoice#6", "#1", "#2", "#4", "#5"],
+    "EST#": ["Invoice#2", "Invoice#3", "Invoice#6", "#1", "#2", "#4", "5"],
     "Invoice Number": [
         "Invoice#2",
         "Invoice#3",
@@ -9,7 +9,7 @@ REPORT = {
         "#1",
         "#2",
         "#4",
-        "#5",
+        "5",
     ],
     "WO": ["101", "102", "103", "201", "202", "203", "204"],
     "Invoice Date": [
