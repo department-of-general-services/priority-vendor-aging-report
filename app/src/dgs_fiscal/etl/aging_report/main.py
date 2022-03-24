@@ -52,7 +52,13 @@ class AgingReport:
 
         # download and read in file from SharePoint
         file.download(download_loc)
-        return pd.read_excel(tmp_file, dtype={"Vendor ID": "string"})
+        df = pd.read_excel(
+            tmp_file,
+            dtype={"Vendor ID": "string", "WO": "string"},
+        )
+        df.columns = [col.strip() for col in df.columns]
+
+        return df
 
     def get_citibuy_data(self, invoice_window: int = 365) -> pd.DataFrame:
         """Exports open and recently paid invoices from CitiBuy
