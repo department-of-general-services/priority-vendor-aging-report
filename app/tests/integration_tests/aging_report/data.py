@@ -2,7 +2,15 @@ from pandas import Timestamp
 
 REPORT = {
     "EST#": ["Invoice#2", "Invoice#3", "Invoice#6", "#1", "#2", "#4", "#5"],
-    "Invoice": ["Invoice#2", "Invoice#3", "Invoice#6", "#1", "#2", "#4", "#5"],
+    "Invoice Number": [
+        "Invoice#2",
+        "Invoice#3",
+        "Invoice#6",
+        "#1",
+        "#2",
+        "#4",
+        "#5",
+    ],
     "WO": ["101", "102", "103", "201", "202", "203", "204"],
     "Invoice Date": [
         Timestamp("2020-07-01 00:00:00"),

@@ -10,6 +10,8 @@ from dgs_fiscal.systems import CitiBuy, SharePoint
 from dgs_fiscal.etl.aging_report import constants
 
 REPORT_PATH = "/Prompt Payment/Priority Vendor (Aging) Report/AgingReport.xlsx"
+MATCH_COLS = ["Vendor ID", "Invoice Number"]
+CITIBUY_COLS = [*MATCH_COLS, "Invoice Status"]
 
 
 class AgingReport:
@@ -56,7 +58,10 @@ class AgingReport:
             tmp_file,
             dtype={"Vendor ID": "string", "WO": "string"},
         )
+
+        # clean and rename the columns
         df.columns = [col.strip() for col in df.columns]
+        df = df.rename(columns={"Invoice": "Invoice Number"})
 
         return df
 
@@ -92,6 +97,36 @@ class AgingReport:
         df = df.replace(self.citibuy.INVOICE_STATUS)
         df = df.replace(self.citibuy.PO_STATUS)
 
+        return df
+
+    def populate_report(
+        self,
+        report: pd.DataFrame,
+        citibuy_data: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """Populate the new Aging Report with updated invoice statuses
+
+        Parameters
+        ----------
+        report: pd.DataFrame
+            The blank AgingReport downloaded from SharePoint
+        citibuy_data: pd.DataFrame
+            The invoice data exported from CitiBuy by self.get_citibuy_data()
+
+        Returns
+        -------
+        pd.DataFrame
+            A dataframe of the new report populated with statuses from CitiBuy,
+            Integrify, and CoreIntegrator
+        """
+        # add statuses from citibuy, keeping unmatched rows blank
+        df = report.merge(
+            citibuy_data[CITIBUY_COLS],
+            how="left",
+            on=MATCH_COLS,
+        )
+        df = df.rename(columns={"Invoice Status": "CitiBuy Status"})
+        df = df.fillna("")
         return df
 
     def upload_invoice_data(

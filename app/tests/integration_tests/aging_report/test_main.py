@@ -85,7 +85,7 @@ class TestGetSharePointData:
         Validates the following conditions:
         - get_sharepoint_data() returns a dataframe of the blank Aging Report
           downloaded from SharePoint
-        - The resulting dataframe reads the vendor ID in as a string
+        - The resulting dataframe reads the Vendor ID and WO cols as a string
         """
         # setup - reset mock AgingReport.xslx
         mock_file = TEST_DIR / "SampleAgingReport.xlsx"
@@ -111,3 +111,31 @@ class TestGetSharePointData:
         # validation
         assert list(df.columns) == list(expected.columns)
         assert df.equals(expected)
+
+
+class TestPopulateReport:
+    """Tests the AgingReport.populate_report() method"""
+
+    def test_populate_report(self, mock_aging):
+        """Tests that the populate_report() method executes correctly
+
+        Validates the following conditions:
+        - The CitiBuy Statuses are matched to each invoice correctly
+        - Missing values are converted to the empty string ("")
+        """
+        # setup - read in and format expected input
+        report = pd.DataFrame(data.REPORT)
+        report["Vendor ID"] = report["Vendor ID"].astype("string")
+        report["WO"] = report["WO"].astype("string")
+        # setup - read in and format expected output
+        expected = pd.DataFrame(data.OUTPUT)
+        expected["Vendor ID"] = expected["Vendor ID"].astype("string")
+        expected["WO"] = expected["WO"].astype("string")
+        # setup - get CitiBuy data
+        invoice_data = mock_aging.get_citibuy_data()
+        print(invoice_data.columns)
+        # execution
+        output = mock_aging.populate_report(report, invoice_data)
+        print(output.to_dict("records"))
+        # validation
+        assert output.to_dict("records") == expected.to_dict("records")
