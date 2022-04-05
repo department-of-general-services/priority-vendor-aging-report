@@ -10,7 +10,7 @@ from dgs_fiscal.systems import CitiBuy, SharePoint
 from dgs_fiscal.etl.aging_report import constants
 
 REPORT_PATH = "/Prompt Payment/Priority Vendor (Aging) Report/AgingReport.xlsx"
-MATCH_COLS = ["Vendor ID", "Invoice Number"]
+MATCH_COLS = ["Vendor ID", "Invoice Key"]
 CITIBUY_COLS = [*MATCH_COLS, "Invoice Status"]
 
 
@@ -66,7 +66,7 @@ class AgingReport:
 
         # clean and rename the columns
         df.columns = [col.strip() for col in df.columns]
-        df = df.rename(columns={"Invoice": "Invoice Number"})
+        df = df.rename(columns={"EST#": "Invoice Key"})
 
         return df
 
@@ -125,6 +125,9 @@ class AgingReport:
             Integrify, and CoreIntegrator
         """
         # add statuses from citibuy, keeping unmatched rows blank
+        citibuy_data = citibuy_data.rename(
+            columns={"Invoice Number": "Invoice Key"}
+        )
         df = report.merge(
             citibuy_data[CITIBUY_COLS],
             how="left",

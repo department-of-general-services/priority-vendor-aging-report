@@ -97,7 +97,7 @@ class TestGetSharePointData:
         assert upload.name == "AgingReport.xlsx"
         # setup - read in and format expected output
         expected = pd.DataFrame(data.REPORT)
-        for col in ["Vendor ID", "WO", "Invoice Number", "EST#"]:
+        for col in ["Vendor ID", "WO", "Invoice", "Invoice Key"]:
             expected[col] = expected[col].astype("string")
         # execution
         report_path = "/Prompt Payment/Workflow Archives/test/AgingReport.xlsx"
@@ -125,11 +125,11 @@ class TestPopulateReport:
         """
         # setup - read in and format expected input
         report = pd.DataFrame(data.REPORT)
-        for col in ["Vendor ID", "WO", "Invoice Number", "EST#"]:
+        for col in ["Vendor ID", "WO", "Invoice", "Invoice Key"]:
             report[col] = report[col].astype("string")
         # setup - read in and format expected output
         expected = pd.DataFrame(data.OUTPUT)
-        for col in ["Vendor ID", "WO", "Invoice Number", "EST#"]:
+        for col in ["Vendor ID", "WO", "Invoice", "Invoice Key"]:
             expected[col] = expected[col].astype("string")
         # setup - get CitiBuy data
         invoice_data = mock_aging.get_citibuy_data()

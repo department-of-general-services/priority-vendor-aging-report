@@ -1,8 +1,16 @@
 from pandas import Timestamp
 
 REPORT = {
-    "EST#": ["Invoice#2", "Invoice#3", "Invoice#6", "#1", "#2", "#4", "5"],
-    "Invoice Number": [
+    "Invoice Key": [
+        "Invoice#2",
+        "Invoice#3",
+        "Invoice#6",
+        "#1",
+        "#2",
+        "#4",
+        "5",
+    ],
+    "Invoice": [
         "Invoice#2",
         "Invoice#3",
         "Invoice#6",
