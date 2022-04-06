@@ -7,6 +7,9 @@ import pandas as pd
 from dgs_fiscal.etl import AgingReport
 from dgs_fiscal.systems import SharePoint
 from dgs_fiscal.etl.aging_report import constants
+from tests.integration_tests.aging_report import data
+
+TEST_DIR = Path(__file__).parent.resolve()
 
 
 @pytest.fixture(scope="session", name="mock_aging")
@@ -82,25 +85,57 @@ class TestGetSharePointData:
         Validates the following conditions:
         - get_sharepoint_data() returns a dataframe of the blank Aging Report
           downloaded from SharePoint
-        - The resulting dataframe reads the vendor ID in as a string
+        - The resulting dataframe reads the Vendor ID and WO cols as a string
         """
         # setup - reset mock AgingReport.xslx
-        curr_dir = Path(__file__).parent.resolve()
-        mock_file = curr_dir / "SampleAgingReport.xlsx"
-        expected = pd.read_excel(mock_file)
+        mock_file = TEST_DIR / "SampleAgingReport.xlsx"
         upload = test_archive.upload_file(
             local_path=mock_file,
             folder_name="test",
             file_name="AgingReport.xlsx",
         )
         assert upload.name == "AgingReport.xlsx"
+        # setup - read in and format expected output
+        expected = pd.DataFrame(data.REPORT)
+        for col in ["Vendor ID", "WO", "Invoice", "Invoice Key"]:
+            expected[col] = expected[col].astype("string")
         # execution
         report_path = "/Prompt Payment/Workflow Archives/test/AgingReport.xlsx"
         df = mock_aging.get_sharepoint_data(
             report_path=report_path,
             download_loc=test_archive_dir,
         )
-        print(df)
+        print(df.to_dict("list"))
+        print(df.dtypes)
+        print(expected.dtypes)
         # validation
-        assert df.shape == expected.shape
-        assert df.loc[0, "Vendor ID"] == "111"
+        assert list(df.columns) == list(expected.columns)
+        assert df.to_dict("records") == expected.to_dict("records")
+
+
+class TestPopulateReport:
+    """Tests the AgingReport.populate_report() method"""
+
+    def test_populate_report(self, mock_aging):
+        """Tests that the populate_report() method executes correctly
+
+        Validates the following conditions:
+        - The CitiBuy Statuses are matched to each invoice correctly
+        - Missing values are converted to the empty string ("")
+        """
+        # setup - read in and format expected input
+        report = pd.DataFrame(data.REPORT)
+        for col in ["Vendor ID", "WO", "Invoice", "Invoice Key"]:
+            report[col] = report[col].astype("string")
+        # setup - read in and format expected output
+        expected = pd.DataFrame(data.OUTPUT)
+        for col in ["Vendor ID", "WO", "Invoice", "Invoice Key"]:
+            expected[col] = expected[col].astype("string")
+        # setup - get CitiBuy data
+        invoice_data = mock_aging.get_citibuy_data()
+        print(invoice_data.columns)
+        # execution
+        output = mock_aging.populate_report(report, invoice_data)
+        print(output.to_dict("records"))
+        # validation
+        assert output.to_dict("records") == expected.to_dict("records")
