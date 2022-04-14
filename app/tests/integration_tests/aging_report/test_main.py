@@ -141,14 +141,3 @@ class TestPopulateReport:
         print(output.to_dict("records"))
         # validation
         assert output.to_dict("records") == expected.to_dict("records")
-
-
-class TestUpdateSharePoint:
-    """Tests the AgingReport.update_sharepoint() method"""
-
-    def test_update_sharepoint(self, mock_aging):
-        """Tests that update_sharepoint() method executes correctly
-
-        Validates the following conditions:
-        -
-        """
