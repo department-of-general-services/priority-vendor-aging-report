@@ -53,7 +53,8 @@ class TestAgingReport:
         for val in output["PO Status"]:
             assert val in mock_aging.citibuy.PO_STATUS.values()
 
-    def test_upload_invoice_data(self, mock_aging, test_archive_dir):
+    @pytest.mark.parametrize("file_name", ["InvoiceExport", "AgingReport"])
+    def test_update_sharepoint(self, file_name, mock_aging, test_archive_dir):
         """Tests that upload_invoice_data() method executes correctly
 
         Validates the following conditions:
@@ -62,16 +63,17 @@ class TestAgingReport:
         """
         # setup
         date_str = datetime.today().strftime("%Y-%m-%d")
-        file_name = f"{date_str}_InvoiceExport.xlsx"
+        expected_name = f"{date_str}_{file_name}.xlsx"
         df = pd.DataFrame({"Col A": ["a", "b"], "Col B": ["d", "f"]})
         # execution
-        file = mock_aging.upload_invoice_data(
+        file = mock_aging.update_sharepoint(
             df=df,
+            report_name=file_name,
             folder_name="test",
             local_archive=test_archive_dir,
         )
         # validation
-        assert file.name == file_name
+        assert file.name == expected_name
 
 
 class TestGetSharePointData:
@@ -139,3 +141,14 @@ class TestPopulateReport:
         print(output.to_dict("records"))
         # validation
         assert output.to_dict("records") == expected.to_dict("records")
+
+
+class TestUpdateSharePoint:
+    """Tests the AgingReport.update_sharepoint() method"""
+
+    def test_update_sharepoint(self, mock_aging):
+        """Tests that update_sharepoint() method executes correctly
+
+        Validates the following conditions:
+        -
+        """
