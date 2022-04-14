@@ -137,9 +137,10 @@ class AgingReport:
         df = df.fillna("")
         return df
 
-    def upload_invoice_data(
+    def update_sharepoint(
         self,
         df: pd.DataFrame,
+        report_name: str,
         folder_name: Optional[str] = None,
         local_archive: Optional[Path] = None,
     ) -> File:
@@ -163,7 +164,7 @@ class AgingReport:
         """
         # set the file name to the current date
         date_str = datetime.today().strftime("%Y-%m-%d")
-        file_name = f"{date_str}_InvoiceExport.xlsx"
+        file_name = f"{date_str}_{report_name}.xlsx"
 
         # export the invoice data to local archive
         archive = self.sharepoint.get_archive_folder(local_archive)
@@ -171,5 +172,4 @@ class AgingReport:
 
         # upload the exported file to SharePoint
         folder = folder_name or "aging_report"
-        print(folder)
         return archive.upload_file(tmp_file, folder, file_name)
