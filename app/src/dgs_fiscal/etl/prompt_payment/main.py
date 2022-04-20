@@ -1,12 +1,15 @@
 from __future__ import annotations  # prevents NameError for typehints
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
 import pandas as pd
 
 from dgs_fiscal.systems import CoreIntegrator, SharePoint
 from dgs_fiscal.systems.sharepoint import BatchedChanges
 from dgs_fiscal.etl.prompt_payment import constants
+
+REPORT_PATH = "/Prompt Payment/Prompt Payment Report.xlsx"
 
 
 class PromptPayment:
@@ -96,10 +99,36 @@ class PromptPayment:
         invoices = invoice_list.get_items(query=query)
         return invoices.to_dataframe()
 
+    def get_old_excel(
+        self,
+        report_path: Optional[str] = REPORT_PATH,
+        download_loc: Optional[Path] = None,
+    ) -> pd.DataFrame:
+        """Retrieves the previous Prompt Payment report from SharePoint
+
+        This method is different from get_old_report() because it pulls the
+        report from the Excel file instead of the SharePoint list
+
+        Returns
+        -------
+        pd.DataFrame
+            A dataframe of the old Prompt Payment report in SharePoint
+        """
+        # Set the download location
+        download_loc = download_loc or Path.cwd() / "archives"
+        file = self.sharepoint.get_item_by_path(report_path)
+        tmp_file = download_loc / file.name
+
+        # download and read in file from SharePoint
+        file.download(download_loc)
+        df = pd.read_excel(tmp_file)
+
+        return df
+
     def reconcile_reports(
         self,
-        new_report,
-        old_report,
+        new_report: pd.DataFrame,
+        old_report: pd.DataFrame,
     ) -> BatchedChanges:
         """Merges the old report from SharePoint with the new report scraped
         from CoreIntegrator and return a list of the changes to make
