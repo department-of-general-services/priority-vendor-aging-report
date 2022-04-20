@@ -50,6 +50,8 @@ def populate_db(session: Session) -> None:
     locations = create_records(models.Location, data.LOCATIONS)
     ven_addresses = create_records(models.VendorAddress, data.VEN_ADDRESS)
     inv_history = create_records(models.InvoiceStatusHistory, data.INV_HISTORY)
+    receipts = create_records(models.Receipt, data.RECEIPTS)
+    approvers = create_records(models.Approver, data.APPROVERS)
 
     add_to_session(session, vendors)
     add_to_session(session, po_records)
@@ -59,4 +61,6 @@ def populate_db(session: Session) -> None:
     add_to_session(session, locations)
     add_to_session(session, ven_addresses)
     add_to_session(session, inv_history)
+    add_to_session(session, receipts)
+    add_to_session(session, approvers)
     session.commit()
