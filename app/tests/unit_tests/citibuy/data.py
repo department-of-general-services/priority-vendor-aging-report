@@ -115,3 +115,31 @@ INVOICE_RESULTS = [
         "contract_amount_spent": 250.00,
     },
 ]
+
+
+RECEIPT_RESULTS = [
+    {
+        **mock_data.RECEIPTS["receipt1"],
+        "approval_nbr": 1,
+        "approver": "JOHNSMITH",
+        "proxy_approver": "MICKEYMOUSE",
+        "requested_date": datetime(2020, 9, 1),
+        "unit": mock_data.LOCATIONS["building"]["desc"],
+    },
+    {
+        **mock_data.RECEIPTS["receipt2"],
+        "approval_nbr": 1,
+        "approver": "JANEDOE",
+        "proxy_approver": "MICKEYMOUSE",
+        "requested_date": datetime(2020, 9, 1),
+        "unit": mock_data.LOCATIONS["fleet"]["desc"],
+    },
+    {
+        **mock_data.RECEIPTS["receipt2"],
+        "approval_nbr": 1,
+        "approver": "JOHNSMITH",
+        "proxy_approver": "MICKEYMOUSE",
+        "requested_date": datetime(2020, 9, 1),
+        "unit": mock_data.LOCATIONS["fleet"]["desc"],
+    },
+]

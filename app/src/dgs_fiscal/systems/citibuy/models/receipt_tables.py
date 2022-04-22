@@ -13,7 +13,7 @@ class Receipt(db.Base):
     release_nbr = db.Column("RELEASE_NBR", db.Integer)
     status = db.Column("CURRENT_HEADER_STATUS", db.String)
     owner = db.Column("RECEIPT_OWNER_ID", db.String)
-    location = db.Column("LOCATION", db.String)
+    loc_id = db.Column("LOCATION_NBR", db.String)
     desc = db.Column("SHORT_DESC", db.String)
     agency = db.Column("DEPT_NBR_PREFIX", db.String)
     receipt_date = db.Column("RECEIPT_DATE", db.DateTime)
@@ -21,6 +21,19 @@ class Receipt(db.Base):
 
     # relationships
     approvers = db.relationship("Approver", backref="location")
+
+    # column list for querying
+    columns = (
+        "receipt_id",
+        "po_nbr",
+        "release_nbr",
+        "status",
+        "loc_id",
+        "owner",
+        "desc",
+        "agency",
+        "created_date",
+    )
 
 
 class Approver(db.Base):
@@ -44,3 +57,10 @@ class Approver(db.Base):
     order = db.Column("ORDER_SEQUENCE", db.Integer, primary_key=True)
     proxy_approver = db.Column("PROXY_USER_ID", db.String)
     requested_date = db.Column("RECEIT_REQ_APP_DATE", db.DateTime)
+
+    # column list for querying
+    columns = (
+        "approver",
+        "proxy_approver",
+        "requested_date",
+    )

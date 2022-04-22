@@ -222,6 +222,50 @@ class CitiBuy:
             rows = session.execute(query).fetchall()
         return DatabaseRows(rows)
 
+    def get_receipts(self) -> DatabaseRows:
+        """Gets open receipts from CitiBuy
+
+        This query pulls both the PO Receipts and the associated approval paths
+        from CitiBuy in order to help Fiscal AP Analysts monitor their queue
+
+        Returns
+        -------
+            An instance of DatabaseRows for the receipt records
+        """
+        # create aliases for the tables
+        receipt = aliased(models.Receipt, name="receipt")
+        approver = aliased(models.Approver, name="approver")
+        location = aliased(models.Location, name="location")
+
+        # build the with statement and join approval paths to receipts
+        fkey_receipt = receipt.receipt_id == approver.receipt_id
+        fkey_location = receipt.loc_id == location.loc_id
+        subq = sa.select(
+            *[getattr(receipt, col) for col in receipt.columns],
+            *[getattr(approver, col) for col in approver.columns],
+            location.desc.label("unit"),  # business unit
+            sa.func.rank()  # used to filter out previous approval paths
+            .over(
+                order_by=approver.order.desc(),  # most recent approvals first
+                partition_by=approver.receipt_id,
+            )
+            .label("approval_nbr"),
+        )
+        subq = subq.join(location, fkey_location)
+        subq = subq.join(approver, fkey_receipt)
+        subq = subq.cte("receipts")  # converts to a with statement
+
+        # build the final query and filter out approved receipts
+        # and previous approval paths
+        not_approved = subq.c.status.in_(("5CR", "5CRT", "5CI"))
+        last_approver = subq.c.approval_nbr == 1
+        query = sa.select(subq).where(not_approved & last_approver)
+
+        # execute the query and return the db rows
+        with Session(self.engine) as session:
+            rows = session.execute(query).fetchall()
+        return DatabaseRows(rows)
+
 
 class DatabaseRows:
     """A class that provides simplified access to the results of a SQL query

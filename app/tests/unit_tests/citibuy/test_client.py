@@ -122,3 +122,20 @@ class TestGetInvoices:
         # validation
         assert len(output) >= len(filtered)  # ensure more results are returned
         assert old_invoice in invoice_ids
+
+
+class TestGetReceipts:
+    """Tests the CitiBuy.get_receipts() method"""
+
+    def test_get_receipts(self, mock_citibuy):
+        """Tests that the get_receipts() method executes successfully"""
+        # setup
+        expected = data.RECEIPT_RESULTS
+        # execution
+        output = mock_citibuy.get_receipts().records
+        pprint(output)
+        # validation
+        assert isinstance(output, list)
+        assert isinstance(output[0], dict)
+        assert len(output) == len(expected)
+        assert output == expected
