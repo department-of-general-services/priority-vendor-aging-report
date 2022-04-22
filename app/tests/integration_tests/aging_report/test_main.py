@@ -76,6 +76,28 @@ class TestAgingReport:
         assert file.name == expected_name
 
 
+class TestGetReceiptQueue:
+    """Tests the AgingReport.get_receipt_queue() method"""
+
+    def test_get_receipt_queue(self, mock_aging):
+        """Tests that the get_receipt_queue() method executes correctly
+
+        Validates the following conditions:
+        - The correct set of receipts are returned from CitiBuy
+        - Each record has all of the necessary fields
+        - The receipt status was recoded correctly
+        """
+        # setup
+        cols = list(constants.CITIBUY["receipt_cols"].values())
+        # execution
+        output = mock_aging.get_receiptg_queue()
+        print(output)
+        # validation
+        assert list(output.columns) == cols
+        for val in output["Receipt Status"]:
+            assert val in mock_aging.citibuy.RECEIPT_STATUS.values()
+
+
 class TestGetSharePointData:
     """Tests the AgingReport.get_sharepoint_data() method"""
 

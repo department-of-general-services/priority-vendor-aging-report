@@ -39,6 +39,12 @@ class CitiBuy:
         "3PCR": "3PCR - Completed Receipt",
         "3PCO": "3PCO - Closed",
     }
+    RECEIPT_STATUS = {
+        "5CA": "5CA - Approved",
+        "5CR": "5CR - Ready for Approval",
+        "5CRT": "5CRT - Returned",
+        "5CI": "5CI - In Progress",
+    }
     DGS_LOCATIONS = [
         "DGS - BUILDING MAINTENANCE",
         "DGS - FACILITIES CONTRACT MAINTENANCE",
