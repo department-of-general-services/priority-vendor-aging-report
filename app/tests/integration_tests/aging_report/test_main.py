@@ -90,7 +90,7 @@ class TestGetReceiptQueue:
         # setup
         cols = list(constants.CITIBUY["receipt_cols"].values())
         # execution
-        output = mock_aging.get_receiptg_queue()
+        output = mock_aging.get_receipt_queue()
         print(output)
         # validation
         assert list(output.columns) == cols
