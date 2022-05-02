@@ -125,6 +125,7 @@ RECEIPT_RESULTS = [
         "proxy_approver": "MICKEYMOUSE",
         "requested_date": datetime(2020, 9, 1),
         "unit": mock_data.LOCATIONS["building"]["desc"],
+        "approval_date": None,
     },
     {
         **mock_data.RECEIPTS["receipt2"],
@@ -133,6 +134,7 @@ RECEIPT_RESULTS = [
         "proxy_approver": "MICKEYMOUSE",
         "requested_date": datetime(2020, 9, 1),
         "unit": mock_data.LOCATIONS["fleet"]["desc"],
+        "approval_date": None,
     },
     {
         **mock_data.RECEIPTS["receipt2"],
@@ -141,5 +143,15 @@ RECEIPT_RESULTS = [
         "proxy_approver": "MICKEYMOUSE",
         "requested_date": datetime(2020, 9, 1),
         "unit": mock_data.LOCATIONS["fleet"]["desc"],
+        "approval_date": None,
+    },
+    {
+        **mock_data.RECEIPTS["receipt3"],
+        "approval_nbr": 1,
+        "approver": "JOHNSMITH",
+        "proxy_approver": "MICKEYMOUSE",
+        "requested_date": datetime(2020, 9, 1),
+        "unit": mock_data.LOCATIONS["building"]["desc"],
+        "approval_date": datetime(2025, 9, 1),
     },
 ]

@@ -70,7 +70,7 @@ class AgingReport:
 
         return df
 
-    def get_receipt_queue(self) -> pd.DataFrame:
+    def get_receipt_queue(self, receipt_window: int = 365) -> pd.DataFrame:
         """Exports unapproved receipts from CitiBuy
 
         Returns
@@ -78,9 +78,9 @@ class AgingReport:
         pd.DataFrame
             A dataframe of the receipts exported from CitiBuy
         """
-        # query the receipts not yet approved
+        # query receipts not yet approved or approved within the last year
         # and the people listed in the approval path
-        df = self.citibuy.get_receipts().dataframe
+        df = self.citibuy.get_receipts(days_ago=receipt_window).dataframe
 
         # reorder and rename the columns
         cols = constants.CITIBUY["receipt_cols"]

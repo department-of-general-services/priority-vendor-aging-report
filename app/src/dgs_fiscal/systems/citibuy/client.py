@@ -228,7 +228,7 @@ class CitiBuy:
             rows = session.execute(query).fetchall()
         return DatabaseRows(rows)
 
-    def get_receipts(self) -> DatabaseRows:
+    def get_receipts(self, days_ago: int = 90) -> DatabaseRows:
         """Gets open receipts from CitiBuy
 
         This query pulls both the PO Receipts and the associated approval paths
@@ -263,9 +263,15 @@ class CitiBuy:
 
         # build the final query and filter out approved receipts
         # and previous approval paths
+        approval_cutoff = date.today() - timedelta(days_ago)
         not_approved = subq.c.status.in_(("5CR", "5CRT", "5CI"))
         last_approver = subq.c.approval_nbr == 1
-        query = sa.select(subq).where(not_approved & last_approver)
+        dgs_receipt = subq.c.agency == "DGS"
+        query = sa.select(subq).where(last_approver)
+        query = query.where(dgs_receipt)
+        query = query.where(
+            (not_approved) | (subq.c.modified_date > approval_cutoff)
+        )
 
         # execute the query and return the db rows
         with Session(self.engine) as session:
