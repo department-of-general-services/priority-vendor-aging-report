@@ -447,6 +447,7 @@ RECEIPTS = {
         "desc": INVOICES["inv3"]["invoice_nbr"],
         "agency": "DGS",
         "created_date": datetime(2020, 9, 1),
+        "modified_date": datetime(2025, 9, 1),
     },
     "receipt2": {
         "receipt_id": "D002",
@@ -458,6 +459,7 @@ RECEIPTS = {
         "desc": INVOICES["inv4"]["invoice_nbr"],
         "agency": "DGS",
         "created_date": datetime(2020, 9, 1),
+        "modified_date": datetime(2025, 9, 1),
     },
     "receipt3": {
         "receipt_id": "D003",
@@ -467,8 +469,33 @@ RECEIPTS = {
         "owner": "JOHNDOE",
         "loc_id": LOCATIONS["building"]["loc_id"],
         "desc": INVOICES["inv5"]["invoice_nbr"],
+        "agency": "DGS",
+        "created_date": datetime(2020, 9, 1),
+        "modified_date": datetime(2025, 9, 1),
+    },
+    "receipt4": {
+        "receipt_id": "D004",
+        "po_nbr": "P333",
+        "release_nbr": 0,
+        "status": "5CA",
+        "owner": "JOHNDOE",
+        "loc_id": LOCATIONS["building"]["loc_id"],
+        "desc": INVOICES["inv7"]["invoice_nbr"],
+        "agency": "DGS",
+        "created_date": datetime(2020, 9, 1),
+        "modified_date": datetime(2020, 9, 1),
+    },
+    "receipt5": {
+        "receipt_id": "D005",
+        "po_nbr": "P333",
+        "release_nbr": 0,
+        "status": "5CA",
+        "owner": "JOHNDOE",
+        "loc_id": LOCATIONS["building"]["loc_id"],
+        "desc": INVOICES["inv7"]["invoice_nbr"],
         "agency": "DPW",
         "created_date": datetime(2020, 9, 1),
+        "modified_date": datetime(2020, 9, 1),
     },
 }
 
@@ -481,6 +508,7 @@ APPROVERS = {
         "order": 1,
         "proxy_approver": "MICKEYMOUSE",
         "requested_date": datetime(2020, 9, 1),
+        "approval_date": None,
     },
     "approver1.2P": {
         "receipt_id": RECEIPTS["receipt1"]["receipt_id"],
@@ -489,6 +517,7 @@ APPROVERS = {
         "order": 2,
         "proxy_approver": "MICKEYMOUSE",
         "requested_date": datetime(2020, 9, 1),
+        "approval_date": None,
     },
     "approver2.1P": {
         "receipt_id": RECEIPTS["receipt2"]["receipt_id"],
@@ -497,6 +526,7 @@ APPROVERS = {
         "order": 2,
         "proxy_approver": "MICKEYMOUSE",
         "requested_date": datetime(2020, 9, 1),
+        "approval_date": None,
     },
     "approver2.1A": {
         "receipt_id": RECEIPTS["receipt2"]["receipt_id"],
@@ -505,6 +535,7 @@ APPROVERS = {
         "order": 2,
         "proxy_approver": "MICKEYMOUSE",
         "requested_date": datetime(2020, 9, 1),
+        "approval_date": None,
     },
     "approver3.1P": {
         "receipt_id": RECEIPTS["receipt3"]["receipt_id"],
@@ -513,5 +544,15 @@ APPROVERS = {
         "order": 2,
         "proxy_approver": "MICKEYMOUSE",
         "requested_date": datetime(2020, 9, 1),
+        "approval_date": datetime(2025, 9, 1),
+    },
+    "approver4.1P": {
+        "receipt_id": RECEIPTS["receipt4"]["receipt_id"],
+        "approver_type": "P",
+        "approver": "JANEDOE",
+        "order": 1,
+        "proxy_approver": "JOHNSMITH",
+        "requested_date": datetime(2020, 9, 1),
+        "approval_date": datetime(2020, 9, 1),
     },
 }
