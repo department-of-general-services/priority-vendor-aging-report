@@ -11,7 +11,7 @@ class Receipt(db.Base):
     receipt_id = db.Column("RECEIPT_ID", db.String, primary_key=True)
     po_nbr = db.Column("PO_NBR", db.String)
     release_nbr = db.Column("RELEASE_NBR", db.Integer)
-    status = db.Column("CURRENT_HEADER_STATUS", db.String)
+    status = db.Column("CURRENT_HDR_STATUS", db.String)
     owner = db.Column("RECEIPT_OWNER_ID", db.String)
     loc_id = db.Column("LOCATION_NBR", db.String)
     desc = db.Column("SHORT_DESC", db.String)
@@ -58,7 +58,7 @@ class Approver(db.Base):
     approver = db.Column("RECEIPT_APPROVER", db.String, primary_key=True)
     order = db.Column("ORDER_SEQUENCE", db.Integer, primary_key=True)
     proxy_approver = db.Column("PROXY_USER_ID", db.String)
-    requested_date = db.Column("RECEIT_REQ_APP_DATE", db.DateTime)
+    requested_date = db.Column("RECEIPT_REQ_APP_DATE", db.DateTime)
     approval_date = db.Column("APPROVAL_DATE", db.DateTime)
 
     # column list for querying
