@@ -1,11 +1,11 @@
-# Priority Vendor Aging Report
+# DGS Fiscal Automations
 
 <details open="open">
 <summary>Table of Contents</summary>
 
 <!-- TOC -->
 
-- [Priority Vendor Aging Report](#priority-vendor-aging-report)
+- [DGS Fiscal Automations](#dgs-fiscal-automations)
   - [About this Project](#about-this-project)
     - [Made With](#made-with)
     - [Relevant Documents](#relevant-documents)
@@ -15,11 +15,9 @@
     - [Installation](#installation)
     - [Secret Configuration](#secret-configuration)
   - [Usage](#usage)
-    - [Reading and Writing Data to SharePoint](#reading-and-writing-data-to-sharepoint)
-      - [Working with SharePoint lists](#working-with-sharepoint-lists)
-      - [Working with SharePoint Document Libraries](#working-with-sharepoint-document-libraries)
-    - [Retrieving data from CitiBuy](#retrieving-data-from-citibuy)
-    - [Retrieving data from](#retrieving-data-from)
+    - [Contract Management Report](#contract-management-report)
+    - [Aging Report](#aging-report)
+    - [Prompt Payment](#prompt-payment)
   - [Vision and Roadmap](#vision-and-roadmap)
   - [Contributing](#contributing)
   - [License](#license)
@@ -32,10 +30,9 @@
 
 ## About this Project
 
-The Priority Vendor Aging Report is a weekly report that allows the DGS Fiscal team to track the status of the overdue invoices submitted by the agency's highest priority vendors. This project seeks to automate the process of updating that report with information aggregated from each of the systems that an invoice passes through during the requisition and fulfillment workflow.
+DGS Fiscal Automations is a series of Extract, Transform, and Load (ETL) workflows that aggregates the data the DGS Fiscal team needs to report on the status of vendor contracts and invoices. This repository centralizes the code for those workflows and simplifies the process of executing them by exposing a CLI entry point for each ETL process.
 
 ### Made With
-
 
 - **Project Dependencies**
   - [O365](https://github.com/O365/python-o365) - A third party package for managing calls to the Microsoft Graph API
@@ -147,98 +144,45 @@ If you receive an error message, or the version of python you have installed is 
 
 ## Usage
 
-### Reading and Writing Data to SharePoint
+### Contract Management Report
 
-SharePoint is one of the core systems used by the DGS Fiscal team to manage its workflows. SharePoint lists are used to store things like records of invoices and vendors, while SharePoint document libraries are used to store archived copies of reports.
+The Contract Management Report allows the DGS Fiscal team and contract managers in other divisions to monitor the burn rate and expiration of active Master Blanket Purchase Orders with DGS vendors. It involves exporting the list of Master Blanket POs, Purchase Order Releases, and the associated vendors from CitiBuy and uploading them to SharePoint.
 
-#### Working with SharePoint lists
+To run this workflow execute the command `dgs_fiscal contract_management` from the command line, which should print the following steps to the terminal as the workflow executes:
 
-To access a SharePoint list client that will allow you to query, add, and update items in that list, you can use the `SharePoint.get_list()` method which will return an instance of the `SiteList` class:
-
-```python
-from dgs_fiscal.systems import SharePoint
-
-# instantiate the SharePoint client
-sp_client = SharePoint()
-
-# get an instance of SiteList for the following lists
-vendor_list = sp_client.get_list("Vendors")
-po_list = sp_client.get_list("Purchase Orders")
-invoice_list = sp_client.get_list("Invoices")
+```bash
+$ dgs_fiscal contract_management
+Starting the contract management workflow
+Getting data from Citibuy and Sharepoint
+Updating the vendor list
+Updating the contract list
+Updating the PO list
+Workflow ran successfully
 ```
 
-To query a set of items from the list, you can use the `SiteList.get_items()` which will return an `ItemCollection` instance:
+### Aging Report
 
-```python
-from dgs_fiscal import SharePoint
+The Aging Report is a report that the DGS Fiscal team uses to monitor and inform priority vendors of the status of their outstanding invoices in the accounts payable process. This report depends on integrating data from multiple information systems involved in the AP process, including Integrify, CoreIntegrator, and CitiBuy. In order to simplify the process of generating that report, this workflow extracts data on invoices and receipts from CitiBuy and uploads them to SharePoint.
 
-# get a client for the Purchase Order SharePoint list
-sp_client = SharePoint()
-po_list = sp_client.get_list("Purchase Orders")
+To run this workflow, execute the command `dgs_fiscal aging_report` from the command line, which should print the following steps to the terminal as the workflow executes:
 
-# query Purchase Orders with the "3PCO - Closed" status
-query = {"Status": "3PPR - Partial Receipt"}
-po_partial = po_list.get_items(filter_dict=query)
-
-# filter the results for a specific PO Number
-filter_key = {"PO Number": "P12345", "Release Number": 10}
-po = po_partial.filter_items(filter_key)[0]
-
-# export all of the POs to a dataframe
-df_po = po_partial.to_dataframe()
+```bash
+$ dgs_fiscal aging_report
+Starting the aging report workflow
+Exporting invoice and receipt data from CitiBuy
+Uploading the exported data to SharePoint
+Workflow ran successfully
 ```
 
-Alternatively you can also retrieve a single list item directly from SharePoint using its key:
+### Prompt Payment
 
-```python
-from dgs_fiscal import SharePoint
+The Prompt Payment Report is a standard report from CoreIntegrator that shows the set of invoices that have been received by BAPS but need to be receipted by the DGS Fiscal team. This workflow involves scraping the most recent Prompt Payment Report from CoreIntegrator, then reconciling it with the previous version of the report in SharePoint, during this reconciliation process receipted and paid invoices are dropped from the report, new invoices are added, and comments on the remaining invoices are carried over to the new report, which is then re-uploaded to SharePoint.
 
-# get a client for the Purchase Order SharePoint list
-sp_client = SharePoint()
-po_list = sp_client.get_list("Purchase Orders")
-
-# get a PO with the following key
-po_key = {"PO Number": "P12345", "Release Number": 10}
-po = po_list.get_item_by_key(po_key)
-```
-
-Once you have an individual list item you can print it's current fields or update the value of those fields in SharePoint:
-
-```python
-# same code as previous example
-po = po_list.get_item_by_key(po_key)
-
-# print the current fields
-old_fields = po.fields
-print(old_fields)
-
-# update the fields in SharePoint
-po.update({"Status": "3PCO - Closed"})
-
-# double check that the values changed
-po = po_list.get_item_by_key(po_key)
-assert old_fields != po.fields
-```
-
-#### Working with SharePoint Document Libraries
-
-TODO: Add documentation here
-
-
-### Retrieving data from CitiBuy
-
-
-TODO: Add documentation here
-
-
-### Retrieving data from CoreIntegrator
-
-TODO: Add documentation here
-
+The command to run this workflow is still in development.
 
 ## Vision and Roadmap
 
-The vision for this project is to create a single source of truth for information about invoices throughout the fulfillment pipeline, so that the DGS Fiscal Office can more easily track and report on the status of outstanding invoices. This project aims to fulfill this vision by:
+The vision for this project is to create a single repository
 
 - Adding all invoices that get processed through Integrify to to a SharePoint list that will become the single source of truth.
 - Scraping information about these invoices from each of the systems involved in processing invoice payments, namely:
