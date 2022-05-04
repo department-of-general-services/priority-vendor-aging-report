@@ -26,6 +26,18 @@ def fixture_contract_mgmt_etl(monkeypatch):
     )
 
 
+@pytest.fixture(name="aging_etl")
+def fixture_aging_etl(monkeypatch):
+    """Monkeypatches the ContractManagement ETL class with the test class
+    MockContractManagement to prevent calls to Citibuy or SharePoint
+    """
+    monkeypatch.setattr(
+        etl,
+        "AgingReport",
+        mock_etl.MockAgingReport,
+    )
+
+
 def test_entrypoint():
     """Tests that the entrypoints specified in setup.py work correctly"""
     # execution
@@ -75,6 +87,29 @@ def test_contract_management(
     ]
     # execution
     result = runner.invoke(app, ["contract_management"])
+    print(result.stdout)
+    # validation
+    assert result.exit_code == 0
+    for message in messages:
+        assert message in result.stdout
+
+
+def test_aging_report(runner, aging_etl):  # pylint: disable=unused-argument
+    """Tests that the contract_management command
+
+    Validates the following conditions:
+    - The command executes with exit code 0 (success)
+    - The correct messages are printed to the console
+    """
+    # setup
+    messages = [
+        "Starting the aging report workflow",
+        "Exporting invoice and receipt data from CitiBuy",
+        "Uploading the exported data to SharePoint",
+        "Workflow ran successfully",
+    ]
+    # execution
+    result = runner.invoke(app, ["aging_report"])
     print(result.stdout)
     # validation
     assert result.exit_code == 0
