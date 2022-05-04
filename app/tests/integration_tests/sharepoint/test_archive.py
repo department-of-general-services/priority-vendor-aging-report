@@ -93,6 +93,8 @@ class TestArchiveFolder:
         file_name = "test_download.csv"
         tmp_dir = test_archive_dir / "tmp"
         if tmp_dir.exists():
+            for file in tmp_dir.iterdir():
+                file.unlink()
             assert not any(tmp_dir.iterdir())
         file = test_archive.get_last_upload(TEST_FOLDER)
         # execution
