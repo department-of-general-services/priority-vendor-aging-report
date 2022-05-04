@@ -25,7 +25,6 @@ def new_report_file():
 class TestPromptPayment:
     """Tests the PromptPayment etl class"""
 
-    @pytest.mark.skip
     def test_init(self, test_prompt, test_archive_dir):
         """Tests that the PromptPayment inits correctly"""
         # validation
@@ -33,7 +32,6 @@ class TestPromptPayment:
         assert isinstance(test_prompt.core_integrator, CoreIntegrator)
         assert isinstance(test_prompt.sharepoint, SharePoint)
 
-    @pytest.mark.skip
     def test_get_old_report(self, test_prompt):
         """Tests that the get_old_report() method executes successfully
 
