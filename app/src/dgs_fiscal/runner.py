@@ -64,7 +64,7 @@ def run_aging_report_etl():
     # get data from CitiBuy and SharePoint
     typer.echo("Exporting invoice and receipt data from CitiBuy")
     invoice_data = aging_etl.get_citibuy_data(invoice_window=365)
-    receipt_data = aging_etl.get_receipt_queue(receipt_window=365)
+    receipt_data = aging_etl.get_receipt_queue(receipt_window=1200)
 
     # get data from CitiBuy and SharePoint
     typer.echo("Uploading the exported data to SharePoint")

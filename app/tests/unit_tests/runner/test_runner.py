@@ -106,6 +106,7 @@ def test_aging_report(runner, aging_etl):  # pylint: disable=unused-argument
         "Starting the aging report workflow",
         "Exporting invoice and receipt data from CitiBuy",
         "Uploading the exported data to SharePoint",
+        "1200",
         "Workflow ran successfully",
     ]
     # execution
