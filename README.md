@@ -49,7 +49,7 @@ DGS Fiscal Automations is a series of Extract, Transform, and Load (ETL) workflo
 ### Relevant Documents
 
 - [Invoice Fulfillment Process](docs/diagrams/invoice-fulfillment/invoice-fulfillment-process.md)
-- [Architecture Decision Records](docs/adrs)
+- [Architecture Decision Records](docs/adr/)
 - [Project Scoping Document](docs/project-scope.md)
 - [Data Dictionary](docs/data-dictionary.md)
 
@@ -57,16 +57,18 @@ DGS Fiscal Automations is a series of Extract, Transform, and Load (ETL) workflo
 
 The list below represents a summary of important files and directories within the project.
 
-- `.github/` Contains templates for issues and pull requests as well as configuration files for GitHub Actions
-- `app/` Contains the scripts and other files that comprise the main codebase for this project
-  - `src/dgs_fiscal/` The main python package for this project
-  - `tests/` Contains the unit and integration tests used to assess the quality of the code base
-  - `setup.py` Details about the package in `src/dgs_fiscal/` and the file that facilitates installation of that package
-  - `requirements.txt` The project's development dependencies
-- `docs/` Contains documentation about the project
-  - `adr/` Contains key architectural decisions for the project
-  - `diagrams/` Contains diagrams referenced in the docs and in the `README.md`
-  - `project-scope.md` An overview of the project and its goals
+- [`.github/`](.github/) Contains templates for issues and pull requests as well as configuration files for GitHub Actions
+- [`app/`](app/) Contains the scripts and other files that comprise the main codebase for this project
+  - [`src/dgs_fiscal/`](app/src/dgs_fiscal/) The main python package for this project
+    - [`etl/`](app/src/dgs_fiscal/etl/) The Extract Transform Load sub-package which contains modules for each of the DGS Fiscal ETL workflows that can be run with this project, i.e. the Contract Management Report, Aging Report, and Prompt Payment Report.
+    - [`systems/`](app/src/dgs_fiscal/systems/) The systems sub-package which contains modules for programmatically interfacing with each of the systems involved in the DGS Fiscal Workflows, i.e. CitiBuy, CoreIntegrator, SharePoint, and Integrify.
+  - [`tests/`](app/tests/) Contains the unit and integration tests used to assess the quality of the code base
+  - [`setup.py`](app/setup.py) Details about the package in `src/dgs_fiscal/` and the file that facilitates installation of that package
+  - [`requirements.txt`](app/requirements.txt) The project's development dependencies
+- [`docs/`](docs/) Contains documentation about the project
+  - [`adr/`](docs/adr/) Contains key architectural decisions for the project
+  - [`diagrams/`](docs/diagrams/) Contains diagrams referenced in the docs and in the `README.md`
+  - [`project-scope.md`](docs/project-scope.md) An overview of the project and its goals
 
 ## Getting Started
 
