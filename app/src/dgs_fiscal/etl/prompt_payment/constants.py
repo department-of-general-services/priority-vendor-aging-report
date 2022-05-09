@@ -3,8 +3,8 @@ NEW_REPORT = {
         "Execution ID": "string",
         "Location": "string",
         "Status Age (days)": "int64",
-        # "Days Since Creation": "int64",
-        # "Status": "string",
+        "Days Since Creation": "int64",
+        "Status": "string",
         "Amount": "float64",
         "Document Type": "string",
         "Name": "string",
@@ -14,8 +14,8 @@ NEW_REPORT = {
         "Document Number": "string",
         "Document Date": "datetime64",
         "PO Number": "string",
-        # "EA Number": "string",
-        # "Note": "string",
+        "EA Number": "string",
+        "Note": "string",
     },
     "columns": {
         "PO Number": "PO Number",
@@ -30,4 +30,63 @@ NEW_REPORT = {
         "Assigned Date (Core)": "Assigned Date (Core)",
         "Name": "DGS Name",
     },
+}
+
+OLD_REPORT = {
+    "dtypes": {
+        "document_number": "string",
+        "vendor_id": "string",
+        "comments": "string",
+        "current_status": "string",
+        "date_of_most_recent_action": ["datetime64[ns]"],
+        "division": "object",
+    },
+    "columns": {
+        "PO Number": "PO Number",
+        "Vendor ID": "Vendor ID",
+        "Vendor Name": "Vendor Name",
+        "Document Number": "Invoice Number",
+        "Document Date": "Invoice Date",
+        "Amount": "Invoice Amount",
+        "Execution ID": "Execution ID (Core)",
+        "Location": "Location (Core)",
+        "Creation Date": "Creation Date (Core)",
+        "Assigned Date (Core)": "Assigned Date (Core)",
+        "Name": "DGS Name",
+    },
+}
+
+
+DIVISIONS = {
+    "Fleet": [
+        "Donna Howard",
+        "Donna Jones",
+        "Erlynda Parton",
+        "Jacquelyn Powers",
+        "Jennifer Millan",
+        "Keith Davis",
+        "Lakia Carrillo",
+        "Latrice Thomas",
+        "Rosa Gold",
+        "Abrar Abukhdeir",
+        "Asia Ali",
+        "David Gold",
+    ],
+    "Fiscal": [
+        "Garrett Knight",
+        "Rose Carter",
+        "Benjamin Brosch",
+        "Troy Parrish",
+        "Tonay Davis",
+        "Jonae Barnes",
+        "Krystal Roberts-Saunders",
+    ],
+    "Facilities": [
+        "Darryl Ragin",
+        "Jim Fisher",
+        "Phillip Waclawski",
+        "Richard Nelson",
+        "Karl Rusk",
+        "Jason Ludd",
+    ],
 }
