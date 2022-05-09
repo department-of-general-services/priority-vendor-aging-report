@@ -95,8 +95,8 @@ If you receive an error message, or the version of python you have installed is 
 1. Activate the virtual environment
    - On Mac/Linux: `source env/bin/activate`
    - On Windows: `.\env\Scripts\activate`
+1. Install the dependencies required to contribute to the project: `pip install -r requirements.txt`
 1. Install this package in editable mode by running `pip install -e .` which makes changes made to scripts within this package available without re-installing it.
-1. Install the other dependencies required to contribute to the project: `pip -r requirements.txt`
 1. Install `pre-commit` to autoformat your code: `pre-commit install`
 1. Execute all tests by running `tox` All tests should pass with an output that ends in something like this:
    ```
@@ -128,10 +128,10 @@ If you receive an error message, or the version of python you have installed is 
 1. Test that the config variables are loading correctly. Enter all of the lines that begin with a `$` or `>>>`
    ```bash
    $ python
-   >>> from aging_report.config import settings
+   >>> from dgs_fiscal.config import settings
    >>> settings.client_id
    'test_id'  # This should match the value you added to .secrets.toml
-   >>> settings.secret
+   >>> settings.client_secret
    'test_secret'  # This should match the value you added to .secrets.toml
    ```
 1. If the config variables are loading correctly, try running the integration tests: `pytest tests/integration_tests`
