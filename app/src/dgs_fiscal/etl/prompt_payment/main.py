@@ -1,12 +1,24 @@
 from __future__ import annotations  # prevents NameError for typehints
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
+from dataclasses import dataclass
 
 import pandas as pd
+from O365.drive import File
 
 from dgs_fiscal.systems import CoreIntegrator, SharePoint
-from dgs_fiscal.systems.sharepoint import BatchedChanges
-from dgs_fiscal.etl.prompt_payment import constants
+from dgs_fiscal.etl.prompt_payment import constants, utils
+
+REPORT_PATH = "/Prompt Payment/Prompt Payment Report.xlsx"
+
+
+@dataclass
+class ReportOutput:
+    """Output of Prompt Payment Report manipulations"""
+
+    df: pd.DataFrame
+    file: Path
 
 
 class PromptPayment:
@@ -40,14 +52,17 @@ class PromptPayment:
         self.sharepoint = SharePoint()
         self.archive = self.sharepoint.get_archive_folder(local_archive)
 
-    def get_new_report(self) -> pd.DataFrame:
+    def get_new_report(self) -> ReportOutput:
         """Downloads the most recent Prompt Payment report from CoreIntegrator,
         uploads it to the archive folder, then loads it as a dataframe
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame of the new Prompt Payment Report from CoreIntegrator
+        ReportOutput
+            Report output which includes the path to a local copy of the new
+            Prompt Payment Report scraped and downloaded from CoreIntegrator
+            as well as a dataframe of that report which has been prepared for
+            reconciliation with the old report
         """
         dtypes = constants.NEW_REPORT["dtypes"]
         columns = constants.NEW_REPORT["columns"]
@@ -79,7 +94,8 @@ class PromptPayment:
         # preserve and rename a subset of columns for matching
         df = df[columns.keys()]
         df.columns = columns.values()
-        return df
+
+        return ReportOutput(df=df, file=file)
 
     def get_old_report(self) -> pd.DataFrame:
         """Retrieves the previous Prompt Payment report from SharePoint,
@@ -96,11 +112,46 @@ class PromptPayment:
         invoices = invoice_list.get_items(query=query)
         return invoices.to_dataframe()
 
+    def get_old_excel(
+        self,
+        report_path: Optional[str] = REPORT_PATH,
+        download_loc: Optional[Path] = None,
+    ) -> pd.DataFrame:
+        """Retrieves the previous Prompt Payment report from SharePoint
+
+        This method is different from get_old_report() because it pulls the
+        report from the Excel file instead of the SharePoint list
+
+        Returns
+        -------
+        ReportOutput
+            Report output which includes the path to a local copy of the old
+            Prompt Payment Report downloaded from SharePoint as well as a
+            dataframe of that report which has been prepared for reconciliation
+            with the new report from CoreIntegrator
+        """
+        # get the list of columns and dtypes
+        dtypes = constants.NEW_REPORT["dtypes"]
+
+        # Set the download location
+        download_loc = download_loc or Path.cwd() / "archives"
+        file = self.sharepoint.get_item_by_path(report_path)
+        tmp_file = download_loc / file.name
+
+        # download and read in file from SharePoint
+        file.download(download_loc)
+        df = pd.read_excel(tmp_file, dtype=dtypes)
+
+        # zfill vendor_id to 8 characters
+        df["Vendor ID"] = df["Vendor ID"].str.zfill(8)
+
+        return ReportOutput(df=df, file=tmp_file)
+
     def reconcile_reports(
         self,
-        new_report,
-        old_report,
-    ) -> BatchedChanges:
+        new_report: pd.DataFrame,
+        old_report: pd.DataFrame,
+    ) -> pd.DataFrame:
         """Merges the old report from SharePoint with the new report scraped
         from CoreIntegrator and return a list of the changes to make
 
@@ -118,16 +169,44 @@ class PromptPayment:
         BatchedChanges
 
         """
-        pass
+        # merge reports on vendor_id and document_number
+        # preserve all of the rows in Core Integrator report
+        merge_fields = ["Vendor ID", "Document Number"]
+        df = new_report.merge(old_report, how="left", on=merge_fields)
 
-    def update_sharepoint(self, changes: BatchedChanges) -> None:
-        """Updates sharepoint with the set of changes returned by the
-        self.reconcile_reports() method
+        # compute additional fields and sort dataframe
+        df["Age of Invoice"] = utils.compute_age_of_invoice(df)
+        df["Days Outstanding"] = utils.compute_days_outstanding(df)
+        df["Days with BAPS"] = utils.compute_days_with_baps(df)
+        df = utils.update_division(df)
+
+        # return reconciled report with oldest invoices listed first
+        return df.sort_values(by="Age of Invoice", ascending=False)
+
+    def update_sharepoint(
+        self,
+        file_path: Path,
+        report_name: str,
+        folder_name: str,
+    ) -> File:
+        """Uploads CitiBuy invoice data to SharePoint as an Excel file
 
         Parameters
         ----------
-        changes: BatchedChanges
-            An instance of BatchedChanges that contains the list changes that
-            need to be made to the Invoices list in SharePoint
+        file_path: Path
+            Path to the local file to upload
+        folder_name: str, optional
+            The name of the folder to which the invoice data will be uploaded
+
+        Returns
+        -------
+        File
+            Returns an instance of the O365 File class for the Excel file that
+            was uploaded to SharePoint
         """
-        pass
+        # set the file name to the current date
+        date_str = datetime.today().strftime("%Y-%m-%d")
+        file_name = f"{date_str}_{report_name}.xlsx"
+
+        # upload the exported file to SharePoint
+        return self.archive.upload_file(file_path, folder_name, file_name)

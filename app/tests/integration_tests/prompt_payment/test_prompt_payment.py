@@ -4,8 +4,10 @@ import pytest
 import pandas as pd
 
 from dgs_fiscal.etl import PromptPayment
-from dgs_fiscal.etl.prompt_payment import constants
+from dgs_fiscal.etl.prompt_payment.main import constants, ReportOutput
 from dgs_fiscal.systems import CoreIntegrator, SharePoint
+
+TEST_DIR = Path(__file__).parent.resolve()
 
 
 @pytest.fixture(scope="session", name="test_prompt")
@@ -48,6 +50,37 @@ class TestPromptPayment:
         assert isinstance(df, pd.DataFrame)
         assert len(df[~df["Prompt Payment"]]) == 0
 
+    def test_get_old_excel(self, test_prompt, test_archive, test_archive_dir):
+        """Tests that the get_old_excel() method executes successfully
+
+        Validates the following conditions:
+        - A dataframe is returned as the result
+        - The columns have been renamed correctly
+        - The
+        """
+        # setup - reset mock AgingReport.xslx
+        file_name = "PromptPaymentReport.xlsx"
+        mock_file = TEST_DIR / "old_report_input.xlsx"
+        upload = test_archive.upload_file(
+            local_path=mock_file,
+            folder_name="test",
+            file_name=file_name,
+        )
+        assert upload.name == file_name
+        # execution
+        report_path = (
+            "/Prompt Payment/Workflow Archives/test/PromptPaymentReport.xlsx"
+        )
+        output = test_prompt.get_old_excel(
+            report_path=report_path,
+            download_loc=test_archive_dir,
+        )
+        print(output.df.columns)
+        print(output.df)
+        # validation
+        assert isinstance(output, ReportOutput)
+        assert output.file.exists()
+
     def test_get_new_report(self, test_prompt, monkeypatch):
         """Tests that the get_new_report() method executes successfully
 
@@ -66,8 +99,9 @@ class TestPromptPayment:
         )
         vendor_ids = ["00048571", "00048571", "00001928", "01012092"]
         # execution
-        df = test_prompt.get_new_report()
+        output = test_prompt.get_new_report()
+        df = output.df
         # validation
-        assert isinstance(df, pd.DataFrame)
+        assert isinstance(output, ReportOutput)
         assert list(df.columns) == columns
         assert list(df["Vendor ID"]) == vendor_ids
