@@ -26,6 +26,47 @@ class ArchiveFolder:
         self.archive_dir = archive_dir or (Path.cwd() / "archives")
         self.tmp_dir = self.archive_dir / "tmp"
         self.subfolders = list(self.folder.get_child_folders())
+        self.tmp_dir.mkdir(exist_ok=True, parents=True)
+
+    def export_dataframe(
+        self,
+        df: pd.DataFrame,
+        file_name: str,
+    ) -> Path:
+        """Export dataframe to Excel in local archive for upload to SharePoint
+        and styles the data as a table
+
+        Parameters
+        ----------
+        df: pd.DataFrame
+            The dataframe to export to Excel
+        file_name: str
+            File name to save to save the exported dataframe under
+
+        Returns
+        -------
+        Path
+            Path to where the dataframe was saved as an Excel file
+        """
+        # set the export location to local tmp_dir
+        file = self.tmp_dir / file_name
+
+        # write the data to Excel and get the worksheet using XlsxWriter
+        writer = pd.ExcelWriter(  # pylint: disable=abstract-class-instantiated
+            file, engine="xlsxwriter"
+        )
+        df.to_excel(writer, sheet_name="Sheet1", index=False)
+        worksheet = writer.sheets["Sheet1"]
+
+        # format the data as a table and adjust col width
+        (max_row, max_col) = df.shape
+        columns = [{"header": column} for column in df.columns]
+        worksheet.add_table(0, 0, max_row, max_col - 1, {"columns": columns})
+        worksheet.set_column(0, max_col - 1, 12)
+
+        # save the file and return the path
+        writer.save()
+        return file
 
     def upload_file(
         self,
@@ -43,7 +84,7 @@ class ArchiveFolder:
             Name of the sub-folder in the archive where the file will be
             uploaded. Must be one of the folders in self.subfolders
         file_name: str
-            What to name of the file once it's uploaded
+            What to name of the file once it"s uploaded
         """
         # check that the upload file exists
         if not local_path.exists():
@@ -68,7 +109,7 @@ class ArchiveFolder:
         download_path: Path
             Local path to where file will be downloaded
         download_name: str, optional
-            What to name the file when it's downloaded. Default is to use the
+            What to name the file when it"s downloaded. Default is to use the
             existing name of the file in SharePoint
 
         Returns

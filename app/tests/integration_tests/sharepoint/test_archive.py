@@ -1,6 +1,8 @@
 from pathlib import Path
+from datetime import date
 
 import pytest
+import pandas as pd
 from O365.drive import Folder, File
 
 DATA_DIR = Path.cwd() / "tests" / "integration_tests" / "sharepoint" / "data"
@@ -55,7 +57,8 @@ class TestArchiveFolder:
         """
         # setup
         file_loc = DATA_DIR / "upload.csv"
-        file_name = "test_upload.csv"
+        date_str = date.today().strftime("%Y-%m-%d")
+        file_name = f"test_upload_{date_str}.csv"
         # execution
         output = test_archive.upload_file(file_loc, TEST_FOLDER, file_name)
         # validation
@@ -70,11 +73,13 @@ class TestArchiveFolder:
         - The result returned is an instance of O365.File
         - The name of that file matches the last uploaded csv
         """
+        # setup
+        date_str = date.today().strftime("%Y-%m-%d")
         # execution
         output = test_archive.get_last_upload(TEST_FOLDER)
         # validation
         assert isinstance(output, File)
-        assert output.name == "test_last_upload.csv"
+        assert date_str in output.name
 
     def test_download_file(self, test_archive_dir, test_archive):
         """Tests that the ArchiveFolder.download_file() method successfully
@@ -88,6 +93,8 @@ class TestArchiveFolder:
         file_name = "test_download.csv"
         tmp_dir = test_archive_dir / "tmp"
         if tmp_dir.exists():
+            for file in tmp_dir.iterdir():
+                file.unlink()
             assert not any(tmp_dir.iterdir())
         file = test_archive.get_last_upload(TEST_FOLDER)
         # execution
@@ -96,3 +103,14 @@ class TestArchiveFolder:
         assert isinstance(output, Path)
         assert output.name == file_name
         assert any(tmp_dir.iterdir())
+
+    def test_export_dataframe(self, test_archive):
+        """Tests that the export_dataframe() method successfully exports the
+        dataframe to an Excel file and formats it with a table
+        """
+        # setup
+        df = pd.DataFrame({"Col A": ["a", "b"], "Col B": ["d", "f"]})
+        # execution
+        file = test_archive.export_dataframe(df, "test.xlsx")
+        # validation
+        assert file.exists()

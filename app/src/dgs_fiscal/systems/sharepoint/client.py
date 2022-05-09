@@ -3,7 +3,7 @@ from pathlib import Path
 
 from dynaconf import Dynaconf
 from O365 import Account
-from O365.drive import Drive
+from O365.drive import Drive, DriveItem
 from O365.sharepoint import Site, Sharepoint
 
 from dgs_fiscal.config import settings
@@ -44,6 +44,17 @@ class SharePoint:
     def is_authenticated(self) -> bool:
         """Returns True if account is authenticated"""
         return self.account.is_authenticated
+
+    def get_item_by_path(self, path: str) -> DriveItem:
+        """Returns a O365.Folder instance given a folder path in SharePoint
+
+        Parameters
+        ----------
+        path: url
+        """
+        drive_id = self.config.drive_id
+        self.drive = self.site.get_document_library(drive_id)
+        return self.drive.get_item_by_path(path)
 
     def get_archive_folder(self, archive_dir: Path = None) -> ArchiveFolder:
         """Returns ArchiveFolder instance and stores it in self.archive

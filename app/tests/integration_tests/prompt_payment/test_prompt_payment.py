@@ -1,7 +1,10 @@
+from pathlib import Path
+
 import pytest
 import pandas as pd
 
 from dgs_fiscal.etl import PromptPayment
+from dgs_fiscal.etl.prompt_payment import constants
 from dgs_fiscal.systems import CoreIntegrator, SharePoint
 
 
@@ -9,6 +12,14 @@ from dgs_fiscal.systems import CoreIntegrator, SharePoint
 def fixture_prompt_payment(test_archive_dir):
     """Creates a fixture of the PromptPayment class for testing"""
     return PromptPayment(local_archive=test_archive_dir)
+
+
+def new_report_file():
+    """Returns the link to a dummy version of the report scraped from
+    CoreIntegrator by CoreIntegrator.scrape_report()
+    """
+    current_dir = Path(__file__).parent
+    return current_dir / "new_report_input.xlsx"
 
 
 class TestPromptPayment:
@@ -36,3 +47,27 @@ class TestPromptPayment:
         # validation
         assert isinstance(df, pd.DataFrame)
         assert len(df[~df["Prompt Payment"]]) == 0
+
+    def test_get_new_report(self, test_prompt, monkeypatch):
+        """Tests that the get_new_report() method executes successfully
+
+        Validates the following conditions:
+        - A dataframe is returned as the result
+        - The columns have been renamed correctly
+        - There are no invoices on the list where the PromptPaymentReport
+          field is False
+        """
+        # setup
+        columns = list(constants.NEW_REPORT["columns"].values())
+        monkeypatch.setattr(
+            test_prompt.core_integrator,
+            "scrape_report",
+            new_report_file,
+        )
+        vendor_ids = ["00048571", "00048571", "00001928", "01012092"]
+        # execution
+        df = test_prompt.get_new_report()
+        # validation
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == columns
+        assert list(df["Vendor ID"]) == vendor_ids

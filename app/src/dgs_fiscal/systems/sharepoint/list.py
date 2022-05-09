@@ -3,6 +3,7 @@ from typing import Dict, List, Iterable, Any, Optional
 from dataclasses import dataclass, field
 
 import pandas as pd
+from more_itertools import chunked
 from O365.sharepoint import SharepointList, SharepointListItem
 
 from dgs_fiscal.systems.sharepoint.utils import build_filter_str, col_api_name
@@ -23,6 +24,22 @@ class BatchedChanges:
     """
 
     updates: Optional[Dict[dict]] = field(default_factory=dict)
+    inserts: Optional[List[dict]] = field(default_factory=list)
+
+
+@dataclass
+class BatchResults:
+    """Data class for storing the results to a series of batch requests
+
+    Attributes
+    ----------
+    updates: List[list], optional
+        A list of the JSON responses from each batch update request
+    inserts: List[list], optional
+        A list of the JSON responses from each batch update request
+    """
+
+    updates: Optional[Dict[dict]] = field(default_factory=list)
     inserts: Optional[List[dict]] = field(default_factory=list)
 
 
@@ -131,7 +148,7 @@ class SiteList:
         Parameters
         ----------
         changes: BatchedChanges
-            Instance of BatchedChanges dataclass which contains the items
+            Instance of the BatchedChanges dataclass which contains the items
             to update or insert into this SharePoint list
 
         Returns
@@ -139,47 +156,63 @@ class SiteList:
         dict
             A dictionary of the JSON response from a batch request
         """
-        batch_url = "https://graph.microsoft.com/v1.0/$batch"
-        base_url = f"/{self.list.main_resource}"
-        requests = []
-        counter = 0
+        results = BatchResults()
 
+        # execute batch updates
         if changes.updates:
-            for item_id, data in changes.updates.items():
-                counter += 1
-                url = base_url + f"/items/{item_id}/fields"
-                request = self._build_request(counter, data, url, "PATCH")
-                requests.append(request)
+            update_batches = chunked(changes.updates.items(), 20)
+            for batch in update_batches:
+                response = self._execute_batch(batch, "PATCH")
+                results.updates.append(response["responses"])
 
+        # execute batch inserts
         if changes.inserts:
-            for data in changes.inserts:
-                counter += 1
-                url = base_url + "/items"
-                request = self._build_request(counter, data, url, "POST")
-                requests.append(request)
+            insert_batches = chunked(changes.inserts, 20)
+            for batch in insert_batches:
+                response = self._execute_batch(batch, "POST")
+                results.inserts.append(response["responses"])
+
+        return results
+
+    def _execute_batch(self, batch: Iterable, method: str) -> dict:
+        """Formats and executes a batch request to Graph API
+
+        Parameters
+        ----------
+        batch: Iterable
+            An iterable of updates or inserts that need to be batched
+        method: str
+            The HTTP method to use for the batch requests
+
+        Returns
+        -------
+        dict
+            Returns a JSON of the response returned by the batch request
+        """
+        batch_url = "https://graph.microsoft.com/v1.0/$batch"
+        base_url = self.list.main_resource
+        counter = 0
+        requests = []
+
+        for item in batch:
+            counter += 1
+            if method == "PATCH":
+                data = self._format_request_data(item[1])
+                url = f"/{base_url}/items/{item[0]}/fields"
+            elif method == "POST":
+                data = {"fields": self._format_request_data(item)}
+                url = f"/{base_url}/items"
+            request = {
+                "id": str(counter),
+                "url": url,
+                "method": method,
+                "body": data,
+                "headers": {"Content-Type": "application/json"},
+            }
+            requests.append(request)
 
         response = self.list.con.post(batch_url, {"requests": requests})
         return response.json()
-
-    def _build_request(
-        self,
-        counter: int,
-        data: dict,
-        url: str,
-        method: str,
-    ) -> dict:
-        """Builds an entry to add to a batch request entry"""
-        request_data = self._format_request_data(data)
-        if method == "POST":
-            request_data = {"fields": request_data}
-        request = {
-            "id": str(counter),
-            "url": url,
-            "method": method,
-            "body": request_data,
-            "headers": {"Content-Type": "application/json"},
-        }
-        return request
 
     def _format_request_data(self, data) -> dict:
         """Get the API col name for each column in the request data"""
@@ -249,10 +282,13 @@ class ItemCollection:
                 matches.append(item)
         return matches
 
-    def to_dataframe(self) -> pd.DataFrame:
+    def to_dataframe(self, include_id=False) -> pd.DataFrame:
         """Exports the list of items and their fields as a dataframe"""
         # convert items to dataframe
-        items = [item.fields for item in self.items]
+        if include_id:
+            items = [{"id": item.id, **item.fields} for item in self.items]
+        else:
+            items = [item.fields for item in self.items]
         df = pd.DataFrame(items)
         # rename the columns
         cols = self.list.columns
@@ -285,6 +321,11 @@ class ListItem:
     def fields(self) -> dict:
         """Returns the fields associated with this list item"""
         return self.item.fields
+
+    @property
+    def id(self) -> dict:
+        """Returns the SharePoint id for this list item"""
+        return self.item.object_id
 
     def update(self, data: dict) -> None:
         """Updates the list item in SharePoint

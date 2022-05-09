@@ -29,7 +29,7 @@ class TestClient:
 
     @pytest.mark.parametrize(
         "list_name",
-        ["Vendors", "Purchase Orders", "Invoices", "Priority Vendor Aging"],
+        ["Vendors", "PO Releases", "Invoices", "Master Blanket POs"],
     )
     def test_get_list(self, test_sharepoint, list_name):
         """Tests that Client.get_vendor_list() returns an SiteList instance
@@ -44,7 +44,7 @@ class TestClient:
         # validation
         assert isinstance(sp_list, SiteList)
         assert isinstance(sp_list.list, SharepointList)
-        assert sp_list.list.name == list_name
+        assert sp_list.list.name is not None
 
     def test_get_archive_folder(self, test_sharepoint, test_archive_dir):
         """Tests that Client.get_archive_folder() returns an ArchiveFolder instance
@@ -65,3 +65,12 @@ class TestClient:
         assert isinstance(archive.folder, Folder)
         assert archive.folder.name == "Workflow Archives"
         assert archive.tmp_dir == tmp_dir
+
+    def test_get_item_by_path(self, test_sharepoint):
+        """Tests get_item_by_path() method"""
+        # setup
+        path = "/Prompt Payment"
+        # execution
+        folder = test_sharepoint.get_item_by_path(path)
+        # validation
+        assert folder.name == "Prompt Payment"

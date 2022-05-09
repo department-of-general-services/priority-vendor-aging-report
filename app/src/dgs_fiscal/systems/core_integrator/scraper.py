@@ -40,6 +40,7 @@ class CoreIntegrator:
     EXCEPTIONS = (
         KeyError,
         FileNotFoundError,
+        AssertionError,
         TimeoutException,
         UnexpectedAlertPresentException,
         SessionNotCreatedException,
@@ -93,8 +94,8 @@ class CoreIntegrator:
                 self._login(config)
                 self._access_report()
                 self._rename_download()
-                df = self.load_report()
-                return df
+                assert self.file_path.exists()
+                return self.file_path
             except self.EXCEPTIONS as e:
                 error = e
             finally:
@@ -192,7 +193,7 @@ class CoreIntegrator:
         download_path.replace(renamed_path)
 
     def load_report(self) -> pd.DataFrame:
-        """Loads the downloaded report as a pandas dataframe
+        """Opens and resaves the downloaded report to trigger calculations
 
         Automates the opening and saving of an excel workbook before reading it
         in through pd.read_excel, which addresses the NaN issue described in
