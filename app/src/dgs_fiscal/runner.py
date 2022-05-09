@@ -53,7 +53,7 @@ def run_contract_management_etl():
 
 @app.command(name="aging_report")
 def run_aging_report_etl():
-    """Run the contract management workflow"""
+    """Run the Aging Report workflow"""
 
     from dgs_fiscal import etl  # pylint: disable=import-outside-toplevel
 
@@ -70,5 +70,38 @@ def run_aging_report_etl():
     typer.echo("Uploading the exported data to SharePoint")
     aging_etl.update_sharepoint(invoice_data, "InvoiceExport")
     aging_etl.update_sharepoint(receipt_data, "ReceiptExport")
+
+    typer.echo("Workflow ran successfully")
+
+
+@app.command(name="prompt_payment")
+def run_prompt_payment_etl():
+    """Run the Prompt Payment Report Workflow"""
+
+    from dgs_fiscal import etl  # pylint: disable=import-outside-toplevel
+
+    # init the ETL workflow class
+    typer.echo("Starting the prompt payment report workflow")
+    prompt_etl = etl.PromptPayment()
+
+    # Scrape the new report from CoreIntegrator
+    typer.echo("Scraping the new report from CoreIntegrator")
+    new_report = prompt_etl.get_new_report()
+
+    # Download the old report from SharePoint
+    old_report = prompt_etl.get_old_report()
+
+    # Archive the copies of those reports
+    typer.echo("Archiving the snapshots of the report")
+    prompt_etl.update_sharepoint(
+        file_path=new_report.file,
+        report_name="scraped_report",
+        folder_name="core_integrator",
+    )
+    prompt_etl.update_sharepoint(
+        file_path=old_report.file,
+        report_name="old_report",
+        folder_name="commented_invoices",
+    )
 
     typer.echo("Workflow ran successfully")

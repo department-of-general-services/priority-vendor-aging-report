@@ -39,10 +39,10 @@ def compute_days_with_baps(df: pd.DataFrame) -> pd.DataFrame:
     return days_with_baps
 
 
-def update_division(
+def update_division(  # pylint: disable=dangerous-default-value
     df: pd.DataFrame,
     staff_mapping: list = DIVISIONS,
-) -> pd.DataFrame:  # pylint: disable=dangerous-default-value
+) -> pd.DataFrame:
     """Assigns the division associated with a give AP staff"""
 
     # change default to "No matching division"

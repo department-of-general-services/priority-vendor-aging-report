@@ -5,9 +5,9 @@ from typing import Optional
 from dataclasses import dataclass
 
 import pandas as pd
+from O365.drive import File
 
 from dgs_fiscal.systems import CoreIntegrator, SharePoint
-from dgs_fiscal.systems.sharepoint import BatchedChanges
 from dgs_fiscal.etl.prompt_payment import constants, utils
 
 REPORT_PATH = "/Prompt Payment/Prompt Payment Report.xlsx"
@@ -183,14 +183,30 @@ class PromptPayment:
         # return reconciled report with oldest invoices listed first
         return df.sort_values(by="Age of Invoice", ascending=False)
 
-    def update_sharepoint(self, changes: BatchedChanges) -> None:
-        """Updates sharepoint with the set of changes returned by the
-        self.reconcile_reports() method
+    def update_sharepoint(
+        self,
+        file_path: Path,
+        report_name: str,
+        folder_name: str,
+    ) -> File:
+        """Uploads CitiBuy invoice data to SharePoint as an Excel file
 
         Parameters
         ----------
-        changes: BatchedChanges
-            An instance of BatchedChanges that contains the list changes that
-            need to be made to the Invoices list in SharePoint
+        file_path: Path
+            Path to the local file to upload
+        folder_name: str, optional
+            The name of the folder to which the invoice data will be uploaded
+
+        Returns
+        -------
+        File
+            Returns an instance of the O365 File class for the Excel file that
+            was uploaded to SharePoint
         """
-        pass
+        # set the file name to the current date
+        date_str = datetime.today().strftime("%Y-%m-%d")
+        file_name = f"{date_str}_{report_name}.xlsx"
+
+        # upload the exported file to SharePoint
+        return self.archive.upload_file(file_path, folder_name, file_name)
