@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 
 from dgs_fiscal.etl import PromptPayment
-from dgs_fiscal.etl.prompt_payment import constants
+from dgs_fiscal.etl.prompt_payment.main import constants, ReportOutput
 from dgs_fiscal.systems import CoreIntegrator, SharePoint
 
 TEST_DIR = Path(__file__).parent.resolve()
@@ -75,9 +75,11 @@ class TestPromptPayment:
             report_path=report_path,
             download_loc=test_archive_dir,
         )
-        print(output)
+        print(output.df.columns)
+        print(output.df)
         # validation
-        assert 0
+        assert isinstance(output, ReportOutput)
+        assert output.file.exists()
 
     def test_get_new_report(self, test_prompt, monkeypatch):
         """Tests that the get_new_report() method executes successfully
@@ -97,8 +99,9 @@ class TestPromptPayment:
         )
         vendor_ids = ["00048571", "00048571", "00001928", "01012092"]
         # execution
-        df = test_prompt.get_new_report()
+        output = test_prompt.get_new_report()
+        df = output.df
         # validation
-        assert isinstance(df, pd.DataFrame)
+        assert isinstance(output, ReportOutput)
         assert list(df.columns) == columns
         assert list(df["Vendor ID"]) == vendor_ids

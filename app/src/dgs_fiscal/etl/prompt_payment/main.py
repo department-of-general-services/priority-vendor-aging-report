@@ -2,14 +2,23 @@ from __future__ import annotations  # prevents NameError for typehints
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
+from dataclasses import dataclass
 
 import pandas as pd
 
 from dgs_fiscal.systems import CoreIntegrator, SharePoint
 from dgs_fiscal.systems.sharepoint import BatchedChanges
-from dgs_fiscal.etl.prompt_payment import constants
+from dgs_fiscal.etl.prompt_payment import constants, utils
 
 REPORT_PATH = "/Prompt Payment/Prompt Payment Report.xlsx"
+
+
+@dataclass
+class ReportOutput:
+    """Output of Prompt Payment Report manipulations"""
+
+    df: pd.DataFrame
+    file: Path
 
 
 class PromptPayment:
@@ -43,14 +52,17 @@ class PromptPayment:
         self.sharepoint = SharePoint()
         self.archive = self.sharepoint.get_archive_folder(local_archive)
 
-    def get_new_report(self) -> pd.DataFrame:
+    def get_new_report(self) -> ReportOutput:
         """Downloads the most recent Prompt Payment report from CoreIntegrator,
         uploads it to the archive folder, then loads it as a dataframe
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame of the new Prompt Payment Report from CoreIntegrator
+        ReportOutput
+            Report output which includes the path to a local copy of the new
+            Prompt Payment Report scraped and downloaded from CoreIntegrator
+            as well as a dataframe of that report which has been prepared for
+            reconciliation with the old report
         """
         dtypes = constants.NEW_REPORT["dtypes"]
         columns = constants.NEW_REPORT["columns"]
@@ -82,7 +94,8 @@ class PromptPayment:
         # preserve and rename a subset of columns for matching
         df = df[columns.keys()]
         df.columns = columns.values()
-        return df
+
+        return ReportOutput(df=df, file=file)
 
     def get_old_report(self) -> pd.DataFrame:
         """Retrieves the previous Prompt Payment report from SharePoint,
@@ -111,9 +124,15 @@ class PromptPayment:
 
         Returns
         -------
-        pd.DataFrame
-            A dataframe of the old Prompt Payment report in SharePoint
+        ReportOutput
+            Report output which includes the path to a local copy of the old
+            Prompt Payment Report downloaded from SharePoint as well as a
+            dataframe of that report which has been prepared for reconciliation
+            with the new report from CoreIntegrator
         """
+        # get the list of columns and dtypes
+        dtypes = constants.NEW_REPORT["dtypes"]
+
         # Set the download location
         download_loc = download_loc or Path.cwd() / "archives"
         file = self.sharepoint.get_item_by_path(report_path)
@@ -121,9 +140,12 @@ class PromptPayment:
 
         # download and read in file from SharePoint
         file.download(download_loc)
-        df = pd.read_excel(tmp_file)
+        df = pd.read_excel(tmp_file, dtype=dtypes)
 
-        return df
+        # zfill vendor_id to 8 characters
+        df["Vendor ID"] = df["Vendor ID"].str.zfill(8)
+
+        return ReportOutput(df=df, file=tmp_file)
 
     def reconcile_reports(
         self,
