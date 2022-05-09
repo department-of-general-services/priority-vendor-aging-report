@@ -1,7 +1,5 @@
 import typer
 
-from dgs_fiscal import etl
-
 # instantiate typer app
 app = typer.Typer()
 
@@ -15,6 +13,8 @@ def hello_world(name: str):
 @app.command(name="contract_management")
 def run_contract_management_etl():
     """Run the contract management workflow"""
+
+    from dgs_fiscal import etl  # pylint: disable=import-outside-toplevel
 
     # init the ETL workflow class
     typer.echo("Starting the contract management workflow")
@@ -48,4 +48,27 @@ def run_contract_management_etl():
         vendor_lookup=vendor_output.mapping,
         contract_lookup=contract_output.mapping,
     )
+    typer.echo("Workflow ran successfully")
+
+
+@app.command(name="aging_report")
+def run_aging_report_etl():
+    """Run the contract management workflow"""
+
+    from dgs_fiscal import etl  # pylint: disable=import-outside-toplevel
+
+    # init the ETL workflow class
+    typer.echo("Starting the aging report workflow")
+    aging_etl = etl.AgingReport()
+
+    # get data from CitiBuy and SharePoint
+    typer.echo("Exporting invoice and receipt data from CitiBuy")
+    invoice_data = aging_etl.get_citibuy_data(invoice_window=365)
+    receipt_data = aging_etl.get_receipt_queue(receipt_window=1200)
+
+    # get data from CitiBuy and SharePoint
+    typer.echo("Uploading the exported data to SharePoint")
+    aging_etl.update_sharepoint(invoice_data, "InvoiceExport")
+    aging_etl.update_sharepoint(receipt_data, "ReceiptExport")
+
     typer.echo("Workflow ran successfully")

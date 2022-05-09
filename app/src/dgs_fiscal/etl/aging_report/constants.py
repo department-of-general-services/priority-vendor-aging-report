@@ -17,5 +17,19 @@ CITIBUY = {
         "contract_end_date": "Contract End Date",
         "contract_dollar_limit": "Contract Dollar Limit",
         "contract_amount_spent": "Contract Amount Spent",
-    }
+    },
+    "receipt_cols": {
+        "receipt_id": "Receipt ID",
+        "po_nbr": "PO Number",
+        "release_nbr": "Release Number",
+        "status": "Receipt Status",
+        "agency": "Agency",
+        "unit": "Business Unit",
+        "desc": "Description",
+        "created_date": "Date Created",
+        "owner": "Owner",
+        "approver": "Approver",
+        "proxy_approver": "Proxy Approver",
+        "requested_date": "Date Requested",
+    },
 }

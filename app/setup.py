@@ -12,6 +12,7 @@ setup(
     author="Department of General Services",
     author_email="william.daly@baltimorecity.gov",
     install_requires=[
+        "wheel",
         "dynaconf",
         "O365",
         "pandas",
