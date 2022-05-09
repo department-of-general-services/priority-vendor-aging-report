@@ -151,7 +151,7 @@ class PromptPayment:
         self,
         new_report: pd.DataFrame,
         old_report: pd.DataFrame,
-    ) -> BatchedChanges:
+    ) -> pd.DataFrame:
         """Merges the old report from SharePoint with the new report scraped
         from CoreIntegrator and return a list of the changes to make
 
@@ -169,7 +169,19 @@ class PromptPayment:
         BatchedChanges
 
         """
-        pass
+        # merge reports on vendor_id and document_number
+        # preserve all of the rows in Core Integrator report
+        merge_fields = ["Vendor ID", "Document Number"]
+        df = new_report.merge(old_report, how="left", on=merge_fields)
+
+        # compute additional fields and sort dataframe
+        df["Age of Invoice"] = utils.compute_age_of_invoice(df)
+        df["Days Outstanding"] = utils.compute_days_outstanding(df)
+        df["Days with BAPS"] = utils.compute_days_with_baps(df)
+        df = utils.update_division(df)
+
+        # return reconciled report with oldest invoices listed first
+        return df.sort_values(by="Age of Invoice", ascending=False)
 
     def update_sharepoint(self, changes: BatchedChanges) -> None:
         """Updates sharepoint with the set of changes returned by the
