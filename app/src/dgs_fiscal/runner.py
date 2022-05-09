@@ -89,7 +89,8 @@ def run_prompt_payment_etl():
     new_report = prompt_etl.get_new_report()
 
     # Download the old report from SharePoint
-    old_report = prompt_etl.get_old_report()
+    typer.echo("Downloading the old report from SharePoint")
+    old_report = prompt_etl.get_old_excel()
 
     # Archive the copies of those reports
     typer.echo("Archiving the snapshots of the report")
