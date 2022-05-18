@@ -131,7 +131,8 @@ class PromptPayment:
             with the new report from CoreIntegrator
         """
         # get the list of columns and dtypes
-        dtypes = constants.NEW_REPORT["dtypes"]
+        dtypes = constants.OLD_REPORT["dtypes"]
+        print(dtypes)
 
         # Set the download location
         download_loc = download_loc or Path.cwd() / "archives"
@@ -144,6 +145,9 @@ class PromptPayment:
 
         # zfill vendor_id to 8 characters
         df["Vendor ID"] = df["Vendor ID"].str.zfill(8)
+
+        # preserve only a subset of columns for matching
+        df = df[dtypes.keys()]
 
         return ReportOutput(df=df, file=tmp_file)
 
@@ -172,7 +176,11 @@ class PromptPayment:
         # merge reports on vendor_id and document_number
         # preserve all of the rows in Core Integrator report
         merge_fields = ["Vendor ID", "Document Number"]
+        for field in merge_fields:
+            assert field in new_report.columns
+            assert field in old_report.columns
         df = new_report.merge(old_report, how="left", on=merge_fields)
+        print(df.columns)
 
         # compute additional fields and sort dataframe
         df["Age of Invoice"] = utils.compute_age_of_invoice(df)
