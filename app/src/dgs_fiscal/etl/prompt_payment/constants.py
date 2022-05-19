@@ -21,9 +21,11 @@ NEW_REPORT = {
         "PO Number": "PO Number",
         "Vendor ID": "Vendor ID",
         "Vendor Name": "Vendor Name",
-        "Document Number": "Invoice Number",
+        "Document Number": "Document Number",
         "Document Date": "Invoice Date",
         "Amount": "Invoice Amount",
+        "Status Age (days)": "Status Age (days)",
+        "Days Since Creation": "Days Since Creation",
         "Execution ID": "Execution ID (Core)",
         "Location": "Location (Core)",
         "Creation Date": "Creation Date (Core)",
@@ -34,26 +36,13 @@ NEW_REPORT = {
 
 OLD_REPORT = {
     "dtypes": {
-        "document_number": "string",
-        "vendor_id": "string",
-        "comments": "string",
-        "current_status": "string",
-        "date_of_most_recent_action": ["datetime64[ns]"],
-        "division": "object",
-    },
-    "columns": {
-        "PO Number": "PO Number",
-        "Vendor ID": "Vendor ID",
-        "Vendor Name": "Vendor Name",
-        "Document Number": "Invoice Number",
-        "Document Date": "Invoice Date",
-        "Amount": "Invoice Amount",
-        "Execution ID": "Execution ID (Core)",
-        "Location": "Location (Core)",
-        "Creation Date": "Creation Date (Core)",
-        "Assigned Date (Core)": "Assigned Date (Core)",
-        "Name": "DGS Name",
-    },
+        "Document Number": "string",
+        "Vendor ID": "string",
+        "Comments": "string",
+        "Current Status": "string",
+        "Date of Most Recent Action": "datetime64[ns]",
+        "Division": "object",
+    }
 }
 
 
@@ -90,3 +79,18 @@ DIVISIONS = {
         "Jason Ludd",
     ],
 }
+
+
+VALIDATION = [
+    "Receipted",
+    "errors",
+    "Awaiting FMD/ Fleet Approval",
+    "Funds Needed",
+    "Change Order Requested",
+    "other",
+    "Credit Memo",
+    "Justification",
+    "Paid",
+    "Reassign",
+    "Duplicate",
+]

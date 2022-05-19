@@ -59,6 +59,7 @@ class TestPromptPayment:
         - The
         """
         # setup - reset mock AgingReport.xslx
+        columns = list(constants.OLD_REPORT["dtypes"].keys())
         file_name = "PromptPaymentReport.xlsx"
         mock_file = TEST_DIR / "old_report_input.xlsx"
         upload = test_archive.upload_file(
@@ -79,6 +80,7 @@ class TestPromptPayment:
         print(output.df)
         # validation
         assert isinstance(output, ReportOutput)
+        assert list(output.df.columns) == columns
         assert output.file.exists()
 
     def test_get_new_report(self, test_prompt, monkeypatch):
@@ -105,3 +107,35 @@ class TestPromptPayment:
         assert isinstance(output, ReportOutput)
         assert list(df.columns) == columns
         assert list(df["Vendor ID"]) == vendor_ids
+
+    def test_reconcile_reports(self, test_prompt, test_archive_dir):
+        """Tests that reconcile_reports() executes correctly
+
+        Validates the following conditions
+        """
+        # setup
+        dropped = ["37010778", "BCB4-33"]
+        added = ["1851"]
+        old_dtypes = constants.OLD_REPORT["dtypes"]
+        new_dtypes = constants.NEW_REPORT["dtypes"]
+        old_report = pd.read_excel(
+            TEST_DIR / "old_report_output.xlsx",
+            dtype=old_dtypes,
+        )
+        new_report = pd.read_excel(
+            TEST_DIR / "new_report_output.xlsx",
+            dtype=new_dtypes,
+        )
+        print(old_report)
+        print(new_report)
+        # execution
+        output = test_prompt.reconcile_reports(
+            new_report,
+            old_report,
+            test_archive_dir,
+        )
+        # validation
+        for invoice in dropped:
+            assert invoice not in list(output.df["Document Number"])
+        for invoice in added:
+            assert invoice in list(output.df["Document Number"])
