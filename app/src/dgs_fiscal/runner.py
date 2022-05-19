@@ -92,6 +92,9 @@ def run_prompt_payment_etl():
     typer.echo("Downloading the old report from SharePoint")
     old_report = prompt_etl.get_old_excel()
 
+    typer.echo("Reconciling the old report with the new report")
+    ouptut_report = prompt_etl.reconcile_reports(new_report, old_report)
+
     # Archive the copies of those reports
     typer.echo("Archiving the snapshots of the report")
     prompt_etl.update_sharepoint(
@@ -103,6 +106,11 @@ def run_prompt_payment_etl():
         file_path=old_report.file,
         report_name="old_report",
         folder_name="commented_invoices",
+    )
+    prompt_etl.update_sharepoint(
+        file_path=ouptut_report.file,
+        report_name="output_report",
+        folder_name="output",
     )
 
     typer.echo("Workflow ran successfully")
