@@ -1,3 +1,4 @@
+# pylint: skip-file
 from __future__ import annotations  # prevents NameError for typehints
 from pathlib import Path
 from datetime import datetime

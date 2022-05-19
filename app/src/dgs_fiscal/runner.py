@@ -93,7 +93,10 @@ def run_prompt_payment_etl():
     old_report = prompt_etl.get_old_excel()
 
     typer.echo("Reconciling the old report with the new report")
-    ouptut_report = prompt_etl.reconcile_reports(new_report, old_report)
+    ouptut_report = prompt_etl.reconcile_reports(
+        new_report.df,
+        old_report.df,
+    )
 
     # Archive the copies of those reports
     typer.echo("Archiving the snapshots of the report")
