@@ -132,7 +132,6 @@ class PromptPayment:
         """
         # get the list of columns and dtypes
         dtypes = constants.OLD_REPORT["dtypes"]
-        print(dtypes)
 
         # Set the download location
         download_loc = download_loc or Path.cwd() / "archives"
