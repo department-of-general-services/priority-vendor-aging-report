@@ -79,3 +79,18 @@ DIVISIONS = {
         "Jason Ludd",
     ],
 }
+
+
+VALIDATION = [
+    "Receipted",
+    "errors",
+    "Awaiting FMD/ Fleet Approval",
+    "Funds Needed",
+    "Change Order Requested",
+    "other",
+    "Credit Memo",
+    "Justification",
+    "Paid",
+    "Reassign",
+    "Duplicate",
+]

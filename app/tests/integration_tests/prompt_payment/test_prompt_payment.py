@@ -108,7 +108,7 @@ class TestPromptPayment:
         assert list(df.columns) == columns
         assert list(df["Vendor ID"]) == vendor_ids
 
-    def test_reconcile_reports(self, test_prompt):
+    def test_reconcile_reports(self, test_prompt, test_archive_dir):
         """Tests that reconcile_reports() executes correctly
 
         Validates the following conditions
@@ -129,9 +129,13 @@ class TestPromptPayment:
         print(old_report)
         print(new_report)
         # execution
-        output = test_prompt.reconcile_reports(new_report, old_report)
+        output = test_prompt.reconcile_reports(
+            new_report,
+            old_report,
+            test_archive_dir,
+        )
         # validation
         for invoice in dropped:
-            assert invoice not in list(output["Document Number"])
+            assert invoice not in list(output.df["Document Number"])
         for invoice in added:
-            assert invoice in list(output["Document Number"])
+            assert invoice in list(output.df["Document Number"])

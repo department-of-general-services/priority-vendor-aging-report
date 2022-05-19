@@ -155,6 +155,62 @@ class PromptPayment:
         self,
         new_report: pd.DataFrame,
         old_report: pd.DataFrame,
+        export_path: Optional[Path] = None,
+    ) -> ReportOutput:
+        """Merges the old report from SharePoint with the new report scraped
+        from CoreIntegrator and return a list of the changes to make
+
+        Parameters
+        ----------
+        new_report: pd.DataFrame
+            A DataFrame of the new Prompt Payment report that was scraped from
+            CoreIntegrator
+        old_report: pd.DataFrame
+            A DataFrame of the records added or updated in SharePoint in the
+            previous run of the Prompt Payment report
+
+        Returns
+        -------
+        ReportOutput
+            An instance of ReportOutput with the reconciled report as both a
+            dataframe and a locally saved and formatted file
+        """
+        df = self._merge_reports(new_report, old_report)
+        file = self._export_report(df=df, export_path=export_path)
+        return ReportOutput(df=df, file=file)
+
+    def update_sharepoint(
+        self,
+        file_path: Path,
+        report_name: str,
+        folder_name: str,
+    ) -> File:
+        """Uploads CitiBuy invoice data to SharePoint as an Excel file
+
+        Parameters
+        ----------
+        file_path: Path
+            Path to the local file to upload
+        folder_name: str, optional
+            The name of the folder to which the invoice data will be uploaded
+
+        Returns
+        -------
+        File
+            Returns an instance of the O365 File class for the Excel file that
+            was uploaded to SharePoint
+        """
+        # set the file name to the current date
+        date_str = datetime.today().strftime("%Y-%m-%d")
+        file_name = f"{date_str}_{report_name}.xlsx"
+
+        # upload the exported file to SharePoint
+        return self.archive.upload_file(file_path, folder_name, file_name)
+
+    def _merge_reports(
+        self,
+        new_report: pd.DataFrame,
+        old_report: pd.DataFrame,
     ) -> pd.DataFrame:
         """Merges the old report from SharePoint with the new report scraped
         from CoreIntegrator and return a list of the changes to make
@@ -191,30 +247,41 @@ class PromptPayment:
         # return reconciled report with oldest invoices listed first
         return df.sort_values(by="Age of Invoice", ascending=False)
 
-    def update_sharepoint(
+    def _export_report(
         self,
-        file_path: Path,
-        report_name: str,
-        folder_name: str,
-    ) -> File:
-        """Uploads CitiBuy invoice data to SharePoint as an Excel file
-
-        Parameters
-        ----------
-        file_path: Path
-            Path to the local file to upload
-        folder_name: str, optional
-            The name of the folder to which the invoice data will be uploaded
-
-        Returns
-        -------
-        File
-            Returns an instance of the O365 File class for the Excel file that
-            was uploaded to SharePoint
+        df: pd.DataFrame,
+        export_path: Optional[Path] = None,
+        sheet_name: str = "Prompt Payment",
+    ) -> Path:
+        """Saves a copy of the report in the 'archives/output/' directory
+        Args:
+            df (dataframe): Merged report that will be archived
+            dir (path): Location where the archived report will be saved
+            src_file (path): Location of file to read validation data from
+            src_sheet (string): Name of the sheet with validation data
+        Returns:
+            file (path): Location of archived file
         """
-        # set the file name to the current date
-        date_str = datetime.today().strftime("%Y-%m-%d")
-        file_name = f"{date_str}_{report_name}.xlsx"
+        # set export directory to local archive
+        dir = export_path or self.archive.tmp_dir
 
-        # upload the exported file to SharePoint
-        return self.archive.upload_file(file_path, folder_name, file_name)
+        # get current date
+        today = datetime.today()
+        format = "%Y-%m-%d"
+        date_str = datetime.strftime(today, format)
+
+        # set path for copied file
+        file = dir / f"joint_report{date_str}.xlsx"
+
+        # export dataframe and format
+        with pd.ExcelWriter(
+            file, engine="openpyxl", datetime_format="MM/DD/YYYY"
+        ) as writer:
+            # write
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+            # update formatting and save
+            wb = writer.book
+            utils.format_workbook(wb)
+            writer.save()
+
+        return file
